@@ -7,14 +7,6 @@ export class AuthResponseDto {
   success: boolean;
 
   @ApiProperty()
-  @IsNumber()
-  status?: number;
-
-  @ApiProperty()
-  @IsString()
-  code?: string;
-
-  @ApiProperty()
   @IsString()
   message: string;
 }

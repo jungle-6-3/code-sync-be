@@ -3,21 +3,21 @@ import { IsEmail, IsString } from 'class-validator';
 
 export class SignUpRequestDto {
   @ApiProperty({
-    example: 'cotmd6203@naver.com',
+    example: 'whguddnr9@github.com',
     description: 'user email',
   })
   @IsEmail()
   email: string;
 
   @ApiProperty({
-    example: 'password123!',
+    example: 'Sync-code123!',
     description: 'user password',
   })
   @IsString()
   password: string;
 
   @ApiProperty({
-    example: '임채승',
+    example: '조형욱',
     description: 'user name',
   })
   @IsString()

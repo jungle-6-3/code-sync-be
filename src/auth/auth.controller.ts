@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, Post } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { LoginRequestDto } from './dto/login-request.dto';
+import { SignInRequestDto } from './dto/signin-request.dto';
 import { SignUpRequestDto } from './dto/signup-request.dto';
 import { AuthResponseDto } from './dto/auth.response.dto';
 import { AuthService } from './auth.service';
@@ -8,7 +8,7 @@ import { AuthService } from './auth.service';
 @ApiTags('Auth API')
 @Controller('auth')
 export class AuthController {
-  constructor(private autService: AuthService) {}
+  constructor(private authService: AuthService) {}
 
   @ApiOperation({
     summary: '로그인',
@@ -48,8 +48,17 @@ export class AuthController {
     type: AuthResponseDto,
   })
   @Post('signUp')
-  signUp(@Body() signupRequestDto: SignUpRequestDto): AuthResponseDto {
-    return;
+  async signUp(
+    @Body() signupRequestDto: SignUpRequestDto,
+  ): Promise<AuthResponseDto> {
+    const result = await this.authService.signUp(signupRequestDto);
+    const response = new AuthResponseDto();
+    if (result == true) {
+      response.success = result;
+      response.message = '회원가입에 성공하셨습니다.';
+    }
+    console.log(result);
+    return response;
   }
 
   @ApiOperation({
