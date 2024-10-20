@@ -20,8 +20,9 @@ export class AuthController {
     type: AuthResponseDto,
   })
   @Post('signin')
-  signIn(@Body() loginRequestDto: LoginRequestDto): AuthResponseDto {
-    return;
+  signIn(@Body() loginRequestDto: SignInRequestDto): AuthResponseDto {
+    this.authService.signIn(loginRequestDto);
+    return 
   }
 
   @ApiOperation({
