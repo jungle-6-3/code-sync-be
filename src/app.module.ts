@@ -6,6 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { ConversationEventsModule } from './conversation-events/conversation-events.module';
+import { ConversationsModule } from './conversations/conversations.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { ConversationEventsModule } from './conversation-events/conversation-eve
     AuthModule,
     UsersModule,
     ConversationEventsModule,
+    ConversationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
