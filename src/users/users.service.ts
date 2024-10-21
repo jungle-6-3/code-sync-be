@@ -14,30 +14,18 @@ export class UsersService {
     private usersRepository: Repository<User>,
   ) {}
 
-  // 패스워드 해쉬 함수
-  async hashingPasswd(password: string): Promise<string> {
-    const salt = await bcrypt.genSalt();
-    const hashedPassword = await bcrypt.hash(password, salt);
-    return hashedPassword;
-  }
-
   async createUser(createUserDto: CreateUserDto) {
     const { email, password, name } = createUserDto;
 
     try {
-      // 비밀번호 해쉬화
-      const hashedPassword = await this.hashingPasswd(password);
-
       const user = await this.usersRepository.create({
         name,
         email,
-        hashedPassword,
+        hashedPassword: password,
       });
       await this.usersRepository.save(user);
-      console.log('true');
       return true;
     } catch (error) {
-      console.log('😱 error is' + error);
       return false;
     }
   }
@@ -46,8 +34,8 @@ export class UsersService {
     return `This action returns all users`;
   }
 
-  async findOne(email:string) {
-    const user = await this.usersRepository.findOneBy({email});
+  async findOne(email: string) {
+    const user = await this.usersRepository.findOneBy({ email });
     return user;
   }
 

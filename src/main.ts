@@ -2,11 +2,14 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
+import * as cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  // dto 유효성 확인
+  // validation dto
   app.useGlobalPipes(new ValidationPipe());
+  // use cookie-parser middleware as global
+  app.use(cookieParser());
 
   const swaggerConfig = new DocumentBuilder()
     .setTitle('Code-Sync')
@@ -16,7 +19,12 @@ async function bootstrap() {
     .build();
   const documentFactory = () =>
     SwaggerModule.createDocument(app, swaggerConfig);
-  SwaggerModule.setup('api', app, documentFactory);
+
+  SwaggerModule.setup('api', app, documentFactory, {
+    swaggerOptions: {
+      withCredentials: true,
+    },
+  });
   await app.listen(3000);
 }
 bootstrap();
