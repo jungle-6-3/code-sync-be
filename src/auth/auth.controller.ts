@@ -1,9 +1,10 @@
-import { Body, Controller, Delete, Get, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Post, Req, Res } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { SignInRequestDto } from './dto/signin-request.dto';
 import { SignUpRequestDto } from './dto/signup-request.dto';
 import { AuthResponseDto } from './dto/auth.response.dto';
 import { AuthService } from './auth.service';
+import { Response } from 'express';
 
 @ApiTags('Auth API')
 @Controller('auth')
@@ -20,9 +21,22 @@ export class AuthController {
     type: AuthResponseDto,
   })
   @Post('signin')
-  signIn(@Body() loginRequestDto: SignInRequestDto): AuthResponseDto {
-    this.authService.signIn(loginRequestDto);
-    return 
+  async signIn(
+    @Body() loginRequestDto: SignInRequestDto,
+    @Res() res: Response,
+  ) {
+    const jwt_token = await this.authService.signIn(loginRequestDto);
+    console.log(jwt_token);
+    // res.setHeader('Authorization', 'Bearer' + jwt_token);
+    res.cookie('token', jwt_token, {
+      httpOnly: true,
+      secure: false,
+      sameSite: 'lax',
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+    return res.send({
+      message: 'success',
+    });
   }
 
   @ApiOperation({
