@@ -37,7 +37,7 @@ export class AuthService {
     }
   }
   // 패스워드 해쉬 함수
-  async hashingPasswd(password: string): Promise<string> {
+  private async hashingPasswd(password: string): Promise<string> {
     const salt = await bcrypt.genSalt();
     const hashedPassword = await bcrypt.hash(password, salt);
     return hashedPassword;
