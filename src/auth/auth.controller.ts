@@ -84,7 +84,7 @@ export class AuthController {
     type: AuthResponseDto,
   })
   @Delete()
-  withdraw(): AuthResponseDto {
+  deleteUser(): AuthResponseDto {
     return;
   }
 }
