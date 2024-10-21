@@ -71,13 +71,7 @@ export class AuthController {
     @Body() signupRequestDto: SignUpRequestDto,
   ): Promise<AuthResponseDto> {
     const result = await this.authService.signUp(signupRequestDto);
-    const response = new AuthResponseDto();
-    if (result == true) {
-      response.success = result;
-      response.message = '회원가입에 성공하셨습니다.';
-    }
-    console.log(result);
-    return response;
+    return { success: true, message: '회원가입에 성공하셨습니다.' };
   }
 
   @ApiOperation({
