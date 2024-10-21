@@ -1,10 +1,11 @@
-import { Body, Controller, Delete, Get, Post, Req, Res } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { SignInRequestDto } from './dto/signin-request.dto';
 import { SignUpRequestDto } from './dto/signup-request.dto';
 import { AuthResponseDto } from './dto/auth.response.dto';
 import { AuthService } from './auth.service';
 import { Response } from 'express';
+import { JwtAuthGuard } from './jwt-auth.guard';
 
 @ApiTags('Auth API')
 @Controller('auth')
@@ -25,17 +26,16 @@ export class AuthController {
     @Body() loginRequestDto: SignInRequestDto,
     @Res() res: Response,
   ) {
-    const jwt_token = await this.authService.signIn(loginRequestDto);
-    console.log(jwt_token);
-    // res.setHeader('Authorization', 'Bearer' + jwt_token);
-    res.cookie('token', jwt_token, {
+    const access_token = await this.authService.signIn(loginRequestDto);
+    res.cookie('token', access_token, {
       httpOnly: true,
       secure: false,
       sameSite: 'lax',
-      maxAge: 24 * 60 * 60 * 1000,
+      maxAge: +process.env.COOKIE_AGE,
     });
     return res.send({
-      message: 'success',
+      success: true,
+      message: '로그인에 성공하였습니다.',
     });
   }
 
