@@ -49,8 +49,12 @@ export class AuthController {
     type: AuthResponseDto,
   })
   @Post('logout')
-  logOut(): AuthResponseDto {
-    return;
+  logOut(@Req() req: Request, @Res() res: Response) {
+    res.cookie('token', '', { maxAge: 0 });
+
+    return res.send({
+      message: 'success',
+    });
   }
 
   @ApiOperation({
