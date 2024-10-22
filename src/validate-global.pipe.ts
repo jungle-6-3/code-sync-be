@@ -27,7 +27,6 @@ export class ValidateGlobalPipe implements PipeTransform {
         const properties = error.map((error) => error.property);
         const { code, message } = this.errorType[properties[0]];
         throw new validDataException(message, code);
-        console.log(code);
       },
     });
     const requestValue = await validPipe.transform(value, metadata);

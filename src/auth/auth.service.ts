@@ -1,9 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { AuthResponseDto } from './dto/auth.response.dto';
 import { UsersService } from 'src/users/users.service';
 import { SignInRequestDto } from './dto/signin-request.dto';
 import { SignUpRequestDto } from './dto/signup-request.dto';
-import { ValidationError } from 'class-validator';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 
@@ -21,7 +19,7 @@ export class AuthService {
     if (!user || !(await bcrypt.compare(password, user.hashedPassword))) {
       throw new AuthExceptionError('아이디 또는 비밀번호가 틀립니다.');
     }
-    const payload = { sub: user.email, username: user.name };
+    const payload = { email: user.email, name: user.name };
     const access_token = await this.jwtService.sign(payload);
     return access_token;
   }
@@ -42,8 +40,6 @@ export class AuthService {
     const hashedPassword = await bcrypt.hash(password, salt);
     return hashedPassword;
   }
-
-  withdraw() {}
 }
 
 class AuthExceptionError extends HttpException {
