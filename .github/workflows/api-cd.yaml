@@ -30,4 +30,4 @@ jobs:
 
       - name: run deploy
         run: |
-          sh ~/deploy.sh
+          /bin/bash ~/deploy.sh
