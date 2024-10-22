@@ -5,6 +5,7 @@ import {
   Post,
   Req,
   Res,
+  UseFilters,
   UseGuards,
   UsePipes,
 } from '@nestjs/common';
@@ -17,10 +18,12 @@ import { Response } from 'express';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { ValidateGlobalPipe } from '../validate-global.pipe';
 import { authError } from './auth.error';
+import { AuthFilter } from './auth.filter';
 
 @ApiTags('Auth API')
 @Controller('auth')
 @UsePipes(new ValidateGlobalPipe(authError))
+@UseFilters(new AuthFilter())
 export class AuthController {
   constructor(private authService: AuthService) {}
 
