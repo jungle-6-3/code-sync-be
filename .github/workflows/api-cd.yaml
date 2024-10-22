@@ -32,7 +32,11 @@ jobs:
           cd ~/code-sync-be/
           git stash
           git pull origin main
-          corepack enable pnpm
+          export PNPM_HOME="/home/ubuntu/.local/share/pnpm"
+          case ":$PATH:" in \n
+            *":$PNPM_HOME:"*) ;; \n
+            *) export PATH="$PNPM_HOME:$PATH" ;; \n
+          esac
           pnpm install --frozen-lockfile --strict-peer-dependencies --ignore-scripts
 
       - name: Build
