@@ -13,12 +13,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: path 변경
-        run: |
-          cd ~/code-sync-be/
-
       - name: env 파일 생성
         run: |
+          cd ~/code-sync-be/
           touch .env
           echo DATABASE_HOSTNAME=${{ secrets.DATABASE_HOSTNAME }} >> .env
           echo DATABASE_PORT=${{ secrets.DATABASE_PORT }} >> .env
@@ -31,6 +28,6 @@ jobs:
           echo COOKIE_AGE=${{ secrets.COOKIE_AGE }} >> .env
           cat .env
 
-      - name: run deply
+      - name: run deploy
         run: |
           sh ~/deploy.sh
