@@ -5,7 +5,7 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { ValidationError } from 'class-validator';
-import { validDataException } from './auth/auth.exceptions';
+import { validDataException } from './validate-exceptions';
 
 /**
  * catch class-validator exception
@@ -19,7 +19,6 @@ export class ValidateGlobalPipe implements PipeTransform {
     this.errorType = errorType;
   }
   async transform(value: any, metadata: ArgumentMetadata) {
-
     const validPipe = new ValidationPipe({
       disableErrorMessages: true,
       exceptionFactory: (error: ValidationError[]) => {
