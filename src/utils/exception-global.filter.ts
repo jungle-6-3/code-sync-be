@@ -5,10 +5,10 @@ import {
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
-import { validDataException } from './auth/auth.exceptions';
+import { validDataException } from './validate-exceptions';
 
 @Catch()
-export class ExceptioGlobalFilter<T> implements ExceptionFilter {
+export class ExceptionGlobalFilter<T> implements ExceptionFilter {
   catch(exception: T, host: ArgumentsHost) {
     const status =
       exception instanceof HttpException

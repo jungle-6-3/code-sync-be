@@ -16,7 +16,7 @@ import { AuthResponseDto } from './dto/auth.response.dto';
 import { AuthService } from './auth.service';
 import { Response } from 'express';
 import { JwtAuthGuard } from './jwt-auth.guard';
-import { ValidateGlobalPipe } from '../validate-global.pipe';
+import { ValidateGlobalPipe } from '../utils/validate-global.pipe';
 import { authError } from './auth.error';
 import { AuthFilter } from './auth.filter';
 
