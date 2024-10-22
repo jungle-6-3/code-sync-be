@@ -1,0 +1,43 @@
+name: api-CD
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: be-dev
+
+    steps:
+      - name: Checkout source code.
+        uses: actions/checkout@v3
+
+      - name: env 파일 생성
+        run: |
+          touch .env
+          echo DATABASE_HOSTNAME=${{ secrets.DATABASE_HOSTNAME }} >> .env
+          echo DATABASE_PORT=${{ secrets.DATABASE_PORT }} >> .env
+          echo DATABASE=${{ secrets.DATABASE }} >> .env
+          echo DATABASE_USER=${{ secrets.DATABASE_USER }} >> .env
+          echo DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }} >> .env
+          echo DATABASE_PORT=${{ secrets.DATABASE_PORT }} >> .env
+          echo JWT_SECRET=${{ secrets.JWT_SECRET }} >> .env
+          echo JWT_EXPIRES=${{ secrets.JWT_EXPIRES }} >> .env
+          echo COOKIE_AGE=${{ secrets.COOKIE_AGE }} >> .env
+          cat .env
+
+      - name: Update dependencies
+        run: |
+          cd code-sync-be
+          git stash
+          git pull origin main
+          pnpm install --frozen-lockfile --strict-peer-dependencies --ignore-scripts
+
+      - name: Build
+        run: |
+          pnpm build
+
+      - name: pm2 restart
+        run: |
+          pm2 restart code-sync-be
