@@ -12,7 +12,7 @@ export class RoomsController {
   ) {}
 
   @UseGuards(JwtAuthGuard)
-  @Post(':prUrl')
+  @Post('create/:prUrl')
   async createRoom(
     @Param('prUrl') prUrl: string,
     @Request() req: Request & { user: JwtPayloadDto },
