@@ -7,7 +7,7 @@ import {
 import { ValidationError } from 'class-validator';
 import { validDataException } from './auth/auth.exceptions';
 
-/*
+/**
  * catch class-validator exception
  * Define a custom error type ex)authError
  * useage : UsePipe(ValidateGlobalPipe(authError))
@@ -30,7 +30,7 @@ export class ValidateGlobalPipe implements PipeTransform {
         console.log(code);
       },
     });
-    const val = await validPipe.transform(value, metadata);
-    return val;
+    const requestValue = await validPipe.transform(value, metadata);
+    return requestValue;
   }
 }
