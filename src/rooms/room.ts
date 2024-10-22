@@ -11,9 +11,9 @@ export class Room {
 
   status: RoomStatus;
 
-  creatorPk: string;
+  creatorPk: number;
 
-  participantPk: string;
+  participantPk: number;
 
   startedAt: Date;
 
