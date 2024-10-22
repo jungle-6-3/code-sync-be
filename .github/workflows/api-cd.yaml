@@ -10,14 +10,12 @@ jobs:
     runs-on: be-dev
 
     steps:
-      - name: Checkout source code.
-        uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Setup
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
-          run_install: false
+      - name: path 변경
+        run: |
+          cd ~/code-sync-be/
 
       - name: env 파일 생성
         run: |
@@ -33,17 +31,6 @@ jobs:
           echo COOKIE_AGE=${{ secrets.COOKIE_AGE }} >> .env
           cat .env
 
-      - name: Update dependencies
+      - name: run deply
         run: |
-          cd ~/code-sync-be/
-          git stash
-          git pull origin main
-          pnpm install --frozen-lockfile --strict-peer-dependencies --ignore-scripts
-
-      - name: Build
-        run: |
-          pnpm build
-
-      - name: pm2 restart
-        run: |
-          pm2 restart code-sync-be
+          sh ~/deploy.sh
