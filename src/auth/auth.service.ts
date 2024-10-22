@@ -1,9 +1,15 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { UsersService } from 'src/users/users.service';
 import { SignInRequestDto } from './dto/signin-request.dto';
 import { SignUpRequestDto } from './dto/signup-request.dto';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
+import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class AuthService {
@@ -39,6 +45,16 @@ export class AuthService {
     const salt = await bcrypt.genSalt();
     const hashedPassword = await bcrypt.hash(password, salt);
     return hashedPassword;
+  }
+
+  async getUser(token: string) {
+    const decoded = this.jwtService.verify<User>(token, {
+      secret: process.env.JWT_SECRET,
+    });
+    if (!decoded) {
+      throw new UnauthorizedException();
+    }
+    return decoded;
   }
 }
 
