@@ -25,7 +25,7 @@ export class Room {
   // Should define after conversations done
   data: any;
 
-  constructor(uuid: string, creatorPk: string, prUrl: string) {
+  constructor(uuid: string, creatorPk: number, prUrl: string) {
     this.uuid = uuid;
     this.status = RoomStatus.WATING;
     this.creatorPk = creatorPk;
