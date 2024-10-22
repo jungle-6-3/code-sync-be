@@ -13,6 +13,9 @@ jobs:
       - name: Checkout source code.
         uses: actions/checkout@v3
 
+      - name: Setup
+        uses: pnpm/action-setup@v4
+
       - name: env 파일 생성
         run: |
           touch .env
@@ -32,11 +35,6 @@ jobs:
           cd ~/code-sync-be/
           git stash
           git pull origin main
-          export PNPM_HOME="/home/ubuntu/.local/share/pnpm"
-          case ":$PATH:" in \n
-            *":$PNPM_HOME:"*) ;; \n
-            *) export PATH="$PNPM_HOME:$PATH" ;; \n
-          esac
           pnpm install --frozen-lockfile --strict-peer-dependencies --ignore-scripts
 
       - name: Build
