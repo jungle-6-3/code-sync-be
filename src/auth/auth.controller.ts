@@ -15,9 +15,12 @@ import { AuthResponseDto } from './dto/auth.response.dto';
 import { AuthService } from './auth.service';
 import { Response } from 'express';
 import { JwtAuthGuard } from './jwt-auth.guard';
+import { ValidateGlobalPipe } from '../validate-global.pipe';
+import { authError } from './auth.error';
 
 @ApiTags('Auth API')
 @Controller('auth')
+@UsePipes(new ValidateGlobalPipe(authError))
 export class AuthController {
   constructor(private authService: AuthService) {}
 
