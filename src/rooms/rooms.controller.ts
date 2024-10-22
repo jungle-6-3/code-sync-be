@@ -26,6 +26,17 @@ export class RoomsController {
     };
   }
 
-  @Post()
-  saveRoom() {}
+  @UseGuards(JwtAuthGuard)
+  @Post('save/:roomUuid')
+  async saveRoom(
+    @Param('roomUuid') roomUuid: string,
+    @Request() req: Request & { user: JwtPayloadDto },
+  ) {
+    const userPk = await this.usersService.findUserPk(req.user);
+    await this.roomsService.saveRoom(userPk, roomUuid);
+    return {
+      success: true,
+      message: '저장에 성공했습니다.',
+    };
+  }
 }
