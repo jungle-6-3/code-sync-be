@@ -9,7 +9,7 @@ import { SignInRequestDto } from './dto/signin-request.dto';
 import { SignUpRequestDto } from './dto/signup-request.dto';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
-import { User } from 'src/users/entities/user.entity';
+import { JwtPayloadDto } from './dto/jwt-payload';
 
 @Injectable()
 export class AuthService {
@@ -48,7 +48,7 @@ export class AuthService {
   }
 
   async getUser(token: string) {
-    const decoded = this.jwtService.verify<User>(token, {
+    const decoded = this.jwtService.verify<JwtPayloadDto>(token, {
       secret: process.env.JWT_SECRET,
     });
     if (!decoded) {
