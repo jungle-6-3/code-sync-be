@@ -33,5 +33,7 @@ export class Rooms {
     this.leaveRoom(room.creatorPk);
     this.leaveRoom(room.participantPk);
     this.roomsById.delete(room.uuid);
+
+    room = null;
   }
 }
