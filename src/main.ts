@@ -7,6 +7,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   // use cookie-parser middleware as global
   app.use(cookieParser());
+  app.setGlobalPrefix('api');
 
   const swaggerConfig = new DocumentBuilder()
     .setTitle('Code-Sync')
@@ -17,7 +18,7 @@ async function bootstrap() {
   const documentFactory = () =>
     SwaggerModule.createDocument(app, swaggerConfig);
 
-  SwaggerModule.setup('api', app, documentFactory, {
+  SwaggerModule.setup('api/api-document', app, documentFactory, {
     swaggerOptions: {
       withCredentials: true,
     },
