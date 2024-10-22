@@ -19,7 +19,6 @@ export class ValidateGlobalPipe implements PipeTransform {
     this.errorType = errorType;
   }
   async transform(value: any, metadata: ArgumentMetadata) {
-    console.log(value);
 
     const validPipe = new ValidationPipe({
       disableErrorMessages: true,
