@@ -39,7 +39,7 @@ export class ConversationEventsGateway
   ) {
     const room: Room = await this.roomsService.findRoombyUuid(roomUuid);
     if (!client.user) {
-      throw new WsException('로그인 좀 하세요');
+      throw new WsException('로그인 해주세요');
     }
     if (!room) {
       throw new WsException('방이 없어요');
@@ -48,6 +48,7 @@ export class ConversationEventsGateway
     if (room.status == RoomStatus.WATING && room.creator.pk == client.user.pk) {
       room.status = RoomStatus.INVITING;
       client.roomUuid = room.uuid;
+      room.creator.socketId = client.id;
       client.join(roomUuid);
       return {
         success: true,
@@ -56,6 +57,7 @@ export class ConversationEventsGateway
     }
     if (room.status == RoomStatus.INVITING) {
       const waitingUser = new RoomUser(client.user);
+      waitingUser.socketId = client.id;
       // TODO watingUsers 리스트를 확인하고 push 그만하는 동작
       room.watingUsers.push(waitingUser);
       this.server.to(room.uuid).emit('join-request-by', {
