@@ -5,7 +5,7 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { ValidationError } from 'class-validator';
-import { validDataException } from './validate-exceptions';
+import { ValidDataException } from './validate-data-exception';
 
 /**
  * catch class-validator exception
@@ -24,7 +24,7 @@ export class ValidateGlobalPipe implements PipeTransform {
       exceptionFactory: (error: ValidationError[]) => {
         const properties = error.map((error) => error.property);
         const { code, message } = this.errorType[properties[0]];
-        throw new validDataException(message, code);
+        throw new ValidDataException(message, code);
       },
     });
     const requestValue = await validPipe.transform(value, metadata);

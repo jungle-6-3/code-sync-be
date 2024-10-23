@@ -4,14 +4,14 @@ import {
   ExceptionFilter,
   UnauthorizedException,
 } from '@nestjs/common';
-import { validDataException } from '../utils/validate-exceptions';
+import { ValidDataException } from '../utils/validate-data-exception';
 
 @Catch()
 export class AuthFilter<T> implements ExceptionFilter {
   catch(exception: T, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse();
-    if (exception instanceof validDataException) {
+    if (exception instanceof ValidDataException) {
       const response = host.switchToHttp().getResponse();
       response.status(exception.getStatus()).json(exception.getResponse());
       return;
