@@ -20,7 +20,7 @@ export class RoomsService {
       );
     }
     const uuid = _uuid();
-    const newRoom = new Room(uuid, creator.pk, prUrl);
+    const newRoom = new Room(uuid, creator, prUrl);
     this.setRoom(uuid, newRoom);
     return `https://code-sync.net/${uuid}`;
   }
@@ -50,8 +50,8 @@ export class RoomsService {
   }
 
   async deleteRoom(room: Room) {
-    this.leaveRoom(room.creatorPk);
-    this.leaveRoom(room.participantPk);
+    this.leaveRoom(room.creator.pk);
+    this.leaveRoom(room.participant.pk);
     this.roomsById.delete(room.uuid);
 
     room = null;
