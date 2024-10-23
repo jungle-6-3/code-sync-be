@@ -5,7 +5,7 @@ import {
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
-import { validDataException } from './validate-exceptions';
+import { ValidDataException } from './validate-exceptions';
 
 @Catch()
 export class ExceptionGlobalFilter<T> implements ExceptionFilter {

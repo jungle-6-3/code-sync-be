@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
 
-export class validDataException extends HttpException {
+export class ValidDataException extends HttpException {
   constructor(message: string, code: string) {
     super(
       {
