@@ -5,7 +5,7 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { ValidationError } from 'class-validator';
-import { ValidDataException } from './validate-exceptions';
+import { ValidDataException } from './validate-data-exception';
 
 /**
  * catch class-validator exception

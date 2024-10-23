@@ -4,7 +4,7 @@ import {
   ExceptionFilter,
   UnauthorizedException,
 } from '@nestjs/common';
-import { ValidDataException } from '../utils/validate-exceptions';
+import { ValidDataException } from '../utils/validate-data-exception';
 
 @Catch()
 export class AuthFilter<T> implements ExceptionFilter {
