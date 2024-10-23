@@ -5,9 +5,10 @@ import { SharedDocGateway } from './events/shared-doc.gateway';
 import { VoiceGateway } from './events/voice.gateway';
 import { UsersModule } from 'src/users/users.module';
 import { AuthModule } from 'src/auth/auth.module';
+import { RoomsModule } from 'src/rooms/rooms.module';
 
 @Module({
-  imports: [UsersModule, AuthModule],
+  imports: [UsersModule, AuthModule, RoomsModule],
   controllers: [],
   providers: [
     ConversationEventsGateway,

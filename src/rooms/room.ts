@@ -36,6 +36,7 @@ export class Room {
     this.creator = new RoomUser(creator);
     this.prUrl = prUrl;
     this.startedAt = new Date();
+    this.watingUsers = [];
   }
 }
 
