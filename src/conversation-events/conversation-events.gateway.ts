@@ -48,6 +48,7 @@ export class ConversationEventsGateway
     if (room.status == RoomStatus.WATING && room.creator.pk == client.user.pk) {
       room.status = RoomStatus.INVITING;
       client.roomUuid = room.uuid;
+      client.join(roomUuid);
       return {
         success: true,
         message: '당신이 개최자입니다.',
@@ -57,6 +58,15 @@ export class ConversationEventsGateway
       const waitingUser = new RoomUser(client.user);
       // TODO watingUsers 리스트를 확인하고 push 그만하는 동작
       room.watingUsers.push(waitingUser);
+      this.server.to(room.uuid).emit('join-request-by', {
+        message: '초대 요청이 왔습니다.',
+        data: {
+          participant: {
+            user: client.user.name,
+            email: client.user.email,
+          },
+        },
+      });
       return {
         success: true,
         message: '방이 존재합니다.',
