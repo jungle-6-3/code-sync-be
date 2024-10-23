@@ -7,13 +7,21 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { Server, Socket } from 'socket.io';
+import { Server } from 'socket.io';
+import { AuthService } from 'src/auth/auth.service';
+import { JwtPayloadDto } from 'src/auth/dto/jwt-payload';
+import { User } from 'src/users/entities/user.entity';
+import { UsersService } from 'src/users/users.service';
+import { initRoomSocket, RoomSocket } from './interfaces/room-socket.interface';
 
 @WebSocketGateway()
 export class ConversationEventsGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
-  constructor() {}
+  constructor(
+    private authService: AuthService,
+    private usersService: UsersService,
+  ) {}
 
   @WebSocketServer() server: Server;
   private logger: Logger = new Logger('RoomEventGateway');
@@ -27,11 +35,22 @@ export class ConversationEventsGateway
     this.logger.log('Initialize WebSocket Server Done');
   }
 
-  handleDisconnect(client: Socket) {
+  handleDisconnect(client: RoomSocket) {
     this.logger.log(`Client Disconnected : ${client.id}`);
   }
 
-  handleConnection(client: Socket, ...args: any[]) {
+  async handleConnection(client: RoomSocket, ...args: any[]) {
+    const cookie = client.handshake.headers.cookie;
+    const params = new URLSearchParams(cookie.replace(/; /g, '&'));
+    const token: string = params.get('token');
+    let user: User = undefined;
+    try {
+      const payload: JwtPayloadDto = await this.authService.getUser(token);
+      user = await this.usersService.findUserbyPayload(payload);
+    } finally {
+      initRoomSocket(client, user);
+    }
+
     this.logger.log(`Client Connected : ${client.id}`);
   }
 }
