@@ -42,6 +42,7 @@ export class RoomUser {
   pk: number;
   email: string;
   name: string;
+  socketId: string;
   peerId: string;
 
   constructor(user: User) {
