@@ -17,8 +17,8 @@ export class RoomsController {
     @Param('prUrl') prUrl: string,
     @Request() req: Request & { user: JwtPayloadDto },
   ) {
-    const userPk = await this.usersService.findUserPk(req.user);
-    const redirectUrl = await this.roomsService.createRoom(userPk, prUrl);
+    const user = await this.usersService.findUserbyPayload(req.user);
+    const redirectUrl = await this.roomsService.createRoom(user, prUrl);
     return {
       success: true,
       message: '회의를 생성했습니다.',
@@ -32,8 +32,8 @@ export class RoomsController {
     @Param('roomUuid') roomUuid: string,
     @Request() req: Request & { user: JwtPayloadDto },
   ) {
-    const userPk = await this.usersService.findUserPk(req.user);
-    await this.roomsService.saveRoom(userPk, roomUuid);
+    const user = await this.usersService.findUserbyPayload(req.user);
+    await this.roomsService.saveRoom(user, roomUuid);
     return {
       success: true,
       message: '저장에 성공했습니다.',

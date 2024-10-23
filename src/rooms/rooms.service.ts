@@ -1,6 +1,7 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { Room } from './room';
 import { v4 as _uuid } from 'uuid';
+import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class RoomsService {
@@ -12,19 +13,19 @@ export class RoomsService {
     this.roomsByPk = new Map();
   }
 
-  async createRoom(creatorPk: number, prUrl: string): Promise<string> {
-    if (await this.findRoombyPk(creatorPk)) {
+  async createRoom(creator: User, prUrl: string): Promise<string> {
+    if (await this.findRoombyPk(creator.pk)) {
       throw new ForbiddenException(
         '이미 대화에 참여하고 있는 방이 존재합니다.',
       );
     }
     const uuid = _uuid();
-    const newRoom = new Room(uuid, creatorPk, prUrl);
+    const newRoom = new Room(uuid, creator.pk, prUrl);
     this.setRoom(uuid, newRoom);
     return `https://code-sync.net/${uuid}`;
   }
 
-  async saveRoom(creatorPk: number, roomUuid: string): Promise<boolean> {
+  async saveRoom(creator: User, roomUuid: string): Promise<boolean> {
     return true;
   }
 

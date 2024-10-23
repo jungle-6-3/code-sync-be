@@ -46,11 +46,11 @@ export class UsersService {
     return `This action removes a #${id} user`;
   }
 
-  async findUserPk({ email, name }: JwtPayloadDto) {
+  async findUserbyPayload({ email, name }: JwtPayloadDto) {
     const user = await this.findOne(email);
     if (!user || user.name !== name) {
       return undefined;
     }
-    return user.pk;
+    return user;
   }
 }
