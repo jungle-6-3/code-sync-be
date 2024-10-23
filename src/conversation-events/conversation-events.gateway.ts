@@ -21,7 +21,7 @@ import { Room, RoomStatus, RoomUser } from 'src/rooms/room';
 
 @WebSocketGateway({
   cors: {
-    origin: ['http://localhost:5173'],
+    origin: '*',
     methods: ['GET', 'POST', 'OPTION', 'FETCH', 'Put', 'DELETE'],
     credentials: true,
   },
