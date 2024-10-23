@@ -19,7 +19,9 @@ import { initRoomSocket, RoomSocket } from './interfaces/room-socket.interface';
 import { RoomsService } from 'src/rooms/rooms.service';
 import { Room, RoomStatus, RoomUser } from 'src/rooms/room';
 
-@WebSocketGateway()
+@WebSocketGateway({
+  cors: ['http://localhost:5173'],
+})
 export class ConversationEventsGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
