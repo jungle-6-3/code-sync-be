@@ -37,6 +37,7 @@ export class ConversationEventsGateway
     @ConnectedSocket() client: RoomSocket,
     @MessageBody() { uuid: roomUuid }: { uuid: string },
   ) {
+    this.logger.log(`join-request from ${client.user}`);
     const room: Room = await this.roomsService.findRoombyUuid(roomUuid);
     if (!client.user) {
       throw new WsException('로그인 해주세요');
@@ -50,6 +51,7 @@ export class ConversationEventsGateway
       client.roomUuid = room.uuid;
       room.creator.socketId = client.id;
       client.join(roomUuid);
+      this.logger.log(`Now ${room.uuid} room is Inviting`);
       return {
         success: true,
         message: '당신이 개최자입니다.',
@@ -69,6 +71,7 @@ export class ConversationEventsGateway
           },
         },
       });
+      this.logger.log(`To ${room.uuid} room, send join request`);
       return {
         success: true,
         message: '방이 존재합니다.',
@@ -83,6 +86,7 @@ export class ConversationEventsGateway
     @ConnectedSocket() client: RoomSocket,
     @MessageBody() { email }: { email: string },
   ) {
+    this.logger.log(`invite-user from ${client.user}`);
     const roomUuid = client.roomUuid;
     if (!roomUuid) {
       throw new WsException('방장이 아니에요');
@@ -109,6 +113,8 @@ export class ConversationEventsGateway
       message: '대화를 시작합니다.',
     });
 
+    this.logger.log(`Now ${room.uuid} room is Running`);
+    room.status = RoomStatus.RUNNING;
     return {
       sucess: true,
       message: '대화를 시작합니다.',
