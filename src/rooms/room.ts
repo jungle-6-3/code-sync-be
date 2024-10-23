@@ -2,6 +2,7 @@ import { User } from 'src/users/entities/user.entity';
 
 export enum RoomStatus {
   WATING = 'Wating',
+  INVITING = 'Inviting',
   RUNNING = 'Running',
   CLOSING1 = 'Closing1',
   CLOSING2 = 'Closing2',
