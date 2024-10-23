@@ -79,8 +79,40 @@ export class ConversationEventsGateway
   }
 
   @SubscribeMessage('invite-user')
-  handleInviteUser(client: any, payload: any): string {
-    return 'Hello world!';
+  async handleInviteUser(
+    @ConnectedSocket() client: RoomSocket,
+    @MessageBody() { email }: { email: string },
+  ) {
+    const roomUuid = client.roomUuid;
+    if (!roomUuid) {
+      throw new WsException('방장이 아니에요');
+    }
+    const room: Room = await this.roomsService.findRoombyUuid(roomUuid);
+    const participantUser: RoomUser = room.watingUsers.find(
+      (user) => user.email == email,
+    );
+    if (!participantUser) {
+      throw new WsException('email에 해당되는 participant를 못 찾겠어요');
+    }
+    room.watingUsers.forEach((user) => {
+      if (user.pk != participantUser.pk) {
+        this.server.to(user.socketId).emit('invite-reject', {
+          message: '초대 요청이 거절되었습니다',
+        });
+        // TODO: disconnect client
+      }
+    });
+    room.watingUsers = [];
+
+    room.participant = participantUser;
+    this.server.to(participantUser.socketId).emit('invite-accepted', {
+      message: '대화를 시작합니다.',
+    });
+
+    return {
+      sucess: true,
+      message: '대화를 시작합니다.',
+    };
   }
 
   afterInit(server: Server) {
