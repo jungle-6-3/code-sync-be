@@ -1,26 +1,29 @@
-import { Injectable } from '@nestjs/common';
-import { CreateRoomDto } from './dto/create-room.dto';
-import { UpdateRoomDto } from './dto/update-room.dto';
+import { ForbiddenException, Injectable } from '@nestjs/common';
+import { Room } from './room';
+import { v4 as _uuid } from 'uuid';
+import { Rooms } from './rooms';
 
 @Injectable()
 export class RoomsService {
-  create(createRoomDto: CreateRoomDto) {
-    return 'This action adds a new room';
+  private rooms: Rooms;
+
+  constructor() {
+    this.rooms = new Rooms();
   }
 
-  findAll() {
-    return `This action returns all rooms`;
+  async createRoom(creatorPk: number, prUrl: string): Promise<string> {
+    if (await this.rooms.findRoombyPk(creatorPk)) {
+      throw new ForbiddenException(
+        '이미 대화에 참여하고 있는 방이 존재합니다.',
+      );
+    }
+    const uuid = _uuid();
+    const newRoom = new Room(uuid, creatorPk, prUrl);
+    this.rooms.setRoom(uuid, newRoom);
+    return `https://code-sync.net/${uuid}`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} room`;
-  }
-
-  update(id: number, updateRoomDto: UpdateRoomDto) {
-    return `This action updates a #${id} room`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} room`;
+  async saveRoom(creatorPk: number, roomUuid: string): Promise<boolean> {
+    return true;
   }
 }
