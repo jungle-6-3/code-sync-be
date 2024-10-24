@@ -117,6 +117,7 @@ export class ConversationEventsGateway
         }
         room.status = RoomStatus.INVITING;
         room.creator.socketId = client.id;
+        await this.roomsService.joinRoom(user.pk, room);
         initRoomSocket(client, user, roomUuid);
       } else if (room.status == RoomStatus.INVITING) {
         if (room.creator.pk == user.pk) {
@@ -132,6 +133,7 @@ export class ConversationEventsGateway
         const waitingUser = new RoomUser(client.user);
         waitingUser.socketId = client.id;
         room.watingUsers.push(waitingUser);
+        await this.roomsService.joinRoom(user.pk, room);
         initRoomSocket(client, user, roomUuid);
 
         this.server.to(room.uuid).emit('join-request-by', {
