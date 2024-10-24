@@ -37,12 +37,7 @@ export class ConversationDatasController {
       return {
         statusCode: 200,
         message: '파일 업로드 성공',
-        data: {
-          originalName: file.originalname,
-          size: file.size,
-          mimeType: file.mimetype,
-          ...result,
-        },
+        result,
       };
     } catch (error) {
       return {
