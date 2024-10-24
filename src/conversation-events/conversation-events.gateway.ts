@@ -50,20 +50,20 @@ export class ConversationEventsGateway
     @MessageBody() { uuid: roomUuid }: { uuid: string },
   ) {
     this.logger.log(`join-request from ${client.user}`);
-    const room: Room = await this.roomsService.findRoombyUuid(roomUuid);
     if (!client.user) {
       throw new ConversationException('AUTH_1', '로그인 해주세요', true);
     }
+    const room: Room = await this.roomsService.findRoombyUuid(roomUuid);
     if (!room) {
       throw new WsException('방이 없어요');
     }
 
     if (room.status == RoomStatus.WATING && room.creator.pk == client.user.pk) {
-      room.status = RoomStatus.INVITING;
       client.roomUuid = room.uuid;
       room.creator.socketId = client.id;
       client.join(roomUuid);
       this.logger.log(`Now ${room.uuid} room is Inviting`);
+      room.status = RoomStatus.INVITING;
       return {
         success: true,
         message: '당신이 개최자입니다.',
@@ -142,21 +142,66 @@ export class ConversationEventsGateway
   }
 
   async handleConnection(client: RoomSocket, ...args: any[]) {
-    let user: User;
     try {
       const cookie = client.handshake.headers.cookie;
       if (cookie == undefined) {
-        throw Error('No cookie');
+        throw new Error('로그인 하지 않았습니다');
       }
-      const params = new URLSearchParams(cookie.replace(/; /g, '&'));
-      const token: string = params.get('token');
+      const cookieMap = new URLSearchParams(cookie.replace(/; /g, '&'));
+      const token: string = cookieMap.get('token');
       const payload: JwtPayloadDto = await this.authService.getUser(token);
-      user = await this.usersService.findUserbyPayload(payload);
+      const user = await this.usersService.findUserbyPayload(payload);
+
+      let roomUuid = client.handshake.query.roomUuid;
+      if (Array.isArray(roomUuid)) {
+        roomUuid = roomUuid[0];
+      }
+      const room: Room = await this.roomsService.findRoombyUuid(roomUuid);
+      if (!room) {
+        throw new Error('방이 존재하지 않습니다.');
+      }
+      if (room.status == RoomStatus.WATING) {
+        if (room.creator.pk != user.pk) {
+          throw new Error('방장이 입장하지 않습니다.');
+        }
+        room.status = RoomStatus.INVITING;
+        room.creator.socketId = client.id;
+        initRoomSocket(client, user, roomUuid);
+      } else if (room.status == RoomStatus.INVITING) {
+        if (room.creator.pk == user.pk) {
+          throw new Error('당신이 방장입니다.');
+        }
+        const sameWaitingUser = room.watingUsers.find(
+          (waiter) => waiter.pk == user.pk,
+        );
+        if (sameWaitingUser != undefined) {
+          throw new Error('이미 참여 요청을 했습니다.');
+        }
+
+        const waitingUser = new RoomUser(client.user);
+        waitingUser.socketId = client.id;
+        room.watingUsers.push(waitingUser);
+        initRoomSocket(client, user, roomUuid);
+
+        this.server.to(room.uuid).emit('join-request-by', {
+          message: '초대 요청이 왔습니다.',
+          data: {
+            participant: {
+              user: client.user.name,
+              email: client.user.email,
+            },
+          },
+        });
+      } else {
+        throw new Error('이미 개최중이거나 종료중인 방입니다.');
+      }
     } catch (error) {
       this.logger.log(`Not logined user : ${client.id}`);
-      user = undefined;
-    } finally {
-      initRoomSocket(client, user);
+      console.log(error);
+      client.emit('exception', error);
+      client.disconnect(true);
+      return;
+      // initRoomSocket(client, undefined, '');
     }
 
     this.logger.log(`Client Connected : ${client.id}`);
