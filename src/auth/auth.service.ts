@@ -23,7 +23,10 @@ export class AuthService {
     const user = await this.userService.findOne(email);
 
     if (!user || !(await bcrypt.compare(password, user.hashedPassword))) {
-      throw new AuthExceptionError('아이디 또는 비밀번호가 틀립니다.');
+      throw new AuthExceptionError(
+        '아이디 또는 비밀번호가 틀립니다.',
+        'AUTH_6',
+      );
     }
     const payload = { email: user.email, name: user.name };
     const access_token = await this.jwtService.sign(payload);
@@ -37,7 +40,7 @@ export class AuthService {
     signUpRequestDto.password = hashedPassword;
     const userData = await this.userService.createUser(signUpRequestDto);
     if (!userData) {
-      throw new AuthExceptionError('회원가입에 실패하였습니다.');
+      throw new AuthExceptionError('중복된 이메일이 있습니다.', 'AUTH_5');
     }
   }
   // 패스워드 해쉬 함수
@@ -59,7 +62,15 @@ export class AuthService {
 }
 
 export class AuthExceptionError extends HttpException {
-  constructor(message: string) {
-    super(message, HttpStatus.BAD_REQUEST);
+  constructor(message: string, code: string) {
+    super(
+      {
+        success: false,
+        status: HttpStatus.BAD_REQUEST,
+        code,
+        message,
+      },
+      HttpStatus.BAD_REQUEST,
+    );
   }
 }
