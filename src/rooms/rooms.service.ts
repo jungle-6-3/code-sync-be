@@ -22,7 +22,7 @@ export class RoomsService {
     const uuid = _uuid();
     const newRoom = new Room(uuid, creator, prUrl);
     this.setRoom(uuid, newRoom);
-    return `https://code-sync.net/${uuid}`;
+    return uuid;
   }
 
   async saveRoom(creator: User, roomUuid: string): Promise<boolean> {
