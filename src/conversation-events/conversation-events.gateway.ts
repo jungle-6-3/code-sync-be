@@ -44,55 +44,6 @@ export class ConversationEventsGateway
   @WebSocketServer() server: Server;
   private logger: Logger = new Logger('RoomEventGateway');
 
-  @SubscribeMessage('join-request')
-  async handleJoinRequest(
-    @ConnectedSocket() client: RoomSocket,
-    @MessageBody() { uuid: roomUuid }: { uuid: string },
-  ) {
-    this.logger.log(`join-request from ${client.user}`);
-    if (!client.user) {
-      throw new ConversationException('AUTH_1', '로그인 해주세요', true);
-    }
-    const room: Room = await this.roomsService.findRoombyUuid(roomUuid);
-    if (!room) {
-      throw new WsException('방이 없어요');
-    }
-
-    if (room.status == RoomStatus.WATING && room.creator.pk == client.user.pk) {
-      client.roomUuid = room.uuid;
-      room.creator.socketId = client.id;
-      client.join(roomUuid);
-      this.logger.log(`Now ${room.uuid} room is Inviting`);
-      room.status = RoomStatus.INVITING;
-      return {
-        success: true,
-        message: '당신이 개최자입니다.',
-      };
-    }
-    if (room.status == RoomStatus.INVITING) {
-      const waitingUser = new RoomUser(client.user);
-      waitingUser.socketId = client.id;
-      // TODO watingUsers 리스트를 확인하고 push 그만하는 동작
-      room.watingUsers.push(waitingUser);
-      this.server.to(room.uuid).emit('join-request-by', {
-        message: '초대 요청이 왔습니다.',
-        data: {
-          participant: {
-            user: client.user.name,
-            email: client.user.email,
-          },
-        },
-      });
-      this.logger.log(`To ${room.uuid} room, send join request`);
-      return {
-        success: true,
-        message: '방이 존재합니다.',
-      };
-    }
-
-    throw new WsException('백앤드를 부르면 어떤 에러인지 나와요');
-  }
-
   @SubscribeMessage('invite-user')
   async handleInviteUser(
     @ConnectedSocket() client: RoomSocket,
@@ -187,8 +138,8 @@ export class ConversationEventsGateway
           message: '초대 요청이 왔습니다.',
           data: {
             participant: {
-              user: client.user.name,
-              email: client.user.email,
+              user: user.name,
+              email: user.email,
             },
           },
         });
