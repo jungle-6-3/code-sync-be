@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as cookieParser from 'cookie-parser';
+import { ExceptionGlobalFilter } from './utils/exception-global.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -9,6 +10,7 @@ async function bootstrap() {
   // use cookie-parser middleware as global
   app.use(cookieParser());
   app.setGlobalPrefix('api');
+  app.useGlobalFilters(new ExceptionGlobalFilter());
 
   const swaggerConfig = new DocumentBuilder()
     .setTitle('Code-Sync')
