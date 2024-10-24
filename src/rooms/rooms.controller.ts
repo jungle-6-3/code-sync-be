@@ -1,4 +1,11 @@
-import { Controller, Post, UseGuards, Request, Param } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  UseGuards,
+  Request,
+  Param,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { RoomsService } from './rooms.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { JwtPayloadDto } from 'src/auth/dto/jwt-payload';

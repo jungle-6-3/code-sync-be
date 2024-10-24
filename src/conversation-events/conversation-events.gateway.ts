@@ -1,4 +1,4 @@
-import { Logger, UseGuards } from '@nestjs/common';
+import { Logger, UseFilters } from '@nestjs/common';
 import {
   ConnectedSocket,
   MessageBody,
@@ -18,9 +18,12 @@ import { UsersService } from 'src/users/users.service';
 import { initRoomSocket, RoomSocket } from './interfaces/room-socket.interface';
 import { RoomsService } from 'src/rooms/rooms.service';
 import { Room, RoomStatus, RoomUser } from 'src/rooms/room';
-import { ConversationEventsFilter } from './conversation-events.filter';
+import {
+  ConversationEventsFilter,
+  ConversationException,
+} from './conversation-events.filter';
 
-@UseGuards(ConversationEventsFilter)
+@UseFilters(ConversationEventsFilter)
 @WebSocketGateway(3001, {
   cors: {
     origin: ['http://localhost:5173'],
@@ -40,55 +43,6 @@ export class ConversationEventsGateway
 
   @WebSocketServer() server: Server;
   private logger: Logger = new Logger('RoomEventGateway');
-
-  @SubscribeMessage('join-request')
-  async handleJoinRequest(
-    @ConnectedSocket() client: RoomSocket,
-    @MessageBody() { uuid: roomUuid }: { uuid: string },
-  ) {
-    this.logger.log(`join-request from ${client.user}`);
-    const room: Room = await this.roomsService.findRoombyUuid(roomUuid);
-    if (!client.user) {
-      throw new WsException('로그인 해주세요');
-    }
-    if (!room) {
-      throw new WsException('방이 없어요');
-    }
-
-    if (room.status == RoomStatus.WATING && room.creator.pk == client.user.pk) {
-      room.status = RoomStatus.INVITING;
-      client.roomUuid = room.uuid;
-      room.creator.socketId = client.id;
-      client.join(roomUuid);
-      this.logger.log(`Now ${room.uuid} room is Inviting`);
-      return {
-        success: true,
-        message: '당신이 개최자입니다.',
-      };
-    }
-    if (room.status == RoomStatus.INVITING) {
-      const waitingUser = new RoomUser(client.user);
-      waitingUser.socketId = client.id;
-      // TODO watingUsers 리스트를 확인하고 push 그만하는 동작
-      room.watingUsers.push(waitingUser);
-      this.server.to(room.uuid).emit('join-request-by', {
-        message: '초대 요청이 왔습니다.',
-        data: {
-          participant: {
-            user: client.user.name,
-            email: client.user.email,
-          },
-        },
-      });
-      this.logger.log(`To ${room.uuid} room, send join request`);
-      return {
-        success: true,
-        message: '방이 존재합니다.',
-      };
-    }
-
-    throw new WsException('백앤드를 부르면 어떤 에러인지 나와요');
-  }
 
   @SubscribeMessage('invite-user')
   async handleInviteUser(
@@ -112,7 +66,7 @@ export class ConversationEventsGateway
         this.server.to(user.socketId).emit('invite-reject', {
           message: '초대 요청이 거절되었습니다',
         });
-        // TODO: disconnect client
+        client.disconnect(true);
       }
     });
     room.watingUsers = [];
@@ -134,26 +88,86 @@ export class ConversationEventsGateway
     this.logger.log('Initialize WebSocket Server Done');
   }
 
-  handleDisconnect(client: RoomSocket) {
+  async handleDisconnect(client: RoomSocket) {
     this.logger.log(`Client Disconnected : ${client.id}`);
+    const roomUuid = client.roomUuid;
+    if (!roomUuid) {
+      return;
+    }
+    const room = await this.roomsService.findRoombyUuid(roomUuid);
+    if (room.creator.pk == client.user.pk) {
+      // TODO 방에 있는 사람 모두 나게게 하기.
+    } else if (room.participant.pk == client.user.pk) {
+      // TODO 방 상태 바꾸기. participant 없애기.
+    } else {
+      // TODO watingUsers에 있던 case. 딱히 할 것이 있나 봐야 함
+    }
+    this.roomsService.leaveRoom(client.user.pk);
   }
 
   async handleConnection(client: RoomSocket, ...args: any[]) {
-    let user: User;
     try {
       const cookie = client.handshake.headers.cookie;
       if (cookie == undefined) {
-        throw Error('No cookie');
+        throw new Error('로그인 하지 않았습니다');
       }
-      const params = new URLSearchParams(cookie.replace(/; /g, '&'));
-      const token: string = params.get('token');
+      const cookieMap = new URLSearchParams(cookie.replace(/; /g, '&'));
+      const token: string = cookieMap.get('token');
       const payload: JwtPayloadDto = await this.authService.getUser(token);
-      user = await this.usersService.findUserbyPayload(payload);
+      const user: User = await this.usersService.findUserbyPayload(payload);
+
+      let roomUuid = client.handshake.query.roomUuid;
+      if (Array.isArray(roomUuid)) {
+        roomUuid = roomUuid[0];
+      }
+      const room: Room = await this.roomsService.findRoombyUuid(roomUuid);
+      if (!room) {
+        throw new Error('방이 존재하지 않습니다.');
+      }
+      if (room.status == RoomStatus.WATING) {
+        if (room.creator.pk != user.pk) {
+          throw new Error('방장이 입장하지 않습니다.');
+        }
+        room.status = RoomStatus.INVITING;
+        room.creator.socketId = client.id;
+        await this.roomsService.joinRoom(user.pk, room);
+        initRoomSocket(client, user, roomUuid);
+      } else if (room.status == RoomStatus.INVITING) {
+        if (room.creator.pk == user.pk) {
+          throw new Error('당신이 방장입니다.');
+        }
+        const sameWaitingUser = room.watingUsers.find(
+          (waiter) => waiter.pk == user.pk,
+        );
+        if (sameWaitingUser != undefined) {
+          throw new Error('이미 참여 요청을 했습니다.');
+        }
+
+        const waitingUser = new RoomUser(client.user);
+        waitingUser.socketId = client.id;
+        room.watingUsers.push(waitingUser);
+        await this.roomsService.joinRoom(user.pk, room);
+        initRoomSocket(client, user, roomUuid);
+
+        this.server.to(room.uuid).emit('join-request-by', {
+          message: '초대 요청이 왔습니다.',
+          data: {
+            participant: {
+              user: user.name,
+              email: user.email,
+            },
+          },
+        });
+      } else {
+        throw new Error('이미 개최중이거나 종료중인 방입니다.');
+      }
     } catch (error) {
       this.logger.log(`Not logined user : ${client.id}`);
-      user = undefined;
-    } finally {
-      initRoomSocket(client, user);
+      console.log(error);
+      client.emit('exception', error);
+      client.disconnect(true);
+      return;
+      // initRoomSocket(client, undefined, '');
     }
 
     this.logger.log(`Client Connected : ${client.id}`);
