@@ -66,7 +66,7 @@ export class ConversationEventsGateway
         this.server.to(user.socketId).emit('invite-reject', {
           message: '초대 요청이 거절되었습니다',
         });
-        // TODO: disconnect client
+        client.disconnect(true);
       }
     });
     room.watingUsers = [];
@@ -88,8 +88,21 @@ export class ConversationEventsGateway
     this.logger.log('Initialize WebSocket Server Done');
   }
 
-  handleDisconnect(client: RoomSocket) {
+  async handleDisconnect(client: RoomSocket) {
     this.logger.log(`Client Disconnected : ${client.id}`);
+    const roomUuid = client.roomUuid;
+    if (!roomUuid) {
+      return;
+    }
+    const room = await this.roomsService.findRoombyUuid(roomUuid);
+    if (room.creator.pk == client.user.pk) {
+      // TODO 방에 있는 사람 모두 나게게 하기.
+    } else if (room.participant.pk == client.user.pk) {
+      // TODO 방 상태 바꾸기. participant 없애기.
+    } else {
+      // TODO watingUsers에 있던 case. 딱히 할 것이 있나 봐야 함
+    }
+    this.roomsService.leaveRoom(client.user.pk);
   }
 
   async handleConnection(client: RoomSocket, ...args: any[]) {
