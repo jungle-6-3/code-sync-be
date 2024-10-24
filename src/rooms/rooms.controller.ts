@@ -1,4 +1,11 @@
-import { Controller, Post, UseGuards, Request, Param } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  UseGuards,
+  Request,
+  Param,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { RoomsService } from './rooms.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { JwtPayloadDto } from 'src/auth/dto/jwt-payload';
@@ -18,6 +25,9 @@ export class RoomsController {
     @Request() req: Request & { user: JwtPayloadDto },
   ) {
     const user = await this.usersService.findUserbyPayload(req.user);
+    if (!user) {
+      throw new UnauthorizedException('회원을 찾을 수 없습니다.');
+    }
     const redirectUrl = await this.roomsService.createRoom(user, prUrl);
     return {
       success: true,
