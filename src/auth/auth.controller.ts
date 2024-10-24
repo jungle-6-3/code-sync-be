@@ -44,8 +44,8 @@ export class AuthController {
     const access_token = await this.authService.signIn(loginRequestDto);
     res.cookie('token', access_token, {
       httpOnly: true,
-      secure: false,
-      sameSite: 'lax',
+      secure: true,
+      sameSite: 'none',
       maxAge: +process.env.COOKIE_AGE,
     });
     return res.send({
