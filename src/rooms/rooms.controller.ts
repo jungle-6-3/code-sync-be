@@ -25,9 +25,6 @@ export class RoomsController {
     @Request() req: Request & { user: JwtPayloadDto },
   ) {
     const user = await this.usersService.findUserbyPayload(req.user);
-    if (!user) {
-      throw new UnauthorizedException('회원을 찾을 수 없습니다.');
-    }
     const redirectUrl = await this.roomsService.createRoom(user, prUrl);
     return {
       success: true,
