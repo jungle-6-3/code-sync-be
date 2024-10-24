@@ -44,6 +44,27 @@ export class ConversationEventsGateway
   @WebSocketServer() server: Server;
   private logger: Logger = new Logger('RoomEventGateway');
 
+  @SubscribeMessage('share-peer-id')
+  async handleSubscribeMessage(
+    @ConnectedSocket() client: RoomSocket,
+    @MessageBody() { peerId }: { peerId: string },
+  ) {
+    // TODO check client is joining in room
+    // TODO check room status is running
+    const room = await this.roomsService.findRoombyUuid(client.roomUuid);
+    this.server.to(room.uuid).emit('new-peer-id', {
+      message: '화면 공유 요청이 왔습니다.',
+      data: {
+        email: client.user.email,
+        peerId: peerId,
+      },
+    });
+    return {
+      sucess: true,
+      message: 'Peer Id를 등록했습니다.',
+    };
+  }
+
   @SubscribeMessage('invite-user')
   async handleInviteUser(
     @ConnectedSocket() client: RoomSocket,
@@ -100,7 +121,7 @@ export class ConversationEventsGateway
     } else if (room.participant.pk == client.user.pk) {
       // TODO 방 상태 바꾸기. participant 없애기.
     } else {
-      // TODO watingUsers에 있던 case. 딱히 할 것이 있나 봐야 함
+      // TODO watingUsers에 있던 case. 리스트에 있는 자기 자신을 없애야 함
     }
     this.roomsService.leaveRoom(client.user.pk);
   }
@@ -140,7 +161,7 @@ export class ConversationEventsGateway
           (waiter) => waiter.pk == user.pk,
         );
         if (sameWaitingUser != undefined) {
-          throw new Error('이미 참여 요청을 했습니다.');
+          this.server.to(sameWaitingUser.socketId).disconnectSockets(true);
         }
 
         const waitingUser = new RoomUser(client.user);
