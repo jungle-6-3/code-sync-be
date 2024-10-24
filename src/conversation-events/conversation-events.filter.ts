@@ -38,6 +38,9 @@ export class ConversationEventsFilter<T> implements ExceptionFilter {
       }
       return;
     }
+    if (exception instanceof WsException) {
+      client.emit('exception', exception);
+    }
     this.logger.debug(exception.stack);
     client.emit('exception', '백엔드 문제');
     return;
