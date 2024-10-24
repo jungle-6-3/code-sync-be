@@ -48,6 +48,13 @@ export class AuthController {
       sameSite: 'none',
       maxAge: +process.env.COOKIE_AGE,
     });
+    res.cookie('token', access_token, {
+      domain: 'http://localhost:5173',
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+      maxAge: +process.env.COOKIE_AGE,
+    });
     return res.send({
       success: true,
       message: '로그인에 성공하였습니다.',
