@@ -1,4 +1,4 @@
-import { Logger } from '@nestjs/common';
+import { Logger, UseGuards } from '@nestjs/common';
 import {
   ConnectedSocket,
   MessageBody,
@@ -18,7 +18,9 @@ import { UsersService } from 'src/users/users.service';
 import { initRoomSocket, RoomSocket } from './interfaces/room-socket.interface';
 import { RoomsService } from 'src/rooms/rooms.service';
 import { Room, RoomStatus, RoomUser } from 'src/rooms/room';
+import { ConversationEventsFilter } from './conversation-events.filter';
 
+@UseGuards(ConversationEventsFilter)
 @WebSocketGateway(3001, {
   cors: {
     origin: ['http://localhost:5173'],
@@ -137,13 +139,19 @@ export class ConversationEventsGateway
   }
 
   async handleConnection(client: RoomSocket, ...args: any[]) {
-    const cookie = client.handshake.headers.cookie;
-    const params = new URLSearchParams(cookie.replace(/; /g, '&'));
-    const token: string = params.get('token');
-    let user: User = undefined;
+    let user: User;
     try {
+      const cookie = client.handshake.headers.cookie;
+      if (cookie == undefined) {
+        throw Error('No cookie');
+      }
+      const params = new URLSearchParams(cookie.replace(/; /g, '&'));
+      const token: string = params.get('token');
       const payload: JwtPayloadDto = await this.authService.getUser(token);
       user = await this.usersService.findUserbyPayload(payload);
+    } catch (error) {
+      this.logger.log(`Not logined user : ${client.id}`);
+      user = undefined;
     } finally {
       initRoomSocket(client, user);
     }
