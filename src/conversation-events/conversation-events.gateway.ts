@@ -70,7 +70,7 @@ export class ConversationEventsGateway
     @ConnectedSocket() client: RoomSocket,
     @MessageBody() { email }: { email: string },
   ) {
-    this.logger.log(`invite-user from ${client.user}`);
+    this.logger.log(`다음 유저로부터 초대 요청 ${client.user.name}`);
     const roomUuid = client.roomUuid;
     if (!roomUuid) {
       throw new WsException('방장이 아니에요');
@@ -92,6 +92,7 @@ export class ConversationEventsGateway
     });
     room.watingUsers = [];
 
+    this.server.to(participantUser.socketId).socketsJoin(roomUuid);
     room.participant = participantUser;
     this.server.to(participantUser.socketId).emit('invite-accepted', {
       message: '대화를 시작합니다.',
@@ -127,6 +128,7 @@ export class ConversationEventsGateway
   }
 
   async handleConnection(client: RoomSocket, ...args: any[]) {
+    this.logger.log(`${client.id}로 부터 connection 요청`);
     try {
       const cookie = client.handshake.headers.cookie;
       if (cookie == undefined) {
@@ -136,11 +138,14 @@ export class ConversationEventsGateway
       const token: string = cookieMap.get('token');
       const payload: JwtPayloadDto = await this.authService.getUser(token);
       const user: User = await this.usersService.findUserbyPayload(payload);
+      this.logger.log(`유저 정보 ${user.email} ${user.name}`);
 
       let roomUuid = client.handshake.query.roomUuid;
+      this.logger.log(`room uuid 바꾸기 전 ${roomUuid}`);
       if (Array.isArray(roomUuid)) {
         roomUuid = roomUuid[0];
       }
+      this.logger.log(`room uuid 바꾼 후 ${roomUuid}`);
       const room: Room = await this.roomsService.findRoombyUuid(roomUuid);
       if (!room) {
         throw new Error('방이 존재하지 않습니다.');
@@ -152,7 +157,10 @@ export class ConversationEventsGateway
         room.status = RoomStatus.INVITING;
         room.creator.socketId = client.id;
         await this.roomsService.joinRoom(user.pk, room);
+        client.join(roomUuid);
         initRoomSocket(client, user, roomUuid);
+        this.logger.log('방장이 되었습니다.');
+        this.logger.log(room);
       } else if (room.status == RoomStatus.INVITING) {
         if (room.creator.pk == user.pk) {
           throw new Error('당신이 방장입니다.');
@@ -169,6 +177,7 @@ export class ConversationEventsGateway
         room.watingUsers.push(waitingUser);
         await this.roomsService.joinRoom(user.pk, room);
         initRoomSocket(client, user, roomUuid);
+        this.logger.log('대기자에 추가되었습니다.');
 
         this.server.to(room.uuid).emit('join-request-by', {
           message: '초대 요청이 왔습니다.',
@@ -183,14 +192,16 @@ export class ConversationEventsGateway
         throw new Error('이미 개최중이거나 종료중인 방입니다.');
       }
     } catch (error) {
-      this.logger.log(`Not logined user : ${client.id}`);
-      console.log(error);
+      this.logger.log(
+        `아래의 error로 인해 유저와 연결을 끊습니다 : ${client.id}`,
+      );
+      this.logger.log(`${error}`);
       client.emit('exception', error);
       client.disconnect(true);
       return;
       // initRoomSocket(client, undefined, '');
     }
-
+    this.logger.log(`${client.roomUuid}`);
     this.logger.log(`Client Connected : ${client.id}`);
   }
 }
