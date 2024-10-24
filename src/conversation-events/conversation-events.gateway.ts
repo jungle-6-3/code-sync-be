@@ -1,4 +1,4 @@
-import { Logger, UseFilters, UseGuards } from '@nestjs/common';
+import { Logger, UseFilters } from '@nestjs/common';
 import {
   ConnectedSocket,
   MessageBody,
@@ -114,7 +114,7 @@ export class ConversationEventsGateway
       const cookieMap = new URLSearchParams(cookie.replace(/; /g, '&'));
       const token: string = cookieMap.get('token');
       const payload: JwtPayloadDto = await this.authService.getUser(token);
-      const user = await this.usersService.findUserbyPayload(payload);
+      const user: User = await this.usersService.findUserbyPayload(payload);
 
       let roomUuid = client.handshake.query.roomUuid;
       if (Array.isArray(roomUuid)) {
