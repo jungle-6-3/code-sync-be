@@ -1,4 +1,4 @@
-import { Logger } from '@nestjs/common';
+import { Logger, UseGuards } from '@nestjs/common';
 import {
   ConnectedSocket,
   MessageBody,
@@ -18,7 +18,9 @@ import { UsersService } from 'src/users/users.service';
 import { initRoomSocket, RoomSocket } from './interfaces/room-socket.interface';
 import { RoomsService } from 'src/rooms/rooms.service';
 import { Room, RoomStatus, RoomUser } from 'src/rooms/room';
+import { ConversationEventsFilter } from './conversation-events.filter';
 
+@UseGuards(ConversationEventsFilter)
 @WebSocketGateway(3001, {
   cors: {
     origin: ['http://localhost:5173'],
