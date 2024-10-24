@@ -28,6 +28,9 @@ export class ConversationDatasService {
       await this.s3Client.send(command);
 
       return {
+        originalName: file.originalname,
+        size: file.size,
+        mimeType: file.mimetype,
         key: command.input.Key,
         url: `https://${this.configService.get('AWS_BUCKET_NAME')}.s3.${this.configService.get('AWS_REGION')}.amazonaws.com/${command.input.Key}`,
       };

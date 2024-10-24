@@ -37,7 +37,9 @@ export class ConversationDatasController {
       return {
         statusCode: 200,
         message: '파일 업로드 성공',
-        result,
+        data: {
+          result,
+        },
       };
     } catch (error) {
       return {
