@@ -58,7 +58,7 @@ export class AuthService {
   }
 }
 
-class AuthExceptionError extends HttpException {
+export class AuthExceptionError extends HttpException {
   constructor(message: string) {
     super(message, HttpStatus.BAD_REQUEST);
   }
