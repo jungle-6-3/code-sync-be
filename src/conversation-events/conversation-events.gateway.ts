@@ -1,4 +1,4 @@
-import { Logger, UseGuards } from '@nestjs/common';
+import { Logger, UseFilters, UseGuards } from '@nestjs/common';
 import {
   ConnectedSocket,
   MessageBody,
@@ -18,9 +18,12 @@ import { UsersService } from 'src/users/users.service';
 import { initRoomSocket, RoomSocket } from './interfaces/room-socket.interface';
 import { RoomsService } from 'src/rooms/rooms.service';
 import { Room, RoomStatus, RoomUser } from 'src/rooms/room';
-import { ConversationEventsFilter } from './conversation-events.filter';
+import {
+  ConversationEventsFilter,
+  ConversationException,
+} from './conversation-events.filter';
 
-@UseGuards(ConversationEventsFilter)
+@UseFilters(ConversationEventsFilter)
 @WebSocketGateway(3001, {
   cors: {
     origin: ['http://localhost:5173'],
@@ -49,7 +52,7 @@ export class ConversationEventsGateway
     this.logger.log(`join-request from ${client.user}`);
     const room: Room = await this.roomsService.findRoombyUuid(roomUuid);
     if (!client.user) {
-      throw new WsException('로그인 해주세요');
+      throw new ConversationException('AUTH_1', '로그인 해주세요', true);
     }
     if (!room) {
       throw new WsException('방이 없어요');
