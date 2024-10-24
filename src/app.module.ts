@@ -8,6 +8,7 @@ import { UsersModule } from './users/users.module';
 import { ConversationEventsModule } from './conversation-events/conversation-events.module';
 import { ConversationsModule } from './conversations/conversations.module';
 import { RoomsModule } from './rooms/rooms.module';
+import { ConversationDatasModule } from './conversation-datas/conversation-datas.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { RoomsModule } from './rooms/rooms.module';
     ConversationEventsModule,
     ConversationsModule,
     RoomsModule,
+    ConversationDatasModule,
   ],
   controllers: [AppController],
   providers: [AppService],
