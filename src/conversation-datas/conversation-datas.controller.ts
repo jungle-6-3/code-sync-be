@@ -26,6 +26,7 @@ export class ConversationDatasController {
   @Post()
   @UseInterceptors(FileInterceptor('file'))
   async uploadFile(@UploadedFile() file: Express.Multer.File) {
+    // TODO: Exception 관리 (custom filter/exception 생성)
     try {
       if (!file) {
         throw new Error('파일이 없습니다.');
