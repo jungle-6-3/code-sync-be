@@ -19,7 +19,6 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   @Get('me')
   @ApiOkResponse({})
-  @UseFilters(new UsersFilter())
   authUser(@Request() req: Request & { user: JwtPayloadDto }) {
     const { email, name }: JwtPayloadDto = req.user;
     const user = new UserInfoDTO(email, name);
