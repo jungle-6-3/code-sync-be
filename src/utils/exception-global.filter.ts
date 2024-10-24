@@ -4,12 +4,15 @@ import {
   ExceptionFilter,
   HttpException,
   HttpStatus,
+  Logger,
   UnauthorizedException,
 } from '@nestjs/common';
 
 @Catch()
 export class ExceptionGlobalFilter<T> implements ExceptionFilter {
-  catch(exception: T, host: ArgumentsHost) {
+  private logger: Logger = new Logger('ExceptionGlobalFilter');
+
+  catch(exception: Error, host: ArgumentsHost) {
     const response = host.switchToHttp().getResponse();
     if (exception instanceof UnauthorizedException) {
       const errorMessage = {
@@ -26,10 +29,10 @@ export class ExceptionGlobalFilter<T> implements ExceptionFilter {
         ? exception.getStatus()
         : HttpStatus.INTERNAL_SERVER_ERROR;
 
-    console.log(exception);
+    this.logger.debug(exception.stack);
     const errorMessage = {
       success: false,
-      status: 401,
+      status: 502,
       code: '???',
       message: '백앤드를 불러주세요',
     };
