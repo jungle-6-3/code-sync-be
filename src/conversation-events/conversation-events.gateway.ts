@@ -139,13 +139,19 @@ export class ConversationEventsGateway
   }
 
   async handleConnection(client: RoomSocket, ...args: any[]) {
-    const cookie = client.handshake.headers.cookie;
-    const params = new URLSearchParams(cookie.replace(/; /g, '&'));
-    const token: string = params.get('token');
-    let user: User = undefined;
+    let user: User;
     try {
+      const cookie = client.handshake.headers.cookie;
+      if (cookie == undefined) {
+        throw Error('No cookie');
+      }
+      const params = new URLSearchParams(cookie.replace(/; /g, '&'));
+      const token: string = params.get('token');
       const payload: JwtPayloadDto = await this.authService.getUser(token);
       user = await this.usersService.findUserbyPayload(payload);
+    } catch (error) {
+      this.logger.log(`Not logined user : ${client.id}`);
+      user = undefined;
     } finally {
       initRoomSocket(client, user);
     }
