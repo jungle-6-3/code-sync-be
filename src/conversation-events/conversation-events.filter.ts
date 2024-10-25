@@ -26,7 +26,6 @@ export class ConversationEventsFilter<T> implements ExceptionFilter {
     const event = ctx.getPattern();
     const client = ctx.getClient<Socket>();
     if (exception instanceof ConversationException) {
-      console.log(exception);
       client.emit('exception', {
         success: false,
         event: event,
@@ -39,7 +38,8 @@ export class ConversationEventsFilter<T> implements ExceptionFilter {
       return;
     }
     if (exception instanceof WsException) {
-      client.emit('exception', exception);
+      client.emit('exception', exception.message);
+      return;
     }
     this.logger.debug(exception.stack);
     client.emit('exception', '백엔드 문제');
