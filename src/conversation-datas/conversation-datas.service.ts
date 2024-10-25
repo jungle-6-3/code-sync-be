@@ -59,4 +59,16 @@ export class ConversationDatasService {
       throw new Error('파일 업로드 실패');
     }
   }
+
+  async createConversationDatas(saveData: SaveDatasDto) {
+    try {
+      const conversationDatas =
+        await this.conversationDatasReoisitory.create(saveData);
+      await this.conversationDatasReoisitory.save(conversationDatas);
+      return true;
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
+  }
 }
