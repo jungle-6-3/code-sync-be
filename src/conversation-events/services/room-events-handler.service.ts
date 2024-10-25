@@ -4,6 +4,9 @@ import {
   initRoomSocket,
   reflashRoomSocket,
   RoomSocket,
+  setToCreator,
+  setToParticipant,
+  setToWaiter,
   SocketStatus,
 } from '../interfaces/room-socket.interface';
 import { AuthService } from 'src/auth/auth.service';
@@ -58,6 +61,7 @@ export class RoomEventsHandlerService {
           throw new Error('이미 다른 방에 참가하거나 참가 신청을 했습니다.');
         }
         // TODO: bofore Socket을 room에서 찾는 logic 추가해야 함.
+        this.logger.log('방에 재진입 했습니다.');
         const beforeSocket = undefined;
         reflashRoomSocket(beforeSocket, client);
 
@@ -69,6 +73,7 @@ export class RoomEventsHandlerService {
           throw new Error('방장이 입장하지 않습니다.');
         }
 
+        setToCreator(client);
         afterInitSocketFuncion = () => {
           room.status = RoomStatus.INVITING;
           room.creatorSocket = client;
@@ -91,6 +96,7 @@ export class RoomEventsHandlerService {
           throw new Error('동시성 문제2: 백앤드를 불러주세요');
         }
 
+        setToWaiter(client);
         afterInitSocketFuncion = () => {
           room.watingSockets.push(client);
           this.logger.log('대기자에 추가되었습니다.');
@@ -163,6 +169,7 @@ export class RoomEventsHandlerService {
     });
     room.watingSockets = [];
 
+    setToParticipant(participantSocket);
     participantSocket.join(room.uuid);
     room.participantSocket = participantSocket;
     participantSocket.emit('invite-accepted', {
