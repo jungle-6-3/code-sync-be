@@ -183,7 +183,7 @@ export class ConversationEventsGateway
           message: '초대 요청이 왔습니다.',
           data: {
             participant: {
-              user: user.name,
+              name: user.name,
               email: user.email,
             },
           },
