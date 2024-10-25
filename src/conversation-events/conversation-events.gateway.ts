@@ -22,7 +22,7 @@ import {
   SocketStatus,
 } from './interfaces/room-socket.interface';
 import { RoomsService } from 'src/rooms/rooms.service';
-import { Room, RoomStatus, RoomUser } from 'src/rooms/room';
+import { Room, RoomStatus } from 'src/rooms/room';
 import {
   ConversationEventsFilter,
   ConversationException,
@@ -50,6 +50,7 @@ export class ConversationEventsGateway
   @WebSocketServer() server: Server;
   private logger: Logger = new Logger('RoomEventGateway');
 
+  // TODO: pipe로 creator나 participant인지 체크하도록 수정 필요.
   @SubscribeMessage('share-peer-id')
   async handleSubscribeMessage(
     @ConnectedSocket() client: RoomSocket,
@@ -57,7 +58,7 @@ export class ConversationEventsGateway
   ) {
     // TODO check client is joining in room
     // TODO check room status is running
-    const room = await this.roomsService.findRoombyUuid(client.roomUuid);
+    const room = client.room;
     this.server.to(room.uuid).emit('new-peer-id', {
       message: '화면 공유 요청이 왔습니다.',
       data: {
@@ -71,36 +72,47 @@ export class ConversationEventsGateway
     };
   }
 
+  // TODO: pipe로 방장인지 체크하도록 수정 필요.
   @SubscribeMessage('invite-user')
   async handleInviteUser(
     @ConnectedSocket() client: RoomSocket,
     @MessageBody() { email }: { email: string },
   ) {
+    if (client.status == undefined) {
+      this.logger.error(
+        'invite-user에서 인증되지 않은 유저입니다. (일어나면 안 되는 일)',
+      );
+      throw new ConversationException(
+        'AUTH_2',
+        '인증되지 않은 유저입니다',
+        true,
+      );
+    }
     this.logger.log(`다음 유저로부터 초대 요청 ${client.user.name}`);
-    const roomUuid = client.roomUuid;
-    if (!roomUuid) {
+    if (client.status != SocketStatus.CREATOR) {
       throw new WsException('방장이 아니에요');
     }
-    const room: Room = await this.roomsService.findRoombyUuid(roomUuid);
-    const participantUser: RoomUser = room.watingUsers.find(
-      (user) => user.email == email,
+    const room = client.room;
+
+    const participantSocket: RoomSocket = room.watingSockets.find(
+      (socket) => socket.user.email == email,
     );
-    if (!participantUser) {
+    if (!participantSocket) {
       throw new WsException('email에 해당되는 participant를 못 찾겠어요');
     }
-    room.watingUsers.forEach((user) => {
-      if (user.pk != participantUser.pk) {
-        this.server.to(user.socketId).emit('invite-reject', {
+    room.watingSockets.forEach((socket) => {
+      if (socket != participantSocket) {
+        socket.emit('invite-reject', {
           message: '초대 요청이 거절되었습니다',
         });
-        client.disconnect(true);
+        socket.disconnect(true);
       }
     });
-    room.watingUsers = [];
+    room.watingSockets = [];
 
-    this.server.to(participantUser.socketId).socketsJoin(roomUuid);
-    room.participant = participantUser;
-    this.server.to(participantUser.socketId).emit('invite-accepted', {
+    participantSocket.join(room.uuid);
+    room.participantSocket = participantSocket;
+    participantSocket.emit('invite-accepted', {
       message: '대화를 시작합니다.',
     });
 
