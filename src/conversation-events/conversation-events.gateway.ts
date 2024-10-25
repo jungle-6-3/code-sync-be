@@ -45,10 +45,11 @@ export class ConversationEventsGateway
     private authService: AuthService,
     private usersService: UsersService,
     private roomsService: RoomsService,
+    private loggerService: ConversationEventsLoggerService,
   ) {}
 
   @WebSocketServer() server: Server;
-  private logger: Logger = new Logger('RoomEventGateway');
+  private logger: Logger = this.loggerService.getLogger();
 
   // TODO: pipe로 creator나 participant인지 체크하도록 수정 필요.
   @SubscribeMessage('share-peer-id')
