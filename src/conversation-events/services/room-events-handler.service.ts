@@ -39,7 +39,7 @@ export class RoomEventsHandlerService {
       const cookieMap = new URLSearchParams(cookie.replace(/; /g, '&'));
       const token: string = cookieMap.get('token');
       const payload: JwtPayloadDto = await this.authService.getUser(token);
-      const user: User = await this.usersService.findUserbyPayload(payload);
+      user = await this.usersService.findUserbyPayload(payload);
       this.logger.log(`유저 정보 ${user.email} ${user.name}`);
 
       let roomUuid = client.handshake.query.roomUuid;
@@ -47,7 +47,7 @@ export class RoomEventsHandlerService {
         roomUuid = roomUuid[0];
       }
       this.logger.log(`받은 room uuid ${roomUuid}`);
-      const room: Room = await this.roomsService.findRoombyUuid(roomUuid);
+      room = await this.roomsService.findRoombyUuid(roomUuid);
       if (!room) {
         throw new Error('방이 존재하지 않습니다.');
       }

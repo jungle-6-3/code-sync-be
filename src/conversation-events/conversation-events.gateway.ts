@@ -11,18 +11,7 @@ import {
   WsException,
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
-import { AuthService } from 'src/auth/auth.service';
-import { JwtPayloadDto } from 'src/auth/dto/jwt-payload';
-import { User } from 'src/users/entities/user.entity';
-import { UsersService } from 'src/users/users.service';
-import {
-  reflashRoomSocket,
-  initRoomSocket,
-  RoomSocket,
-  SocketStatus,
-} from './interfaces/room-socket.interface';
-import { RoomsService } from 'src/rooms/rooms.service';
-import { Room, RoomStatus } from 'src/rooms/room';
+import { RoomSocket, SocketStatus } from './interfaces/room-socket.interface';
 import {
   ConversationEventsFilter,
   ConversationException,
@@ -44,9 +33,6 @@ export class ConversationEventsGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
   constructor(
-    private authService: AuthService,
-    private usersService: UsersService,
-    private roomsService: RoomsService,
     private loggerService: ConversationEventsLoggerService,
     private peerJsEventsHandlerService: PeerJsEventsHandlerService,
     private roomEventsHandlerService: RoomEventsHandlerService,
