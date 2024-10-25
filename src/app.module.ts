@@ -24,7 +24,7 @@ import { ConversationDatasModule } from './conversation-datas/conversation-datas
       password: process.env.DATABASE_PASSWORD,
       database: process.env.DATABASE,
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      synchronize: false,
+      synchronize: true,
     }),
     AuthModule,
     UsersModule,
