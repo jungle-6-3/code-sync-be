@@ -172,7 +172,7 @@ export class ConversationEventsGateway
           this.server.to(sameWaitingUser.socketId).disconnectSockets(true);
         }
 
-        const waitingUser = new RoomUser(client.user);
+        const waitingUser = new RoomUser(user);
         waitingUser.socketId = client.id;
         room.watingUsers.push(waitingUser);
         await this.roomsService.joinRoom(user.pk, room);
@@ -196,6 +196,7 @@ export class ConversationEventsGateway
         `아래의 error로 인해 유저와 연결을 끊습니다 : ${client.id}`,
       );
       this.logger.log(`${error}`);
+      this.logger.log((error as Error).stack);
       client.emit('exception', error);
       client.disconnect(true);
       return;
