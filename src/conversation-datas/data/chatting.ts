@@ -17,8 +17,10 @@ export class ChatData {
 
     return fileData;
   }
-  constructor() {
+
+  constructor(uuid: string) {
     this.chats = [];
+    this.uuid = uuid;
   }
 }
 
