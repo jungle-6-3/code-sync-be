@@ -6,11 +6,16 @@ export class ChatData {
     this.chats.push(chat);
   }
 
-  public toString() {
-    return JSON.stringify(this.chats);
-  }
-  public addChat() {
-    this.chats.push();
+  public toFile() {
+    const stringChat = JSON.stringify(this.chats);
+    const fileData = {
+      fileName: 'Chat',
+      file: stringChat,
+      extension: 'txt',
+      uuid: this.uuid,
+    };
+
+    return fileData;
   }
   constructor() {
     this.chats = [];
