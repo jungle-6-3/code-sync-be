@@ -40,7 +40,8 @@ export class RoomsController {
     @Request() req: Request & { user: JwtPayloadDto },
   ) {
     const user = await this.usersService.findUserbyPayload(req.user);
-    await this.roomsService.saveRoom(user, roomUuid);
+    const room = await this.roomsService.findRoombyUuid(roomUuid);
+    await this.roomsService.saveRoom(room, user);
     return {
       success: true,
       message: '저장에 성공했습니다.',

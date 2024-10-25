@@ -29,8 +29,7 @@ export class Room {
 
   prUrl: string;
 
-  // Not maid yet.
-  // Should define after conversations done
+  // TODO: data의 타입이 정해지면 수정 해야함
   data: any;
 
   constructor(uuid: string, creator: User, prUrl: string) {

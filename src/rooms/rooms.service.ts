@@ -21,12 +21,12 @@ export class RoomsService {
     }
     const roomUuid = _uuid();
     const newRoom = new Room(roomUuid, creator, prUrl);
-    this.setRoom(roomUuid, newRoom);
+    this.setRoom(newRoom, roomUuid);
     return roomUuid;
   }
 
-  // TODO room 내용을 저장하는 행위를 해야함.
-  async saveRoom(creator: User, room: Room): Promise<boolean> {
+  // TODO: room 내용을 저장하는 행위를 해야함.
+  async saveRoom(room: Room, creator: User): Promise<boolean> {
     // 저장하는 행위....
     this.deleteRoom(room);
     return true;
@@ -40,11 +40,11 @@ export class RoomsService {
     return this.roomsByPk.get(userPk);
   }
 
-  async setRoom(uuid: string, room: Room) {
+  async setRoom(room: Room, uuid: string) {
     this.roomsById.set(uuid, room);
   }
 
-  async joinRoom(userPk: number, room: Room) {
+  async joinRoom(room: Room, userPk: number) {
     this.roomsByPk.set(userPk, room);
   }
 
@@ -52,7 +52,7 @@ export class RoomsService {
     if (userPk) this.roomsByPk.delete(userPk);
   }
 
-  // TODO 이거 나중에 수정해야 함
+  // TODO: 이거 나중에 수정해야 함
   async deleteRoom(room: Room) {
     const { creatorSocket, participantSocket } = room;
     room.status = RoomStatus.DELETED;
