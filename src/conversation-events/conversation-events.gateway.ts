@@ -29,6 +29,7 @@ import {
 } from './conversation-events.filter';
 import { ConversationEventsLoggerService } from './services/conversation-events-logger.service';
 import { RoomEventsHandlerService } from './services/room-events-handler.service';
+import { PeerJsEventsHandlerService } from './services/peer-js-events-handler.service';
 
 @UseFilters(ConversationEventsFilter)
 @WebSocketGateway(3001, {
@@ -47,6 +48,7 @@ export class ConversationEventsGateway
     private usersService: UsersService,
     private roomsService: RoomsService,
     private loggerService: ConversationEventsLoggerService,
+    private peerJsEventsHandlerService: PeerJsEventsHandlerService,
     private roomEventsHandlerService: RoomEventsHandlerService,
   ) {}
 
@@ -60,14 +62,11 @@ export class ConversationEventsGateway
     @ConnectedSocket() client: RoomSocket,
     @MessageBody() { peerId }: { peerId: string },
   ) {
-    const room = client.room;
-    this.server.to(room.uuid).emit('new-peer-id', {
-      message: '화면 공유 요청이 왔습니다.',
-      data: {
-        email: client.user.email,
-        peerId: peerId,
-      },
-    });
+    this.peerJsEventsHandlerService.sharePeerIdHandler(
+      this.server,
+      client,
+      peerId,
+    );
     return {
       sucess: true,
       message: 'Peer Id를 등록했습니다.',
