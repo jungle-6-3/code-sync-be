@@ -81,7 +81,11 @@ export class ConversationEventsGateway
       throw new WsException('방장이 아니에요');
     }
 
-    this.roomEventsHandlerService.inviteUserHandler(this.server, client, email);
+    await this.roomEventsHandlerService.inviteUserHandler(
+      this.server,
+      client,
+      email,
+    );
 
     return {
       sucess: true,
