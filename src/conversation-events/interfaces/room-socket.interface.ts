@@ -31,3 +31,10 @@ export function setToWaiter(socket: RoomSocket) {
 export function setToParticipant(socket: RoomSocket) {
   socket.status = SocketStatus.PARTICIPANT;
 }
+
+// TODO: peerId를 복사해도 되는지 확인해야 함
+export function copyRoomSocket(srcSocket: RoomSocket, dstSocket: RoomSocket) {
+  const { status, peerId } = srcSocket;
+  dstSocket.status = status;
+  dstSocket.peerId = peerId;
+}
