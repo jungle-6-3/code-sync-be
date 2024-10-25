@@ -19,6 +19,7 @@ import {
   reflashRoomSocket,
   initRoomSocket,
   RoomSocket,
+  SocketStatus,
 } from './interfaces/room-socket.interface';
 import { RoomsService } from 'src/rooms/rooms.service';
 import { Room, RoomStatus, RoomUser } from 'src/rooms/room';
@@ -26,6 +27,7 @@ import {
   ConversationEventsFilter,
   ConversationException,
 } from './conversation-events.filter';
+import { EventListenerTypes } from 'typeorm/metadata/types/EventListenerTypes';
 
 @UseFilters(ConversationEventsFilter)
 @WebSocketGateway(3001, {
@@ -116,17 +118,17 @@ export class ConversationEventsGateway
 
   async handleDisconnect(client: RoomSocket) {
     this.logger.log(`Client Disconnected : ${client.id}`);
-    const roomUuid = client.roomUuid;
-    if (!roomUuid) {
+    if (client.status == undefined) {
       return;
     }
-    const room = await this.roomsService.findRoombyUuid(roomUuid);
-    if (room.creator.pk == client.user.pk) {
-      // TODO 방에 있는 사람 모두 나게게 하기.
-    } else if (room.participant.pk == client.user.pk) {
-      // TODO 방 상태 바꾸기. participant 없애기.
-    } else {
-      // TODO watingUsers에 있던 case. 리스트에 있는 자기 자신을 없애야 함
+    if (client.status == SocketStatus.REFLASING) {
+      return;
+    }
+    // TODO: type에 따라서 방의 상태도 바꾸기
+    const room: Room = client.room;
+    if (client.status == SocketStatus.CREATOR) {
+    } else if (client.status == SocketStatus.WAITER) {
+    } else if (client.status == SocketStatus.PARTICIPANT) {
     }
     this.roomsService.leaveRoom(client.user.pk);
   }
