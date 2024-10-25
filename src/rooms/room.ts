@@ -1,3 +1,4 @@
+import { RoomSocket } from 'src/conversation-events/interfaces/room-socket.interface';
 import { User } from 'src/users/entities/user.entity';
 
 export enum RoomStatus {
@@ -14,11 +15,13 @@ export class Room {
 
   status: RoomStatus;
 
-  creator: RoomUser;
+  creatorPk: number;
 
-  participant: RoomUser;
+  creatorSocket: RoomSocket;
 
-  watingUsers: RoomUser[];
+  participantSocket: RoomSocket;
+
+  watingSockets: RoomSocket[];
 
   startedAt: Date;
 
@@ -33,24 +36,9 @@ export class Room {
   constructor(uuid: string, creator: User, prUrl: string) {
     this.uuid = uuid;
     this.status = RoomStatus.WATING;
-    this.creator = new RoomUser(creator);
+    this.creatorPk = creator.pk;
     this.prUrl = prUrl;
     this.startedAt = new Date();
-    this.watingUsers = [];
-  }
-}
-
-export class RoomUser {
-  pk: number;
-  email: string;
-  name: string;
-  socketId: string;
-  peerId: string;
-
-  constructor(user: User) {
-    const { pk, email, name } = user;
-    this.pk = pk;
-    this.email = email;
-    this.name = name;
+    this.watingSockets = [];
   }
 }
