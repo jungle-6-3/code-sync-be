@@ -2,12 +2,20 @@ import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { FileInfoDto } from './dto/file-info.dto';
+import { SaveDatasDto } from './dto/save-data.dto';
+import { Repository } from 'typeorm';
+import { ConversationDatas } from './entities/conversations-data.entity';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class ConversationDatasService {
   private s3Client: S3Client;
 
-  constructor(private configService: ConfigService) {
+  constructor(
+    private configService: ConfigService,
+    @InjectRepository(ConversationDatas)
+    private conversationDatasReoisitory: Repository<ConversationDatas>,
+  ) {
     this.s3Client = new S3Client({
       region: this.configService.get('AWS_REGION'),
       credentials: {
