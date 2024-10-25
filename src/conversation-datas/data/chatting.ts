@@ -1,14 +1,26 @@
 export class ChatData {
   private chats: chat[];
+  uuid: string;
 
-  public toString() {
-    return JSON.stringify(this.chats);
+  public addChat(chat: chat) {
+    this.chats.push(chat);
   }
-  public addChat() {
-    this.chats.push();
+
+  public toFile() {
+    const stringChat = JSON.stringify(this.chats);
+    const fileData = {
+      fileName: 'Chat',
+      file: stringChat,
+      extension: 'txt',
+      uuid: this.uuid,
+    };
+
+    return fileData;
   }
-  constructor() {
+
+  constructor(uuid: string) {
     this.chats = [];
+    this.uuid = uuid;
   }
 }
 

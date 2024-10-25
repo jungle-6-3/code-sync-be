@@ -6,7 +6,10 @@ export class ConversationDatas {
   pk: number;
 
   @Column()
-  nodeUrl: string;
+  uuid: string;
+
+  @Column()
+  noteUrl: string;
 
   @Column()
   drawBoardUrl: string;
@@ -15,7 +18,7 @@ export class ConversationDatas {
   chattingUrl: string;
 
   @Column()
-  isNodeShared: boolean;
+  isNoteShared: boolean;
 
   @Column()
   isDrawBoardShared: boolean;
@@ -24,8 +27,5 @@ export class ConversationDatas {
   isChattingShared: boolean;
 
   @Column()
-  uuid: string;
-
-  @Column()
-  shareUuid: string;
+  shareUuid: boolean;
 }

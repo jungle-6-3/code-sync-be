@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   Get,
   Post,
@@ -8,6 +9,7 @@ import {
 import { ConversationDatasService } from './conversation-datas.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { SaveDatasDto } from './dto/save-data.dto';
 
 @ApiTags('Conversation-datas')
 @Controller('conversation-datas')
@@ -16,6 +18,16 @@ export class ConversationDatasController {
   @Get()
   printHello() {
     return 'hello';
+  }
+
+  // Description: 테스트 완료후 삭제 예정
+  @ApiOperation({
+    summary: 'test save data',
+    description: '리뷰 결과 db저장 테스트 api',
+  })
+  @Post('test')
+  async testDb(@Body() data: SaveDatasDto) {
+    return await this.conversationDatasService.createConversationDatas(data);
   }
 
   @ApiOperation({
