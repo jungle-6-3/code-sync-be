@@ -6,6 +6,8 @@ export enum SocketStatus {
   CREATOR = 'Creator',
   WAITER = 'Waiter',
   PARTICIPANT = 'Participant',
+  // 이 상태라면 새로고침이기 때문에, rooms에 userPk가 사라지지 않음
+  REFLASING = 'Reflashing',
 }
 
 export interface RoomSocket extends Socket {
@@ -33,8 +35,12 @@ export function setToParticipant(socket: RoomSocket) {
 }
 
 // TODO: peerId를 복사해도 되는지 확인해야 함
-export function copyRoomSocket(srcSocket: RoomSocket, dstSocket: RoomSocket) {
-  const { status, peerId } = srcSocket;
-  dstSocket.status = status;
-  dstSocket.peerId = peerId;
+export function reflashRoomSocket(
+  beforeSocket: RoomSocket,
+  afterSocket: RoomSocket,
+) {
+  const { status, peerId } = beforeSocket;
+  afterSocket.status = status;
+  afterSocket.peerId = peerId;
+  beforeSocket.status = SocketStatus.REFLASING;
 }
