@@ -15,7 +15,11 @@ import { AuthService } from 'src/auth/auth.service';
 import { JwtPayloadDto } from 'src/auth/dto/jwt-payload';
 import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
-import { initRoomSocket, RoomSocket } from './interfaces/room-socket.interface';
+import {
+  reflashRoomSocket,
+  initRoomSocket,
+  RoomSocket,
+} from './interfaces/room-socket.interface';
 import { RoomsService } from 'src/rooms/rooms.service';
 import { Room, RoomStatus, RoomUser } from 'src/rooms/room';
 import {
@@ -129,6 +133,9 @@ export class ConversationEventsGateway
 
   async handleConnection(client: RoomSocket, ...args: any[]) {
     this.logger.log(`${client.id}로 부터 connection 요청`);
+    let afterInitSocketFuncion: Function;
+    let user: User;
+    let room: Room;
     try {
       const cookie = client.handshake.headers.cookie;
       if (cookie == undefined) {
@@ -141,57 +148,73 @@ export class ConversationEventsGateway
       this.logger.log(`유저 정보 ${user.email} ${user.name}`);
 
       let roomUuid = client.handshake.query.roomUuid;
-      this.logger.log(`room uuid 바꾸기 전 ${roomUuid}`);
       if (Array.isArray(roomUuid)) {
         roomUuid = roomUuid[0];
       }
-      this.logger.log(`room uuid 바꾼 후 ${roomUuid}`);
+      this.logger.log(`받은 room uuid ${roomUuid}`);
       const room: Room = await this.roomsService.findRoombyUuid(roomUuid);
       if (!room) {
         throw new Error('방이 존재하지 않습니다.');
       }
-      if (room.status == RoomStatus.WATING) {
-        if (room.creator.pk != user.pk) {
+      const beforeRoom = await this.roomsService.findRoombyPk(user.pk);
+      // 다시 참여하는 경우
+      if (beforeRoom) {
+        if (beforeRoom.uuid != room.uuid) {
+          throw new Error('이미 다른 방에 참가하거나 참가 신청을 했습니다.');
+        }
+        // TODO: bofore Socket을 room에서 찾는 logic 추가해야 함.
+        const beforeSocket = undefined;
+        reflashRoomSocket(beforeSocket, client);
+
+        afterInitSocketFuncion = () => {};
+      }
+      // 방장이 입장하지 않은 방인 경우
+      else if (room.status == RoomStatus.WATING) {
+        if (room.creatorPk != user.pk) {
           throw new Error('방장이 입장하지 않습니다.');
         }
-        room.status = RoomStatus.INVITING;
-        room.creator.socketId = client.id;
-        await this.roomsService.joinRoom(user.pk, room);
-        client.join(roomUuid);
-        initRoomSocket(client, user, roomUuid);
-        this.logger.log('방장이 되었습니다.');
-        this.logger.log(room);
-      } else if (room.status == RoomStatus.INVITING) {
-        if (room.creator.pk == user.pk) {
-          throw new Error('당신이 방장입니다.');
+
+        afterInitSocketFuncion = () => {
+          room.status = RoomStatus.INVITING;
+          room.creatorSocket = client;
+          client.join(roomUuid);
+          this.logger.log('방장이 되었습니다.');
+          this.logger.log(room);
+        };
+      }
+      // 방장이 입장한 방인 경우
+      else if (room.status == RoomStatus.INVITING) {
+        if (room.creatorPk == user.pk) {
+          this.logger.error('방장이 겹치는지 체크 했는데 뚫렸네요.');
+          throw new Error('동시성 문제1: 백앤드를 불러주세요');
         }
-        const sameWaitingUser = room.watingUsers.find(
-          (waiter) => waiter.pk == user.pk,
+        const sameWaitingUser = room.watingSockets.find(
+          (waiter) => waiter.user.pk == user.pk,
         );
         if (sameWaitingUser != undefined) {
-          this.server.to(sameWaitingUser.socketId).disconnectSockets(true);
+          this.logger.error('참여자가 겹치는지 체크 했는데 뚫렸네요.');
+          throw new Error('동시성 문제2: 백앤드를 불러주세요');
         }
 
-        const waitingUser = new RoomUser(user);
-        waitingUser.socketId = client.id;
-        room.watingUsers.push(waitingUser);
-        await this.roomsService.joinRoom(user.pk, room);
-        initRoomSocket(client, user, roomUuid);
-        this.logger.log('대기자에 추가되었습니다.');
+        afterInitSocketFuncion = () => {
+          room.watingSockets.push(client);
+          this.logger.log('대기자에 추가되었습니다.');
 
-        this.server.to(room.uuid).emit('join-request-by', {
-          message: '초대 요청이 왔습니다.',
-          data: {
-            participant: {
-              name: user.name,
-              email: user.email,
+          this.server.to(room.uuid).emit('join-request-by', {
+            message: '초대 요청이 왔습니다.',
+            data: {
+              participant: {
+                name: user.name,
+                email: user.email,
+              },
             },
-          },
-        });
+          });
+        };
       } else {
         throw new Error('이미 개최중이거나 종료중인 방입니다.');
       }
     } catch (error) {
+      // socket 연결에 실패하는 경우
       this.logger.log(
         `아래의 error로 인해 유저와 연결을 끊습니다 : ${client.id}`,
       );
@@ -200,9 +223,12 @@ export class ConversationEventsGateway
       client.emit('exception', error);
       client.disconnect(true);
       return;
-      // initRoomSocket(client, undefined, '');
     }
-    this.logger.log(`${client.roomUuid}`);
+    initRoomSocket(client, user, room);
+    await this.roomsService.joinRoom(room, user.pk);
+    afterInitSocketFuncion();
+
+    this.logger.log(`${client.room}`);
     this.logger.log(`Client Connected : ${client.id}`);
   }
 }
