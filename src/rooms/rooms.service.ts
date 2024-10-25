@@ -1,5 +1,5 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
-import { Room } from './room';
+import { Room, RoomStatus } from './room';
 import { v4 as _uuid } from 'uuid';
 import { User } from 'src/users/entities/user.entity';
 
@@ -25,7 +25,10 @@ export class RoomsService {
     return roomUuid;
   }
 
-  async saveRoom(creator: User, roomUuid: string): Promise<boolean> {
+  // TODO room 내용을 저장하는 행위를 해야함.
+  async saveRoom(creator: User, room: Room): Promise<boolean> {
+    // 저장하는 행위....
+    this.deleteRoom(room);
     return true;
   }
 
@@ -49,9 +52,17 @@ export class RoomsService {
     if (userPk) this.roomsByPk.delete(userPk);
   }
 
+  // TODO 이거 나중에 수정해야 함
   async deleteRoom(room: Room) {
-    this.leaveRoom(room.creator.pk);
-    this.leaveRoom(room.participant.pk);
+    const { creatorSocket, participantSocket } = room;
+    room.status = RoomStatus.DELETED;
+    if (creatorSocket) {
+      creatorSocket.disconnect();
+    }
+    if (participantSocket) {
+      participantSocket.disconnect();
+    }
+    // 경우에 따라서 waiter 처리도 해야함
     this.roomsById.delete(room.uuid);
 
     room = null;
