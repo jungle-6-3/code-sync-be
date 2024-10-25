@@ -25,11 +25,11 @@ export class RoomsController {
     @Request() req: Request & { user: JwtPayloadDto },
   ) {
     const user = await this.usersService.findUserbyPayload(req.user);
-    const redirectUrl = await this.roomsService.createRoom(user, prUrl);
+    const roomUuid = await this.roomsService.createRoom(user, prUrl);
     return {
       success: true,
       message: '회의를 생성했습니다.',
-      data: { redirectUrl },
+      data: { roomUuid },
     };
   }
 

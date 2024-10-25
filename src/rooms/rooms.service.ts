@@ -19,10 +19,10 @@ export class RoomsService {
         '이미 대화에 참여하고 있는 방이 존재합니다.',
       );
     }
-    const uuid = _uuid();
-    const newRoom = new Room(uuid, creator, prUrl);
-    this.setRoom(uuid, newRoom);
-    return uuid;
+    const roomUuid = _uuid();
+    const newRoom = new Room(roomUuid, creator, prUrl);
+    this.setRoom(roomUuid, newRoom);
+    return roomUuid;
   }
 
   async saveRoom(creator: User, roomUuid: string): Promise<boolean> {
