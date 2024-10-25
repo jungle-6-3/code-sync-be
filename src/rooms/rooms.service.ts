@@ -1,5 +1,5 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
-import { Room } from './room';
+import { Room, RoomStatus } from './room';
 import { v4 as _uuid } from 'uuid';
 import { User } from 'src/users/entities/user.entity';
 
@@ -19,13 +19,16 @@ export class RoomsService {
         '이미 대화에 참여하고 있는 방이 존재합니다.',
       );
     }
-    const uuid = _uuid();
-    const newRoom = new Room(uuid, creator, prUrl);
-    this.setRoom(uuid, newRoom);
-    return uuid;
+    const roomUuid = _uuid();
+    const newRoom = new Room(roomUuid, creator, prUrl);
+    this.setRoom(newRoom, roomUuid);
+    return roomUuid;
   }
 
-  async saveRoom(creator: User, roomUuid: string): Promise<boolean> {
+  // TODO: room 내용을 저장하는 행위를 해야함.
+  async saveRoom(room: Room, creator: User): Promise<boolean> {
+    // 저장하는 행위....
+    this.deleteRoom(room);
     return true;
   }
 
@@ -37,11 +40,11 @@ export class RoomsService {
     return this.roomsByPk.get(userPk);
   }
 
-  async setRoom(uuid: string, room: Room) {
+  async setRoom(room: Room, uuid: string) {
     this.roomsById.set(uuid, room);
   }
 
-  async joinRoom(userPk: number, room: Room) {
+  async joinRoom(room: Room, userPk: number) {
     this.roomsByPk.set(userPk, room);
   }
 
@@ -49,9 +52,17 @@ export class RoomsService {
     if (userPk) this.roomsByPk.delete(userPk);
   }
 
+  // TODO: 이거 나중에 수정해야 함
   async deleteRoom(room: Room) {
-    this.leaveRoom(room.creator.pk);
-    this.leaveRoom(room.participant.pk);
+    const { creatorSocket, participantSocket } = room;
+    room.status = RoomStatus.DELETED;
+    if (creatorSocket) {
+      creatorSocket.disconnect();
+    }
+    if (participantSocket) {
+      participantSocket.disconnect();
+    }
+    // 경우에 따라서 waiter 처리도 해야함
     this.roomsById.delete(room.uuid);
 
     room = null;
