@@ -11,7 +11,7 @@ export class ValidateUserIsJoiningPipe implements PipeTransform {
         value.status != SocketStatus.CREATOR &&
         value.status != SocketStatus.PARTICIPANT
       ) {
-        throw new WsException('방에 참여하지 않았습니다.');
+        throw new WsException(`방에 참여하지 않았습니다.: ${value.status}`);
       }
       const room = value.room;
       if (room.status != RoomStatus.RUNNING) {
