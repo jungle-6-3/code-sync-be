@@ -1,4 +1,10 @@
-import { forwardRef, Inject, Logger, UseFilters } from '@nestjs/common';
+import {
+  forwardRef,
+  Inject,
+  Logger,
+  UseFilters,
+  UsePipes,
+} from '@nestjs/common';
 import {
   ConnectedSocket,
   MessageBody,
@@ -18,6 +24,8 @@ import {
 } from './conversation-events.filter';
 import { PeerJsService } from './events-handler/peer-js.service';
 import { RoomService } from './events-handler/room.service';
+import { ValidateUserIsJoiningPipe } from './pipes/validate-user-is-joining.pipe';
+import { ValidateUserIsCreatorPipe } from './pipes/validate-user-is-creator.pipe';
 
 @UseFilters(ConversationEventsFilter)
 @WebSocketGateway(3001, {
@@ -33,61 +41,34 @@ export class ConversationEventsGateway
 {
   constructor(
     @Inject(forwardRef(() => PeerJsService))
-    private peerJsEventsHandlerService: PeerJsService,
+    private peerJsService: PeerJsService,
     @Inject(forwardRef(() => RoomService))
-    private roomEventsHandlerService: RoomService,
+    private roomService: RoomService,
   ) {}
 
   @WebSocketServer() server: Server;
   logger: Logger = new Logger('RoomEventGateway');
 
-  // TODO: pipe로 creator나 participant인지 체크하도록 수정 필요.
-  // TODO: 참여하고 있는 room이 running인지 확인하도록 수정 필요.
+  @UsePipes(ValidateUserIsJoiningPipe)
   @SubscribeMessage('share-peer-id')
   async handleSubscribeMessage(
     @ConnectedSocket() client: RoomSocket,
     @MessageBody() { peerId }: { peerId: string },
   ) {
-    this.peerJsEventsHandlerService.sharePeerIdHandler(
-      this.server,
-      client,
-      peerId,
-    );
+    this.peerJsService.sharePeerIdHandler(this.server, client, peerId);
     return {
       sucess: true,
       message: 'Peer Id를 등록했습니다.',
     };
   }
 
-  // TODO: pipe로 방장인지 체크하도록 수정 필요.
+  @UsePipes(ValidateUserIsCreatorPipe)
   @SubscribeMessage('invite-user')
   async handleInviteUser(
     @ConnectedSocket() client: RoomSocket,
     @MessageBody() { email }: { email: string },
   ) {
-    // 아래 글은 pipe로 대체되어야 함
-    if (client.status == undefined) {
-      this.logger.error(
-        'invite-user에서 인증되지 않은 유저입니다. (일어나면 안 되는 일)',
-      );
-      throw new ConversationException(
-        'AUTH_2',
-        '인증되지 않은 유저입니다',
-        true,
-      );
-    }
-    this.logger.log(
-      `다음 유저로부터 초대 요청 ${client.user.name}, email: ${email}`,
-    );
-    if (client.status != SocketStatus.CREATOR) {
-      throw new WsException('방장이 아니에요');
-    }
-
-    await this.roomEventsHandlerService.inviteUserHandler(
-      this.server,
-      client,
-      email,
-    );
+    await this.roomService.inviteUserHandler(this.server, client, email);
 
     return {
       sucess: true,
@@ -95,24 +76,13 @@ export class ConversationEventsGateway
     };
   }
 
-  // TODO: pipe로 방장인지 체크하도록 수정 필요.
+  @UsePipes(ValidateUserIsCreatorPipe)
   @SubscribeMessage('reject-user')
   async handleRejectUser(
     @ConnectedSocket() client: RoomSocket,
     @MessageBody() { email }: { email: string },
   ) {
-    this.logger.log(
-      `다음 유저로부터 거절 요청 ${client.user.name}, email: ${email}`,
-    );
-    if (client.status != SocketStatus.CREATOR) {
-      throw new WsException('방장이 아니에요');
-    }
-
-    await this.roomEventsHandlerService.rejectUserHandler(
-      this.server,
-      client,
-      email,
-    );
+    await this.roomService.rejectUserHandler(this.server, client, email);
 
     return {
       sucess: true,
@@ -125,10 +95,10 @@ export class ConversationEventsGateway
   }
 
   async handleDisconnect(client: RoomSocket) {
-    this.roomEventsHandlerService.socketDisconnectHandler(this.server, client);
+    this.roomService.socketDisconnectHandler(this.server, client);
   }
 
   async handleConnection(client: RoomSocket, ...args: any[]) {
-    this.roomEventsHandlerService.socketConnectionHanlder(this.server, client);
+    this.roomService.socketConnectionHanlder(this.server, client);
   }
 }
