@@ -123,7 +123,7 @@ export class RoomService {
       );
       this.logger.log(`${error}`);
       this.logger.log((error as Error).stack);
-      client.emit('exception', error);
+      client.emit('exception', error.message);
       client.disconnect(true);
       return;
     }
@@ -144,20 +144,39 @@ export class RoomService {
       // TODO: type에 따라서 방의 상태도 바꾸기
       const room: Room = client.room;
       const user: User = client.user;
+      console.log(client.status);
       if (client.status == SocketStatus.CREATOR) {
         room.creatorSocket = undefined;
         room.status = RoomStatus.CLOSING2;
         room.finishedAt = new Date();
+        room.watingSockets = [];
 
-        this.server.to(room.uuid).emit('uesr-disconnected');
-        this.server.to(room.uuid).disconnectSockets(true);
+        console.log(room.uuid);
+        server.to(room.uuid).emit('uesr-disconnected', {
+          message: '상대방이 나갔습니다',
+          data: {
+            name: user.name,
+            email: user.email,
+            peerId: client.peerId,
+          },
+        });
+        server.to(room.uuid).disconnectSockets(true);
       } else if (client.status == SocketStatus.PARTICIPANT) {
+        console.log('paaa', room.uuid);
         room.participantSocket = undefined;
         room.status = RoomStatus.CLOSING2;
 
-        this.server.to(room.uuid).emit('uesr-disconnected');
-        this.server.to(room.uuid).disconnectSockets(true);
+        server.to(room.uuid).emit('uesr-disconnected', {
+          message: '상대방이 나갔습니다',
+          data: {
+            name: user.name,
+            email: user.email,
+            peerId: client.peerId,
+          },
+        });
+        server.to(room.uuid).disconnectSockets(true);
       } else if (client.status == SocketStatus.WAITER) {
+        console.log(room.watingSockets);
         if (room.watingSockets.length == 0) {
           throw Error('conversation에 다른 사람이 초대되면서 정리 됨');
         }
@@ -211,7 +230,7 @@ export class RoomService {
     const rejectedSocket: RoomSocket = room.watingSockets.find(
       (socket) => socket.user.email == email,
     );
-    if (rejectedSocket) {
+    if (!rejectedSocket) {
       throw new WsException('email에 해당되는 participant를 못 찾겠어요');
     }
     rejectedSocket.emit('invite-rejected', {
