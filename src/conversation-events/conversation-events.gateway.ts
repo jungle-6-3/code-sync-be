@@ -1,4 +1,4 @@
-import { Logger, UseFilters } from '@nestjs/common';
+import { forwardRef, Inject, Logger, UseFilters } from '@nestjs/common';
 import {
   ConnectedSocket,
   MessageBody,
@@ -16,9 +16,8 @@ import {
   ConversationEventsFilter,
   ConversationException,
 } from './conversation-events.filter';
-import { ConversationEventsLoggerService } from './services/conversation-events-logger.service';
-import { RoomEventsHandlerService } from './services/room-events-handler.service';
-import { PeerJsEventsHandlerService } from './services/peer-js-events-handler.service';
+import { PeerJsService } from './events-handler/peer-js.service';
+import { RoomService } from './events-handler/room.service';
 
 @UseFilters(ConversationEventsFilter)
 @WebSocketGateway(3001, {
@@ -33,13 +32,14 @@ export class ConversationEventsGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
   constructor(
-    private loggerService: ConversationEventsLoggerService,
-    private peerJsEventsHandlerService: PeerJsEventsHandlerService,
-    private roomEventsHandlerService: RoomEventsHandlerService,
+    @Inject(forwardRef(() => PeerJsService))
+    private peerJsEventsHandlerService: PeerJsService,
+    @Inject(forwardRef(() => RoomService))
+    private roomEventsHandlerService: RoomService,
   ) {}
 
   @WebSocketServer() server: Server;
-  private logger: Logger = this.loggerService.getLogger();
+  logger: Logger = new Logger('RoomEventGateway');
 
   // TODO: pipe로 creator나 participant인지 체크하도록 수정 필요.
   // TODO: 참여하고 있는 room이 running인지 확인하도록 수정 필요.
