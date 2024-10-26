@@ -39,7 +39,7 @@ export class ConversationEventsGateway
   ) {}
 
   @WebSocketServer() server: Server;
-  private logger: Logger = this.loggerService.getLogger();
+  logger: Logger = this.loggerService.getLogger();
 
   // TODO: pipe로 creator나 participant인지 체크하도록 수정 필요.
   // TODO: 참여하고 있는 room이 running인지 확인하도록 수정 필요.
