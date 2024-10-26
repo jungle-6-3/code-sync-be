@@ -43,7 +43,6 @@ export class AuthController {
   ) {
     const access_token = await this.authService.signIn(loginRequestDto);
     res.cookie('token', access_token, {
-      domain: 'localhost',
       httpOnly: true,
       secure: true,
       sameSite: 'none',
