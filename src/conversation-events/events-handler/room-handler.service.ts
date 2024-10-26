@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { Server } from 'socket.io';
 import {
   initRoomSocket,
@@ -12,22 +12,24 @@ import {
 import { AuthService } from 'src/auth/auth.service';
 import { UsersService } from 'src/users/users.service';
 import { RoomsService } from 'src/rooms/rooms.service';
-import { ConversationEventsLoggerService } from './conversation-events-logger.service';
 import { User } from 'src/users/entities/user.entity';
 import { Room, RoomStatus } from 'src/rooms/room';
 import { JwtPayloadDto } from 'src/auth/dto/jwt-payload';
 import { ConversationException } from '../conversation-events.filter';
 import { WsException } from '@nestjs/websockets';
+import { ConversationEventsGateway } from '../conversation-events.gateway';
 
 @Injectable()
-export class RoomEventsHandlerService {
+export class RoomHandlerService {
   constructor(
     private authService: AuthService,
     private usersService: UsersService,
     private roomsService: RoomsService,
-    private loggerService: ConversationEventsLoggerService,
+    @Inject(forwardRef(() => ConversationEventsGateway))
+    private conversationEventsGateway: ConversationEventsGateway,
   ) {}
-  private logger: Logger = this.loggerService.getLogger();
+  private server: Server = this.conversationEventsGateway.server;
+  private logger: Logger = this.conversationEventsGateway.logger;
 
   async socketConnectionHanlder(server: Server, client: RoomSocket) {
     this.logger.log(`${client.id}로 부터 connection 요청`);
