@@ -31,7 +31,7 @@ export class RoomService implements OnServerInit {
   private server: Server;
   private logger: Logger;
 
-  async socketConnectionHanlder(server: Server, client: RoomSocket) {
+  async socketConnectionHanlder(client: RoomSocket) {
     this.logger.log(`${client.id}로 부터 connection 요청`);
     let user: User;
     let room: Room;
@@ -67,12 +67,12 @@ export class RoomService implements OnServerInit {
       return;
     }
     initRoomSocket(client, user, room);
-    await this.joinClientInRoom(room, server, client);
+    await this.joinClientInRoom(room, client);
 
     this.logger.log(`연결된 Client id: ${client.id} status: ${client.status}`);
   }
 
-  async socketDisconnectHandler(server: Server, client: RoomSocket) {
+  async socketDisconnectHandler(client: RoomSocket) {
     this.logger.log(`Client Disconnected : ${client.id}`);
     if (client.status == undefined || client.status == SocketStatus.REFLASING) {
       return;
@@ -133,7 +133,7 @@ export class RoomService implements OnServerInit {
     }
   }
 
-  async inviteUserHandler(server: Server, client: RoomSocket, email: string) {
+  async inviteUserHandler(client: RoomSocket, email: string) {
     const room = client.room;
 
     const participantSocket: RoomSocket = room.watingSockets.find(
@@ -163,7 +163,7 @@ export class RoomService implements OnServerInit {
     room.status = RoomStatus.RUNNING;
   }
 
-  async rejectUserHandler(server: Server, client: RoomSocket, email: string) {
+  async rejectUserHandler(client: RoomSocket, email: string) {
     const room = client.room;
     const rejectedSocket: RoomSocket = room.watingSockets.find(
       (socket) => socket.user.email == email,
@@ -177,7 +177,7 @@ export class RoomService implements OnServerInit {
     rejectedSocket.disconnect(true);
   }
 
-  async joinClientInRoom(room: Room, server: Server, client: RoomSocket) {
+  async joinClientInRoom(room: Room, client: RoomSocket) {
     if (client.status == SocketStatus.CREATOR) {
       // 처음 방장이 입장한 경우
       if (room.status == RoomStatus.WATING) {

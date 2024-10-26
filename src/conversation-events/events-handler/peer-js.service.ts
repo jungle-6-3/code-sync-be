@@ -13,10 +13,10 @@ export class PeerJsService implements OnServerInit {
   private server: Server;
   private logger: Logger;
 
-  async sharePeerIdHandler(server: Server, client: RoomSocket, peerId: string) {
+  async sharePeerIdHandler(client: RoomSocket, peerId: string) {
     const room = client.room;
     client.peerId = peerId;
-    server.to(room.uuid).emit('new-peer-id', {
+    this.server.to(room.uuid).emit('new-peer-id', {
       message: '화면 공유 요청이 왔습니다.',
       data: {
         email: client.user.email,

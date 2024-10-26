@@ -54,7 +54,7 @@ export class ConversationEventsGateway
     @ConnectedSocket() client: RoomSocket,
     @MessageBody() { peerId }: { peerId: string },
   ) {
-    this.peerJsService.sharePeerIdHandler(this.server, client, peerId);
+    this.peerJsService.sharePeerIdHandler(client, peerId);
     return {
       sucess: true,
       message: 'Peer Id를 등록했습니다.',
@@ -67,7 +67,7 @@ export class ConversationEventsGateway
     @ConnectedSocket() client: RoomSocket,
     @MessageBody() { email }: { email: string },
   ) {
-    await this.roomService.inviteUserHandler(this.server, client, email);
+    await this.roomService.inviteUserHandler(client, email);
 
     return {
       sucess: true,
@@ -81,7 +81,7 @@ export class ConversationEventsGateway
     @ConnectedSocket() client: RoomSocket,
     @MessageBody() { email }: { email: string },
   ) {
-    await this.roomService.rejectUserHandler(this.server, client, email);
+    await this.roomService.rejectUserHandler(client, email);
 
     return {
       sucess: true,
@@ -96,10 +96,10 @@ export class ConversationEventsGateway
   }
 
   async handleDisconnect(client: RoomSocket) {
-    this.roomService.socketDisconnectHandler(this.server, client);
+    this.roomService.socketDisconnectHandler(client);
   }
 
   async handleConnection(client: RoomSocket, ...args: any[]) {
-    this.roomService.socketConnectionHanlder(this.server, client);
+    this.roomService.socketConnectionHanlder(client);
   }
 }
