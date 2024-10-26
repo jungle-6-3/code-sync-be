@@ -1,24 +1,18 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Room, RoomStatus } from './room';
 import { v4 as _uuid } from 'uuid';
 import { User } from 'src/users/entities/user.entity';
+import { RoomSocket } from 'src/conversation-events/interfaces/room-socket.interface';
 
 @Injectable()
 export class RoomsService {
   private roomsById: Map<string, Room>;
-  private roomsByPk: Map<number, Room>;
 
   constructor() {
     this.roomsById = new Map();
-    this.roomsByPk = new Map();
   }
 
   async createRoom(creator: User, prUrl: string): Promise<string> {
-    if (await this.findRoombyPk(creator.pk)) {
-      throw new ForbiddenException(
-        '이미 대화에 참여하고 있는 방이 존재합니다.',
-      );
-    }
     const roomUuid = _uuid();
     const newRoom = new Room(roomUuid, creator, prUrl);
     this.setRoom(newRoom, roomUuid);
@@ -36,20 +30,21 @@ export class RoomsService {
     return this.roomsById.get(uuid);
   }
 
-  async findRoombyPk(userPk: number): Promise<Room> {
-    return this.roomsByPk.get(userPk);
-  }
-
   async setRoom(room: Room, uuid: string) {
     this.roomsById.set(uuid, room);
   }
 
-  async joinRoom(room: Room, userPk: number) {
-    this.roomsByPk.set(userPk, room);
-  }
-
-  async leaveRoom(userPk: number) {
-    if (userPk) this.roomsByPk.delete(userPk);
+  async findRoomSocket(room: Room, user: User): Promise<RoomSocket> {
+    if (room.creatorSocket && room.creatorSocket.user.pk == user.pk) {
+      return room.creatorSocket;
+    }
+    if (room.participantSocket && room.participantSocket.user.pk == user.pk) {
+      return room.participantSocket;
+    }
+    const sameWaitingUser = room.watingSockets.find(
+      async (socket) => socket.user.pk == user.pk,
+    );
+    return sameWaitingUser;
   }
 
   // TODO: 이거 나중에 수정해야 함
