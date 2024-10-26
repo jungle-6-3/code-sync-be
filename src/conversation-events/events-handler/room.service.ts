@@ -145,7 +145,18 @@ export class RoomService {
       const room: Room = client.room;
       const user: User = client.user;
       if (client.status == SocketStatus.CREATOR) {
+        room.creatorSocket = undefined;
+        room.status = RoomStatus.CLOSING2;
+        room.finishedAt = new Date();
+
+        this.server.to(room.uuid).emit('uesr-disconnected');
+        this.server.to(room.uuid).disconnectSockets(true);
       } else if (client.status == SocketStatus.PARTICIPANT) {
+        room.participantSocket = undefined;
+        room.status = RoomStatus.CLOSING2;
+
+        this.server.to(room.uuid).emit('uesr-disconnected');
+        this.server.to(room.uuid).disconnectSockets(true);
       } else if (client.status == SocketStatus.WAITER) {
         if (room.watingSockets.length == 0) {
           throw Error('conversation에 다른 사람이 초대되면서 정리 됨');
