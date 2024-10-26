@@ -104,7 +104,7 @@ export class RoomService {
           this.logger.log('대기자에 추가되었습니다.');
 
           server.to(room.uuid).emit('join-request-by', {
-            message: '초대 요청이 왔습니다.',
+            message: '참가 요청이 왔습니다.',
             data: {
               participant: {
                 name: user.name,
