@@ -17,9 +17,10 @@ import { ConversationException } from '../conversation-events.filter';
 import { WsException } from '@nestjs/websockets';
 import { ConversationEventsGateway } from '../conversation-events.gateway';
 import { Handshake } from 'socket.io/dist/socket-types';
+import { OnServerInit } from '../interfaces/on-server-init.interface';
 
 @Injectable()
-export class RoomService {
+export class RoomService implements OnServerInit {
   constructor(
     private authService: AuthService,
     private usersService: UsersService,
@@ -27,8 +28,8 @@ export class RoomService {
     @Inject(forwardRef(() => ConversationEventsGateway))
     private conversationEventsGateway: ConversationEventsGateway,
   ) {}
-  private server: Server = this.conversationEventsGateway.server;
-  private logger: Logger = this.conversationEventsGateway.logger;
+  private server: Server;
+  private logger: Logger;
 
   async socketConnectionHanlder(server: Server, client: RoomSocket) {
     this.logger.log(`${client.id}로 부터 connection 요청`);
@@ -93,7 +94,7 @@ export class RoomService {
 
       room.watingSockets = [];
 
-      server.to(room.uuid).emit('uesr-disconnected', {
+      this.server.to(room.uuid).emit('uesr-disconnected', {
         message: '상대방이 나갔습니다',
         data: {
           name: user.name,
@@ -101,12 +102,12 @@ export class RoomService {
           peerId: client.peerId,
         },
       });
-      server.to(room.uuid).disconnectSockets(true);
+      this.server.to(room.uuid).disconnectSockets(true);
     } else if (client.status == SocketStatus.PARTICIPANT) {
       room.participantSocket = undefined;
       room.status = RoomStatus.CLOSING2;
 
-      server.to(room.uuid).emit('uesr-disconnected', {
+      this.server.to(room.uuid).emit('uesr-disconnected', {
         message: '상대방이 나갔습니다',
         data: {
           name: user.name,
@@ -114,7 +115,7 @@ export class RoomService {
           peerId: client.peerId,
         },
       });
-      server.to(room.uuid).disconnectSockets(true);
+      this.server.to(room.uuid).disconnectSockets(true);
     } else if (client.status == SocketStatus.WAITER) {
       if (room.watingSockets.length == 0) {
         return;
@@ -191,7 +192,7 @@ export class RoomService {
       this.logger.log(`참가자가 되었습니다.`);
     } else if (client.status == SocketStatus.WAITER) {
       room.watingSockets.push(client);
-      server.to(room.uuid).emit('join-request-by', {
+      this.server.to(room.uuid).emit('join-request-by', {
         message: '참가 요청이 왔습니다.',
         data: {
           participant: {
@@ -232,5 +233,10 @@ export class RoomService {
     }
 
     return { user, room };
+  }
+
+  afterServerInit() {
+    this.server = this.conversationEventsGateway.server;
+    this.logger = this.conversationEventsGateway.logger;
   }
 }

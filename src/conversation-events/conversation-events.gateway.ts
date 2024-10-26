@@ -91,6 +91,8 @@ export class ConversationEventsGateway
 
   afterInit(server: Server) {
     this.logger.log('Initialize WebSocket Server Done');
+    this.peerJsService.afterServerInit();
+    this.roomService.afterServerInit();
   }
 
   async handleDisconnect(client: RoomSocket) {

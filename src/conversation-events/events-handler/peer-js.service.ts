@@ -2,15 +2,16 @@ import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { RoomSocket } from '../interfaces/room-socket.interface';
 import { Server } from 'socket.io';
 import { ConversationEventsGateway } from '../conversation-events.gateway';
+import { OnServerInit } from '../interfaces/on-server-init.interface';
 
 @Injectable()
-export class PeerJsService {
+export class PeerJsService implements OnServerInit {
   constructor(
     @Inject(forwardRef(() => ConversationEventsGateway))
     private conversationEventsGateway: ConversationEventsGateway,
   ) {}
-  private server: Server = this.conversationEventsGateway.server;
-  private logger: Logger = this.conversationEventsGateway.logger;
+  private server: Server;
+  private logger: Logger;
 
   async sharePeerIdHandler(server: Server, client: RoomSocket, peerId: string) {
     const room = client.room;
@@ -22,5 +23,10 @@ export class PeerJsService {
         peerId: peerId,
       },
     });
+  }
+
+  afterServerInit(): void {
+    this.server = this.conversationEventsGateway.server;
+    this.logger = this.conversationEventsGateway.logger;
   }
 }
