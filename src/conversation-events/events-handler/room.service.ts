@@ -16,6 +16,7 @@ import { JwtPayloadDto } from 'src/auth/dto/jwt-payload';
 import { ConversationException } from '../conversation-events.filter';
 import { WsException } from '@nestjs/websockets';
 import { ConversationEventsGateway } from '../conversation-events.gateway';
+import { Handshake } from 'socket.io/dist/socket-types';
 
 @Injectable()
 export class RoomService {
@@ -31,29 +32,10 @@ export class RoomService {
 
   async socketConnectionHanlder(server: Server, client: RoomSocket) {
     this.logger.log(`${client.id}로 부터 connection 요청`);
-    let afterInitSocketFuncion: Function;
     let user: User;
     let room: Room;
     try {
-      const cookie = client.handshake.headers.cookie;
-      if (cookie == undefined) {
-        throw new Error('로그인 하지 않았습니다');
-      }
-      const cookieMap = new URLSearchParams(cookie.replace(/; /g, '&'));
-      const token: string = cookieMap.get('token');
-      const payload: JwtPayloadDto = await this.authService.getUser(token);
-      user = await this.usersService.findUserbyPayload(payload);
-
-      let roomUuid = client.handshake.query.roomUuid;
-      if (Array.isArray(roomUuid)) {
-        roomUuid = roomUuid[0];
-      }
-      this.logger.log(`유저 정보 ${user.email} ${user.name}`);
-      this.logger.log(`받은 room uuid ${roomUuid}`);
-      room = await this.roomsService.findRoombyUuid(roomUuid);
-      if (!room) {
-        throw new Error('방이 존재하지 않습니다.');
-      }
+      ({ user, room } = await this.getUserAndRoom(client.handshake));
       const beforeSocket = await this.roomsService.findRoomSocket(room, user);
       // 다시 참여하는 경우
       if (beforeSocket) {
@@ -78,7 +60,7 @@ export class RoomService {
       this.logger.log(
         `아래의 error로 인해 유저와 연결을 끊습니다 : ${client.id}`,
       );
-      this.logger.log((error as Error).stack);
+      this.logger.debug((error as Error).stack);
       client.emit('exception', error.message);
       client.disconnect(true);
       return;
@@ -226,5 +208,29 @@ export class RoomService {
         '동일한 connect 요청 과정에서 문제가 생겼습니다. 백앤드를 불러주세요.',
       );
     }
+  }
+
+  async getUserAndRoom(handshake: Handshake) {
+    const cookie = handshake.headers.cookie;
+    if (cookie == undefined) {
+      throw new Error('로그인 하지 않았습니다');
+    }
+    const cookieMap = new URLSearchParams(cookie.replace(/; /g, '&'));
+    const token: string = cookieMap.get('token');
+    const payload: JwtPayloadDto = await this.authService.getUser(token);
+    const user = await this.usersService.findUserbyPayload(payload);
+
+    let roomUuid = handshake.query.roomUuid;
+    if (Array.isArray(roomUuid)) {
+      roomUuid = roomUuid[0];
+    }
+    this.logger.log(`유저 정보 ${user.email} ${user.name}`);
+    this.logger.log(`받은 room uuid ${roomUuid}`);
+    const room = await this.roomsService.findRoombyUuid(roomUuid);
+    if (!room) {
+      throw new Error('방이 존재하지 않습니다.');
+    }
+
+    return { user, room };
   }
 }
