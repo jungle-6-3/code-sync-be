@@ -177,7 +177,7 @@ export class RoomService implements OnServerInit {
     rejectedSocket.disconnect(true);
   }
 
-  async joinClientInRoom(room: Room, client: RoomSocket) {
+  private async joinClientInRoom(room: Room, client: RoomSocket) {
     if (client.status == SocketStatus.CREATOR) {
       // 처음 방장이 입장한 경우
       if (room.status == RoomStatus.WATING) {
@@ -211,7 +211,7 @@ export class RoomService implements OnServerInit {
     }
   }
 
-  async getUserAndRoom(handshake: Handshake) {
+  private async getUserAndRoom(handshake: Handshake) {
     const cookie = handshake.headers.cookie;
     if (cookie == undefined) {
       throw new Error('로그인 하지 않았습니다');
