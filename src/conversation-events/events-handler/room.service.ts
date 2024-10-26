@@ -56,15 +56,10 @@ export class RoomService {
       if (!room) {
         throw new Error('방이 존재하지 않습니다.');
       }
-      const beforeRoom = await this.roomsService.findRoombyPk(user.pk);
+      const beforeSocket = await this.roomsService.findRoomSocket(room, user);
+      console.log(beforeSocket);
       // 다시 참여하는 경우
-      if (beforeRoom) {
-        if (beforeRoom.uuid != room.uuid) {
-          throw new Error('이미 다른 방에 참가하거나 참가 신청을 했습니다.');
-        }
-        // TODO: bofore Socket을 room에서 찾는 logic 추가해야 함.
-        this.logger.log('방에 재진입 했습니다.');
-        const beforeSocket = undefined;
+      if (beforeSocket) {
         reflashRoomSocket(beforeSocket, client);
 
         afterInitSocketFuncion = () => {};
@@ -81,7 +76,6 @@ export class RoomService {
           room.creatorSocket = client;
           client.join(roomUuid);
           this.logger.log('방장이 되었습니다.');
-          this.logger.log(room);
         };
       }
       // 방장이 입장한 방인 경우
@@ -121,18 +115,15 @@ export class RoomService {
       this.logger.log(
         `아래의 error로 인해 유저와 연결을 끊습니다 : ${client.id}`,
       );
-      this.logger.log(`${error}`);
       this.logger.log((error as Error).stack);
       client.emit('exception', error.message);
       client.disconnect(true);
       return;
     }
     initRoomSocket(client, user, room);
-    await this.roomsService.joinRoom(room, user.pk);
     afterInitSocketFuncion();
 
-    this.logger.log(`${client.room}`);
-    this.logger.log(`Client Connected : ${client.id}`);
+    this.logger.log(`연결된 Client id: ${client.id} status: ${client.status}`);
   }
 
   async socketDisconnectHandler(server: Server, client: RoomSocket) {
@@ -140,63 +131,60 @@ export class RoomService {
     if (client.status == undefined || client.status == SocketStatus.REFLASING) {
       return;
     }
-    try {
-      // TODO: type에 따라서 방의 상태도 바꾸기
-      const room: Room = client.room;
-      const user: User = client.user;
-      if (client.status == SocketStatus.CREATOR) {
-        room.creatorSocket = undefined;
-        room.status = RoomStatus.CLOSING2;
-        room.finishedAt = new Date();
+    // TODO: type에 따라서 방의 상태도 바꾸기
+    const room: Room = client.room;
+    const user: User = client.user;
+    if (client.status == SocketStatus.CREATOR) {
+      room.creatorSocket = undefined;
+      room.status = RoomStatus.CLOSING2;
+      room.finishedAt = new Date();
 
-        room.watingSockets.forEach((socket) => {
-          socket.emit('invite-rejected', {
-            message: '초대 요청이 거절되었습니다',
-          });
-          socket.disconnect(true);
+      room.watingSockets.forEach((socket) => {
+        socket.emit('invite-rejected', {
+          message: '초대 요청이 거절되었습니다',
         });
+        socket.disconnect(true);
+      });
 
-        room.watingSockets = [];
+      room.watingSockets = [];
 
-        server.to(room.uuid).emit('uesr-disconnected', {
-          message: '상대방이 나갔습니다',
-          data: {
-            name: user.name,
-            email: user.email,
-            peerId: client.peerId,
-          },
-        });
-        server.to(room.uuid).disconnectSockets(true);
-      } else if (client.status == SocketStatus.PARTICIPANT) {
-        room.participantSocket = undefined;
-        room.status = RoomStatus.CLOSING2;
+      server.to(room.uuid).emit('uesr-disconnected', {
+        message: '상대방이 나갔습니다',
+        data: {
+          name: user.name,
+          email: user.email,
+          peerId: client.peerId,
+        },
+      });
+      server.to(room.uuid).disconnectSockets(true);
+    } else if (client.status == SocketStatus.PARTICIPANT) {
+      room.participantSocket = undefined;
+      room.status = RoomStatus.CLOSING2;
 
-        server.to(room.uuid).emit('uesr-disconnected', {
-          message: '상대방이 나갔습니다',
-          data: {
-            name: user.name,
-            email: user.email,
-            peerId: client.peerId,
-          },
-        });
-        server.to(room.uuid).disconnectSockets(true);
-      } else if (client.status == SocketStatus.WAITER) {
-        if (room.watingSockets.length == 0) {
-          throw Error('conversation에 다른 사람이 초대되면서 정리 됨');
-        }
-        const indexToRemove = room.watingSockets.findIndex(
-          (socket) => socket.user.pk == user.pk,
-        );
-        if (indexToRemove == -1) {
-          this.logger.error(
-            `WAITER가 disconnect되기 전에 목록에서 사라짐 ${user.name} in ${room.uuid}`,
-          );
-          throw Error('로직이 꼬이면서 미리 정리 됨');
-        }
-        room.watingSockets.splice(indexToRemove);
+      server.to(room.uuid).emit('uesr-disconnected', {
+        message: '상대방이 나갔습니다',
+        data: {
+          name: user.name,
+          email: user.email,
+          peerId: client.peerId,
+        },
+      });
+      server.to(room.uuid).disconnectSockets(true);
+    } else if (client.status == SocketStatus.WAITER) {
+      if (room.watingSockets.length == 0) {
+        return;
       }
-    } catch {}
-    this.roomsService.leaveRoom(client.user.pk);
+      const indexToRemove = room.watingSockets.findIndex(
+        (socket) => socket.user.pk == user.pk,
+      );
+      if (indexToRemove == -1) {
+        this.logger.error(
+          `WAITER가 disconnect되기 전에 목록에서 사라짐 ${user.name} in ${room.uuid}`,
+        );
+        return;
+      }
+      room.watingSockets.splice(indexToRemove);
+    }
   }
 
   async inviteUserHandler(server: Server, client: RoomSocket, email: string) {
