@@ -137,33 +137,31 @@ export class RoomService {
 
   async socketDisconnectHandler(server: Server, client: RoomSocket) {
     this.logger.log(`Client Disconnected : ${client.id}`);
-    if (client.status == undefined) {
+    if (client.status == undefined || client.status == SocketStatus.REFLASING) {
       return;
     }
-    if (client.status == SocketStatus.REFLASING) {
-      return;
-    }
-    // TODO: type에 따라서 방의 상태도 바꾸기
-    const room: Room = client.room;
-    const user: User = client.user;
-    if (client.status == SocketStatus.CREATOR) {
-    } else if (client.status == SocketStatus.WAITER) {
-      if (room.watingSockets.length == 0) {
-        this.roomsService.leaveRoom(client.user.pk);
-        return;
-      }
-      const indexToRemove = room.watingSockets.findIndex(
-        (socket) => socket.user.pk == user.pk,
-      );
-      if (indexToRemove == -1) {
-        this.logger.error(
-          `WAITER가 disconnect되기 전에 목록에서 사라짐 ${user.name} in ${room.uuid}`,
+    try {
+      // TODO: type에 따라서 방의 상태도 바꾸기
+      const room: Room = client.room;
+      const user: User = client.user;
+      if (client.status == SocketStatus.CREATOR) {
+      } else if (client.status == SocketStatus.PARTICIPANT) {
+      } else if (client.status == SocketStatus.WAITER) {
+        if (room.watingSockets.length == 0) {
+          throw Error('conversation에 다른 사람이 초대되면서 정리 됨');
+        }
+        const indexToRemove = room.watingSockets.findIndex(
+          (socket) => socket.user.pk == user.pk,
         );
-      } else {
+        if (indexToRemove == -1) {
+          this.logger.error(
+            `WAITER가 disconnect되기 전에 목록에서 사라짐 ${user.name} in ${room.uuid}`,
+          );
+          throw Error('로직이 꼬이면서 미리 정리 됨');
+        }
         room.watingSockets.splice(indexToRemove);
       }
-    } else if (client.status == SocketStatus.PARTICIPANT) {
-    }
+    } catch {}
     this.roomsService.leaveRoom(client.user.pk);
   }
 
