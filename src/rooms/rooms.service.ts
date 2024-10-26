@@ -1,7 +1,8 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Room, RoomStatus } from './room';
 import { v4 as _uuid } from 'uuid';
 import { User } from 'src/users/entities/user.entity';
+import { RoomSocket } from 'src/conversation-events/interfaces/room-socket.interface';
 
 @Injectable()
 export class RoomsService {
@@ -31,6 +32,19 @@ export class RoomsService {
 
   async setRoom(room: Room, uuid: string) {
     this.roomsById.set(uuid, room);
+  }
+
+  async findRoomSocket(room: Room, user: User): Promise<RoomSocket> {
+    if (room.creatorSocket.user.pk == user.pk) {
+      return room.creatorSocket;
+    }
+    if (room.participantSocket.user.pk == user.pk) {
+      return room.participantSocket;
+    }
+    const sameWaitingUser = room.watingSockets.find(
+      async (socket) => socket.user.pk == user.pk,
+    );
+    return sameWaitingUser;
   }
 
   // TODO: 이거 나중에 수정해야 함
