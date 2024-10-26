@@ -144,14 +144,12 @@ export class RoomService {
       // TODO: type에 따라서 방의 상태도 바꾸기
       const room: Room = client.room;
       const user: User = client.user;
-      console.log(client.status);
       if (client.status == SocketStatus.CREATOR) {
         room.creatorSocket = undefined;
         room.status = RoomStatus.CLOSING2;
         room.finishedAt = new Date();
         room.watingSockets = [];
 
-        console.log(room.uuid);
         server.to(room.uuid).emit('uesr-disconnected', {
           message: '상대방이 나갔습니다',
           data: {
@@ -162,7 +160,6 @@ export class RoomService {
         });
         server.to(room.uuid).disconnectSockets(true);
       } else if (client.status == SocketStatus.PARTICIPANT) {
-        console.log('paaa', room.uuid);
         room.participantSocket = undefined;
         room.status = RoomStatus.CLOSING2;
 
@@ -176,7 +173,6 @@ export class RoomService {
         });
         server.to(room.uuid).disconnectSockets(true);
       } else if (client.status == SocketStatus.WAITER) {
-        console.log(room.watingSockets);
         if (room.watingSockets.length == 0) {
           throw Error('conversation에 다른 사람이 초대되면서 정리 됨');
         }
