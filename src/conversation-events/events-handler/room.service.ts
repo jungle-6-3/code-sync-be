@@ -2,12 +2,13 @@ import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { Server } from 'socket.io';
 import {
   initRoomSocket,
-  reflashRoomSocket,
+  copyFromBeforeSocket,
   RoomSocket,
   setToCreator,
   setToParticipant,
   setToWaiter,
   SocketStatus,
+  disconnectBeforeSocket,
 } from '../interfaces/room-socket.interface';
 import { AuthService } from 'src/auth/auth.service';
 import { UsersService } from 'src/users/users.service';
@@ -45,12 +46,12 @@ export class RoomService {
       const token: string = cookieMap.get('token');
       const payload: JwtPayloadDto = await this.authService.getUser(token);
       user = await this.usersService.findUserbyPayload(payload);
-      this.logger.log(`유저 정보 ${user.email} ${user.name}`);
 
       let roomUuid = client.handshake.query.roomUuid;
       if (Array.isArray(roomUuid)) {
         roomUuid = roomUuid[0];
       }
+      this.logger.log(`유저 정보 ${user.email} ${user.name}`);
       this.logger.log(`받은 room uuid ${roomUuid}`);
       room = await this.roomsService.findRoombyUuid(roomUuid);
       if (!room) {
