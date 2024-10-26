@@ -181,4 +181,20 @@ export class RoomService {
     this.logger.log(`Now ${room.uuid} room is Running`);
     room.status = RoomStatus.RUNNING;
   }
+
+  async rejectUserHandler(server: Server, client: RoomSocket, email: string) {
+    const room = client.room;
+    const indexToRemove = room.watingSockets.findIndex(
+      (socket) => socket.user.email == email,
+    );
+    if (indexToRemove == -1) {
+      throw new WsException('email에 해당되는 participant를 못 찾겠어요');
+    }
+    const rejectedSocket = room.watingSockets[indexToRemove];
+    room.watingSockets.splice(indexToRemove);
+    rejectedSocket.emit('invite-rejected', {
+      message: '초대 요청이 거절되었습니다.',
+    });
+    rejectedSocket.disconnect(true);
+  }
 }
