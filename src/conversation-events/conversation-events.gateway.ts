@@ -14,10 +14,9 @@ import {
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
-  WsException,
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
-import { RoomSocket, SocketStatus } from './interfaces/room-socket.interface';
+import { RoomSocket } from './interfaces/room-socket.interface';
 import {
   ConversationEventsFilter,
   ConversationException,
