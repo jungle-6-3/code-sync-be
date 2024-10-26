@@ -61,7 +61,8 @@ export class RoomService {
       console.log(beforeSocket);
       // 다시 참여하는 경우
       if (beforeSocket) {
-        reflashRoomSocket(beforeSocket, client);
+        copyFromBeforeSocket(beforeSocket, client);
+        disconnectBeforeSocket(beforeSocket);
 
         afterInitSocketFuncion = () => {};
       }
