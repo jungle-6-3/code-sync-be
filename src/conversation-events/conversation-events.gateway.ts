@@ -76,7 +76,9 @@ export class ConversationEventsGateway
         true,
       );
     }
-    this.logger.log(`다음 유저로부터 초대 요청 ${client.user.name}`);
+    this.logger.log(
+      `다음 유저로부터 초대 요청 ${client.user.name}, email: ${email}`,
+    );
     if (client.status != SocketStatus.CREATOR) {
       throw new WsException('방장이 아니에요');
     }
@@ -99,7 +101,9 @@ export class ConversationEventsGateway
     @ConnectedSocket() client: RoomSocket,
     @MessageBody() { email }: { email: string },
   ) {
-    this.logger.log(`다음 유저로부터 초대 요청 ${client.user.name}`);
+    this.logger.log(
+      `다음 유저로부터 거절 요청 ${client.user.name}, email: ${email}`,
+    );
     if (client.status != SocketStatus.CREATOR) {
       throw new WsException('방장이 아니에요');
     }
