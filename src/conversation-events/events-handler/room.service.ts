@@ -148,6 +148,14 @@ export class RoomService {
         room.creatorSocket = undefined;
         room.status = RoomStatus.CLOSING2;
         room.finishedAt = new Date();
+
+        room.watingSockets.forEach((socket) => {
+          socket.emit('invite-rejected', {
+            message: '초대 요청이 거절되었습니다',
+          });
+          socket.disconnect(true);
+        });
+
         room.watingSockets = [];
 
         server.to(room.uuid).emit('uesr-disconnected', {
