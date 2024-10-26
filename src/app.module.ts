@@ -9,6 +9,7 @@ import { ConversationEventsModule } from './conversation-events/conversation-eve
 import { ConversationsModule } from './conversations/conversations.module';
 import { RoomsModule } from './rooms/rooms.module';
 import { ConversationDatasModule } from './conversation-datas/conversation-datas.module';
+import { EventsHandlerModule } from './conversation-events/events-handler/events-handler.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { ConversationDatasModule } from './conversation-datas/conversation-datas
     ConversationsModule,
     RoomsModule,
     ConversationDatasModule,
+    EventsHandlerModule,
   ],
   controllers: [AppController],
   providers: [AppService],
