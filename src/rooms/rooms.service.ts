@@ -35,10 +35,10 @@ export class RoomsService {
   }
 
   async findRoomSocket(room: Room, user: User): Promise<RoomSocket> {
-    if (room.creatorSocket.user.pk == user.pk) {
+    if (room.creatorSocket && room.creatorSocket.user.pk == user.pk) {
       return room.creatorSocket;
     }
-    if (room.participantSocket.user.pk == user.pk) {
+    if (room.participantSocket && room.participantSocket.user.pk == user.pk) {
       return room.participantSocket;
     }
     const sameWaitingUser = room.watingSockets.find(
