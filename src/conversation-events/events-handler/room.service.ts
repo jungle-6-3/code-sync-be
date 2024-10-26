@@ -145,8 +145,23 @@ export class RoomService {
     }
     // TODO: type에 따라서 방의 상태도 바꾸기
     const room: Room = client.room;
+    const user: User = client.user;
     if (client.status == SocketStatus.CREATOR) {
     } else if (client.status == SocketStatus.WAITER) {
+      if (room.watingSockets.length == 0) {
+        this.roomsService.leaveRoom(client.user.pk);
+        return;
+      }
+      const indexToRemove = room.watingSockets.findIndex(
+        (socket) => socket.user.pk == user.pk,
+      );
+      if (indexToRemove == -1) {
+        this.logger.error(
+          `WAITER가 disconnect되기 전에 목록에서 사라짐 ${user.name} in ${room.uuid}`,
+        );
+      } else {
+        room.watingSockets.splice(indexToRemove);
+      }
     } else if (client.status == SocketStatus.PARTICIPANT) {
     }
     this.roomsService.leaveRoom(client.user.pk);
@@ -163,7 +178,7 @@ export class RoomService {
     }
     room.watingSockets.forEach((socket) => {
       if (socket != participantSocket) {
-        socket.emit('invite-reject', {
+        socket.emit('invite-rejected', {
           message: '초대 요청이 거절되었습니다',
         });
         socket.disconnect(true);
@@ -184,14 +199,12 @@ export class RoomService {
 
   async rejectUserHandler(server: Server, client: RoomSocket, email: string) {
     const room = client.room;
-    const indexToRemove = room.watingSockets.findIndex(
+    const rejectedSocket: RoomSocket = room.watingSockets.find(
       (socket) => socket.user.email == email,
     );
-    if (indexToRemove == -1) {
+    if (rejectedSocket) {
       throw new WsException('email에 해당되는 participant를 못 찾겠어요');
     }
-    const rejectedSocket = room.watingSockets[indexToRemove];
-    room.watingSockets.splice(indexToRemove);
     rejectedSocket.emit('invite-rejected', {
       message: '초대 요청이 거절되었습니다.',
     });
