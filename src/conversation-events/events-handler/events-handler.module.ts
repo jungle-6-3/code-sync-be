@@ -1,5 +1,5 @@
 import { forwardRef, Module } from '@nestjs/common';
-import { RoomHandlerService } from './room-handler.service';
+import { RoomService } from './room.service';
 import { PeerJsService } from './peer-js.service';
 import { ConversationEventsModule } from '../conversation-events.module';
 import { AuthModule } from 'src/auth/auth.module';
@@ -13,7 +13,7 @@ import { RoomsModule } from 'src/rooms/rooms.module';
     UsersModule,
     RoomsModule,
   ],
-  providers: [RoomHandlerService, PeerJsService],
-  exports: [RoomHandlerService, PeerJsService],
+  providers: [RoomService, PeerJsService],
+  exports: [RoomService, PeerJsService],
 })
 export class EventsHandlerModule {}

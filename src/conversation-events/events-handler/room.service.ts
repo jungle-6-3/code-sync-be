@@ -20,7 +20,7 @@ import { WsException } from '@nestjs/websockets';
 import { ConversationEventsGateway } from '../conversation-events.gateway';
 
 @Injectable()
-export class RoomHandlerService {
+export class RoomService {
   constructor(
     private authService: AuthService,
     private usersService: UsersService,

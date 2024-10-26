@@ -17,7 +17,7 @@ import {
   ConversationException,
 } from './conversation-events.filter';
 import { PeerJsService } from './events-handler/peer-js.service';
-import { RoomHandlerService } from './events-handler/room-handler.service';
+import { RoomService } from './events-handler/room.service';
 
 @UseFilters(ConversationEventsFilter)
 @WebSocketGateway(3001, {
@@ -34,8 +34,8 @@ export class ConversationEventsGateway
   constructor(
     @Inject(forwardRef(() => PeerJsService))
     private peerJsEventsHandlerService: PeerJsService,
-    @Inject(forwardRef(() => RoomHandlerService))
-    private roomEventsHandlerService: RoomHandlerService,
+    @Inject(forwardRef(() => RoomService))
+    private roomEventsHandlerService: RoomService,
   ) {}
 
   @WebSocketServer() server: Server;
