@@ -22,18 +22,6 @@ export function initRoomSocket(socket: RoomSocket, user: User, room: Room) {
   socket.room = room;
 }
 
-export function setToCreator(socket: RoomSocket) {
-  socket.status = SocketStatus.CREATOR;
-}
-
-export function setToWaiter(socket: RoomSocket) {
-  socket.status = SocketStatus.WAITER;
-}
-
-export function setToParticipant(socket: RoomSocket) {
-  socket.status = SocketStatus.PARTICIPANT;
-}
-
 /**
  * beforeSocket이 Waiter라면 watingSockets에서 없애야 하기에 WAITER로 설정.
  * 아니라면 room에 변화를 주면 안 되기 때문에, Reflasing으로 변경

@@ -4,9 +4,6 @@ import {
   initRoomSocket,
   copyFromBeforeSocket,
   RoomSocket,
-  setToCreator,
-  setToParticipant,
-  setToWaiter,
   SocketStatus,
   disconnectBeforeSocket,
 } from '../interfaces/room-socket.interface';
@@ -58,59 +55,23 @@ export class RoomService {
         throw new Error('방이 존재하지 않습니다.');
       }
       const beforeSocket = await this.roomsService.findRoomSocket(room, user);
-      console.log(beforeSocket);
       // 다시 참여하는 경우
       if (beforeSocket) {
         copyFromBeforeSocket(beforeSocket, client);
         disconnectBeforeSocket(beforeSocket);
-
-        afterInitSocketFuncion = () => {};
       }
       // 방장이 입장하지 않은 방인 경우
       else if (room.status == RoomStatus.WATING) {
         if (room.creatorPk != user.pk) {
           throw new Error('방장이 입장하지 않습니다.');
         }
-
-        setToCreator(client);
-        afterInitSocketFuncion = () => {
-          room.status = RoomStatus.INVITING;
-          room.creatorSocket = client;
-          client.join(roomUuid);
-          this.logger.log('방장이 되었습니다.');
-        };
+        client.status = SocketStatus.CREATOR;
       }
       // 방장이 입장한 방인 경우
       else if (room.status == RoomStatus.INVITING) {
-        if (room.creatorPk == user.pk) {
-          this.logger.error('방장이 겹치는지 체크 했는데 뚫렸네요.');
-          throw new Error('동시성 문제1: 백앤드를 불러주세요');
-        }
-        const sameWaitingUser = room.watingSockets.find(
-          (waiter) => waiter.user.pk == user.pk,
-        );
-        if (sameWaitingUser != undefined) {
-          this.logger.error('참여자가 겹치는지 체크 했는데 뚫렸네요.');
-          throw new Error('동시성 문제2: 백앤드를 불러주세요');
-        }
-
-        setToWaiter(client);
-        afterInitSocketFuncion = () => {
-          room.watingSockets.push(client);
-          this.logger.log('대기자에 추가되었습니다.');
-
-          server.to(room.uuid).emit('join-request-by', {
-            message: '참가 요청이 왔습니다.',
-            data: {
-              participant: {
-                name: user.name,
-                email: user.email,
-              },
-            },
-          });
-        };
+        client.status = SocketStatus.WAITER;
       } else {
-        throw new Error('이미 개최중이거나 종료중인 방입니다.');
+        throw new Error(`이미 개최중이거나 종료중인 방입니다: ${room.status}`);
       }
     } catch (error) {
       // socket 연결에 실패하는 경우
@@ -123,7 +84,7 @@ export class RoomService {
       return;
     }
     initRoomSocket(client, user, room);
-    afterInitSocketFuncion();
+    await this.joinClientInRoom(room, server, client);
 
     this.logger.log(`연결된 Client id: ${client.id} status: ${client.status}`);
   }
@@ -208,7 +169,7 @@ export class RoomService {
     });
     room.watingSockets = [];
 
-    setToParticipant(participantSocket);
+    participantSocket.status = SocketStatus.PARTICIPANT;
     participantSocket.join(room.uuid);
     room.participantSocket = participantSocket;
     participantSocket.emit('invite-accepted', {
@@ -231,5 +192,39 @@ export class RoomService {
       message: '초대 요청이 거절되었습니다.',
     });
     rejectedSocket.disconnect(true);
+  }
+
+  async joinClientInRoom(room: Room, server: Server, client: RoomSocket) {
+    if (client.status == SocketStatus.CREATOR) {
+      // 처음 방장이 입장한 경우
+      if (room.status == RoomStatus.WATING) {
+        room.status = RoomStatus.INVITING;
+        this.logger.log(`${room.uuid}에서 초대를 시작합니다`);
+      }
+      room.creatorSocket = client;
+      client.join(room.uuid);
+      this.logger.log('방장이 되었습니다.');
+    } else if (client.status == SocketStatus.PARTICIPANT) {
+      room.participantSocket = client;
+      this.logger.log(`참가자가 되었습니다.`);
+    } else if (client.status == SocketStatus.WAITER) {
+      room.watingSockets.push(client);
+      server.to(room.uuid).emit('join-request-by', {
+        message: '참가 요청이 왔습니다.',
+        data: {
+          participant: {
+            name: client.user.name,
+            email: client.user.email,
+          },
+        },
+      });
+      this.logger.log('대기자에 추가되었습니다.');
+    } else {
+      this.logger.error(`동일한 connect 요청 과정에서 예상하지 못 한 에러`);
+      this.logger.error(`${client.status}`);
+      throw new WsException(
+        '동일한 connect 요청 과정에서 문제가 생겼습니다. 백앤드를 불러주세요.',
+      );
+    }
   }
 }
