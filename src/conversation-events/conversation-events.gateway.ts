@@ -76,7 +76,9 @@ export class ConversationEventsGateway
         true,
       );
     }
-    this.logger.log(`다음 유저로부터 초대 요청 ${client.user.name}`);
+    this.logger.log(
+      `다음 유저로부터 초대 요청 ${client.user.name}, email: ${email}`,
+    );
     if (client.status != SocketStatus.CREATOR) {
       throw new WsException('방장이 아니에요');
     }
@@ -90,6 +92,31 @@ export class ConversationEventsGateway
     return {
       sucess: true,
       message: '대화를 시작합니다.',
+    };
+  }
+
+  // TODO: pipe로 방장인지 체크하도록 수정 필요.
+  @SubscribeMessage('reject-user')
+  async handleRejectUser(
+    @ConnectedSocket() client: RoomSocket,
+    @MessageBody() { email }: { email: string },
+  ) {
+    this.logger.log(
+      `다음 유저로부터 거절 요청 ${client.user.name}, email: ${email}`,
+    );
+    if (client.status != SocketStatus.CREATOR) {
+      throw new WsException('방장이 아니에요');
+    }
+
+    await this.roomEventsHandlerService.rejectUserHandler(
+      this.server,
+      client,
+      email,
+    );
+
+    return {
+      sucess: true,
+      message: '참가 요청을 거절했습니다.',
     };
   }
 

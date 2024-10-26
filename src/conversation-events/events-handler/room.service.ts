@@ -123,7 +123,7 @@ export class RoomService {
       );
       this.logger.log(`${error}`);
       this.logger.log((error as Error).stack);
-      client.emit('exception', error);
+      client.emit('exception', error.message);
       client.disconnect(true);
       return;
     }
@@ -137,18 +137,65 @@ export class RoomService {
 
   async socketDisconnectHandler(server: Server, client: RoomSocket) {
     this.logger.log(`Client Disconnected : ${client.id}`);
-    if (client.status == undefined) {
+    if (client.status == undefined || client.status == SocketStatus.REFLASING) {
       return;
     }
-    if (client.status == SocketStatus.REFLASING) {
-      return;
-    }
-    // TODO: type에 따라서 방의 상태도 바꾸기
-    const room: Room = client.room;
-    if (client.status == SocketStatus.CREATOR) {
-    } else if (client.status == SocketStatus.WAITER) {
-    } else if (client.status == SocketStatus.PARTICIPANT) {
-    }
+    try {
+      // TODO: type에 따라서 방의 상태도 바꾸기
+      const room: Room = client.room;
+      const user: User = client.user;
+      if (client.status == SocketStatus.CREATOR) {
+        room.creatorSocket = undefined;
+        room.status = RoomStatus.CLOSING2;
+        room.finishedAt = new Date();
+
+        room.watingSockets.forEach((socket) => {
+          socket.emit('invite-rejected', {
+            message: '초대 요청이 거절되었습니다',
+          });
+          socket.disconnect(true);
+        });
+
+        room.watingSockets = [];
+
+        server.to(room.uuid).emit('uesr-disconnected', {
+          message: '상대방이 나갔습니다',
+          data: {
+            name: user.name,
+            email: user.email,
+            peerId: client.peerId,
+          },
+        });
+        server.to(room.uuid).disconnectSockets(true);
+      } else if (client.status == SocketStatus.PARTICIPANT) {
+        room.participantSocket = undefined;
+        room.status = RoomStatus.CLOSING2;
+
+        server.to(room.uuid).emit('uesr-disconnected', {
+          message: '상대방이 나갔습니다',
+          data: {
+            name: user.name,
+            email: user.email,
+            peerId: client.peerId,
+          },
+        });
+        server.to(room.uuid).disconnectSockets(true);
+      } else if (client.status == SocketStatus.WAITER) {
+        if (room.watingSockets.length == 0) {
+          throw Error('conversation에 다른 사람이 초대되면서 정리 됨');
+        }
+        const indexToRemove = room.watingSockets.findIndex(
+          (socket) => socket.user.pk == user.pk,
+        );
+        if (indexToRemove == -1) {
+          this.logger.error(
+            `WAITER가 disconnect되기 전에 목록에서 사라짐 ${user.name} in ${room.uuid}`,
+          );
+          throw Error('로직이 꼬이면서 미리 정리 됨');
+        }
+        room.watingSockets.splice(indexToRemove);
+      }
+    } catch {}
     this.roomsService.leaveRoom(client.user.pk);
   }
 
@@ -163,7 +210,7 @@ export class RoomService {
     }
     room.watingSockets.forEach((socket) => {
       if (socket != participantSocket) {
-        socket.emit('invite-reject', {
+        socket.emit('invite-rejected', {
           message: '초대 요청이 거절되었습니다',
         });
         socket.disconnect(true);
@@ -180,5 +227,19 @@ export class RoomService {
 
     this.logger.log(`Now ${room.uuid} room is Running`);
     room.status = RoomStatus.RUNNING;
+  }
+
+  async rejectUserHandler(server: Server, client: RoomSocket, email: string) {
+    const room = client.room;
+    const rejectedSocket: RoomSocket = room.watingSockets.find(
+      (socket) => socket.user.email == email,
+    );
+    if (!rejectedSocket) {
+      throw new WsException('email에 해당되는 participant를 못 찾겠어요');
+    }
+    rejectedSocket.emit('invite-rejected', {
+      message: '초대 요청이 거절되었습니다.',
+    });
+    rejectedSocket.disconnect(true);
   }
 }
