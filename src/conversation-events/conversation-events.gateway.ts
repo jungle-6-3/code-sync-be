@@ -33,9 +33,9 @@ export class ConversationEventsGateway
 {
   constructor(
     @Inject(forwardRef(() => PeerJsService))
-    private peerJsEventsHandlerService: PeerJsService,
+    private peerJsService: PeerJsService,
     @Inject(forwardRef(() => RoomService))
-    private roomEventsHandlerService: RoomService,
+    private roomService: RoomService,
   ) {}
 
   @WebSocketServer() server: Server;
@@ -48,11 +48,7 @@ export class ConversationEventsGateway
     @ConnectedSocket() client: RoomSocket,
     @MessageBody() { peerId }: { peerId: string },
   ) {
-    this.peerJsEventsHandlerService.sharePeerIdHandler(
-      this.server,
-      client,
-      peerId,
-    );
+    this.peerJsService.sharePeerIdHandler(this.server, client, peerId);
     return {
       sucess: true,
       message: 'Peer Id를 등록했습니다.',
@@ -83,11 +79,7 @@ export class ConversationEventsGateway
       throw new WsException('방장이 아니에요');
     }
 
-    await this.roomEventsHandlerService.inviteUserHandler(
-      this.server,
-      client,
-      email,
-    );
+    await this.roomService.inviteUserHandler(this.server, client, email);
 
     return {
       sucess: true,
@@ -108,11 +100,7 @@ export class ConversationEventsGateway
       throw new WsException('방장이 아니에요');
     }
 
-    await this.roomEventsHandlerService.rejectUserHandler(
-      this.server,
-      client,
-      email,
-    );
+    await this.roomService.rejectUserHandler(this.server, client, email);
 
     return {
       sucess: true,
@@ -125,10 +113,10 @@ export class ConversationEventsGateway
   }
 
   async handleDisconnect(client: RoomSocket) {
-    this.roomEventsHandlerService.socketDisconnectHandler(this.server, client);
+    this.roomService.socketDisconnectHandler(this.server, client);
   }
 
   async handleConnection(client: RoomSocket, ...args: any[]) {
-    this.roomEventsHandlerService.socketConnectionHanlder(this.server, client);
+    this.roomService.socketConnectionHanlder(this.server, client);
   }
 }
