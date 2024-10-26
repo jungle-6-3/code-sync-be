@@ -6,19 +6,12 @@ import { User } from 'src/users/entities/user.entity';
 @Injectable()
 export class RoomsService {
   private roomsById: Map<string, Room>;
-  private roomsByPk: Map<number, Room>;
 
   constructor() {
     this.roomsById = new Map();
-    this.roomsByPk = new Map();
   }
 
   async createRoom(creator: User, prUrl: string): Promise<string> {
-    if (await this.findRoombyPk(creator.pk)) {
-      throw new ForbiddenException(
-        '이미 대화에 참여하고 있는 방이 존재합니다.',
-      );
-    }
     const roomUuid = _uuid();
     const newRoom = new Room(roomUuid, creator, prUrl);
     this.setRoom(newRoom, roomUuid);
@@ -36,20 +29,8 @@ export class RoomsService {
     return this.roomsById.get(uuid);
   }
 
-  async findRoombyPk(userPk: number): Promise<Room> {
-    return this.roomsByPk.get(userPk);
-  }
-
   async setRoom(room: Room, uuid: string) {
     this.roomsById.set(uuid, room);
-  }
-
-  async joinRoom(room: Room, userPk: number) {
-    this.roomsByPk.set(userPk, room);
-  }
-
-  async leaveRoom(userPk: number) {
-    if (userPk) this.roomsByPk.delete(userPk);
   }
 
   // TODO: 이거 나중에 수정해야 함
