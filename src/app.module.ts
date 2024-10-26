@@ -25,7 +25,7 @@ import { EventsHandlerModule } from './conversation-events/events-handler/events
       password: process.env.DATABASE_PASSWORD,
       database: process.env.DATABASE,
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      synchronize: true,
+      synchronize: false,
     }),
     AuthModule,
     UsersModule,
