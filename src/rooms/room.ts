@@ -1,3 +1,4 @@
+import { ChatData } from 'src/conversation-datas/data/chatting';
 import { RoomSocket } from 'src/conversation-events/interfaces/room-socket.interface';
 import { User } from 'src/users/entities/user.entity';
 
@@ -30,7 +31,7 @@ export class Room {
   prUrl: string;
 
   // TODO: data의 타입이 정해지면 수정 해야함
-  data: any;
+  data: RoomData;
 
   constructor(uuid: string, creator: User, prUrl: string) {
     this.uuid = uuid;
@@ -39,5 +40,16 @@ export class Room {
     this.prUrl = prUrl;
     this.startedAt = new Date();
     this.watingSockets = [];
+    this.data = {
+      chat: new ChatData(),
+    };
   }
+
+  // TODO: 데이터 넣는 로직 추가.
+}
+
+interface RoomData {
+  chat: ChatData;
+  // note?: NoteData;
+  // draw?: DrawData;
 }
