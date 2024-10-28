@@ -3,7 +3,7 @@ import { Room, RoomStatus } from './room';
 import { v4 as _uuid } from 'uuid';
 import { User } from 'src/users/entities/user.entity';
 import { RoomSocket } from 'src/conversation-events/interfaces/room-socket.interface';
-import { RoomsModule } from './rooms.module';
+import { SocketInformation } from 'src/conversation-events/interfaces/socket-information.interface';
 
 @Injectable()
 export class RoomsService {
@@ -67,5 +67,11 @@ export class RoomsService {
     this.roomsById.delete(room.uuid);
 
     room = null;
+  }
+
+  setInformationTimeoutId(socketInformation: SocketInformation) {
+    socketInformation.timeoutId = setTimeout(() =>
+      this.deleteRoom(socketInformation.room),
+    );
   }
 }
