@@ -30,6 +30,8 @@ export class Room {
 
   prUrl: string;
 
+  timeoutId: NodeJS.Timeout;
+
   // TODO: data의 타입이 정해지면 수정 해야함
   data: any;
 
