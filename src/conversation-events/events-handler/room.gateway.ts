@@ -1,6 +1,7 @@
 import {
   ConnectedSocket,
   MessageBody,
+  OnGatewayInit,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
@@ -22,14 +23,14 @@ import { Server } from 'socket.io';
     transports: ['polling', 'websocket'],
   },
 })
-export class RoomGateway {
+export class RoomGateway implements OnGatewayInit {
   constructor() {}
 
   @WebSocketServer() server: Server;
   logger = new Logger('RoomEventGateway');
 
   afterInit(server: Server) {
-    this.logger.log('Initialize WebSocket Server Done');
+    this.logger.log('Initialize Room Gateway Done');
   }
 
   @UsePipes(ValidateUserIsCreatorPipe)

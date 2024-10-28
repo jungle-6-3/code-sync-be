@@ -1,6 +1,7 @@
 import {
   ConnectedSocket,
   MessageBody,
+  OnGatewayInit,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
@@ -26,10 +27,15 @@ import { RoomSocket } from '../interfaces/room-socket.interface';
     transports: ['polling', 'websocket'],
   },
 })
-export class PeerJsGateway {
+export class PeerJsGateway implements OnGatewayInit {
   constructor() {}
+
   @WebSocketServer() server: Server;
   logger: Logger = new Logger('PeerJsEventGateway');
+
+  afterInit(server: Server) {
+    this.logger.log('Initialize PeerJs Gateway Done');
+  }
 
   @UsePipes(ValidateUserIsJoiningPipe)
   @SubscribeMessage('share-peer-id')
