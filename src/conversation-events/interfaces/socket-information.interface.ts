@@ -30,4 +30,9 @@ export class SocketInformation {
       this.timeoutId = undefined;
     }
   }
+
+  setSocket(socket: RoomSocket) {
+    socket.status = this.status;
+    socket.peerId = this.peerId;
+  }
 }

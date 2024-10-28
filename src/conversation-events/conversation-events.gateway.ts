@@ -140,14 +140,13 @@ export class ConversationEventsGateway
   }
 
   private async setClientStatus(client: RoomSocket, user: User, room: Room) {
-    const beforeSocket = await this.roomsService.findRoomSocket(room, user);
     // 이전 연결을 유지한 채로 다시 참여하는 경우
+    const beforeSocket = await this.roomsService.findRoomSocket(room, user);
     if (beforeSocket) {
       copyFromBeforeSocket(beforeSocket, client);
       disconnectBeforeSocket(beforeSocket);
       return;
     }
-    //TODO: 이전 연결이 끊긴 채로 다시 참여하는 경우
     switch (room.status) {
       // 방장이 입장하지 않은 방인 경우
       case RoomStatus.WATING:
@@ -159,6 +158,18 @@ export class ConversationEventsGateway
       // 방장이 초대 중인 경우
       case RoomStatus.INVITING:
         client.status = SocketStatus.WAITER;
+        break;
+      case RoomStatus.CREATOR_OUT:
+      case RoomStatus.PARTICIPANT_OUT:
+        const beforInformation = room.creatorInformation;
+        if (beforInformation.userPk != user.pk) {
+          throw new Error(
+            `이미 개최중이거나 종료중인 방입니다: ${room.status}`,
+          );
+        }
+        beforInformation.clearTimeout();
+        beforInformation.setSocket(client);
+        room.status = RoomStatus.RUNNING;
         break;
       default:
         throw new Error(`이미 개최중이거나 종료중인 방입니다: ${room.status}`);
