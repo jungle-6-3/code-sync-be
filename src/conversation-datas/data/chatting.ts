@@ -6,7 +6,8 @@ export class ChatData {
   }
 
   public toFile(uuid: string) {
-    const stringChat = JSON.stringify(this.chats);
+    const chat = JSON.stringify(this.chats);
+    const stringChat = Buffer.from(chat).toString('utf-8');
     const fileData = {
       fileName: 'Chat',
       file: stringChat,
