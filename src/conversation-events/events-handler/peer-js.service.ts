@@ -16,6 +16,9 @@ export class PeerJsService implements OnServerInit {
   async sharePeerIdHandler(client: RoomSocket, peerId: string) {
     const room = client.room;
     client.peerId = peerId;
+    this.logger.log(
+      `${room.uuid}에 ${client.user.name}의 peer Id ${peerId}를 공유합니다.`,
+    );
     this.server.to(room.uuid).emit('new-peer-id', {
       message: '화면 공유 요청이 왔습니다.',
       data: {
@@ -25,8 +28,8 @@ export class PeerJsService implements OnServerInit {
     });
   }
 
-  afterServerInit(): void {
-    this.server = this.conversationEventsGateway.server;
+  afterServerInit(server: Server): void {
+    this.server = server;
     this.logger = this.conversationEventsGateway.logger;
   }
 }
