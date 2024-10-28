@@ -1,3 +1,5 @@
+import { Server } from 'socket.io';
+
 export interface OnServerInit {
-  afterServerInit(): void;
+  afterServerInit(server: Server): void;
 }

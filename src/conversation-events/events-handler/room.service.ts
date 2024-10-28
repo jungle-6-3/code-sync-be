@@ -235,8 +235,8 @@ export class RoomService implements OnServerInit {
     return { user, room };
   }
 
-  afterServerInit() {
-    this.server = this.conversationEventsGateway.server;
+  afterServerInit(server: Server) {
+    this.server = server;
     this.logger = this.conversationEventsGateway.logger;
   }
 }
