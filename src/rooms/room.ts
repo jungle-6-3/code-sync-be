@@ -1,3 +1,4 @@
+import { SocketInformation } from 'src/conversation-events/interfaces/socket-information.interface';
 import { RoomSocket } from 'src/conversation-events/interfaces/room-socket.interface';
 import { User } from 'src/users/entities/user.entity';
 
@@ -32,9 +33,9 @@ export class Room {
 
   globalTimeoutId: NodeJS.Timeout;
 
-  creatorTimeoutId: NodeJS.Timeout;
+  creatorInformation: SocketInformation;
 
-  participantTimeoutId: NodeJS.Timeout;
+  participantInformation: SocketInformation;
 
   // TODO: data의 타입이 정해지면 수정 해야함
   data: any;
@@ -48,13 +49,13 @@ export class Room {
     this.watingSockets = [];
   }
 
-  clearTimeOut() {
+  clearTimeout() {
     clearTimeout(this.globalTimeoutId);
-    clearTimeout(this.creatorTimeoutId);
-    clearTimeout(this.participantTimeoutId);
+    clearTimeout(this.creatorInformation.timeoutId);
+    clearTimeout(this.participantInformation.timeoutId);
 
     this.globalTimeoutId = undefined;
-    this.creatorTimeoutId = undefined;
-    this.participantTimeoutId = undefined;
+    this.creatorInformation.timeoutId = undefined;
+    this.participantInformation.timeoutId = undefined;
   }
 }

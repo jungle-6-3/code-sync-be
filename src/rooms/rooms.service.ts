@@ -53,7 +53,7 @@ export class RoomsService {
   }
 
   async deleteRoom(room: Room) {
-    room.clearTimeOut();
+    room.clearTimeout();
 
     const { creatorSocket, participantSocket } = room;
     room.status = RoomStatus.DELETED;
