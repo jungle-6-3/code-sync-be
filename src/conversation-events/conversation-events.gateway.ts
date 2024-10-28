@@ -106,7 +106,7 @@ export class ConversationEventsGateway
     const user: User = client.user;
     if (client.status == SocketStatus.CREATOR) {
       room.creatorSocket = undefined;
-      room.status = RoomStatus.CLOSING2;
+      room.status = RoomStatus.CLOSING;
       room.finishedAt = new Date();
 
       room.watingSockets.forEach((socket) => {
@@ -129,7 +129,7 @@ export class ConversationEventsGateway
       this.server.to(room.uuid).disconnectSockets(true);
     } else if (client.status == SocketStatus.PARTICIPANT) {
       room.participantSocket = undefined;
-      room.status = RoomStatus.CLOSING2;
+      room.status = RoomStatus.CLOSING;
 
       this.server.to(room.uuid).emit('uesr-disconnected', {
         message: '상대방이 나갔습니다',

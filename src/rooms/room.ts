@@ -5,8 +5,9 @@ export enum RoomStatus {
   WATING = 'Wating',
   INVITING = 'Inviting',
   RUNNING = 'Running',
-  CLOSING1 = 'Closing1',
-  CLOSING2 = 'Closing2',
+  CREATOR_OUT = 'CreatorOut',
+  PARTICIPANT_OUT = 'ParticipantOut',
+  CLOSING = 'Closing',
   DELETED = 'Deleted',
 }
 
