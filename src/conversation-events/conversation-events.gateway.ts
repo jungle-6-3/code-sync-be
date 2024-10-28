@@ -1,4 +1,4 @@
-import { forwardRef, Inject, Logger, UseFilters } from '@nestjs/common';
+import { Logger, UseFilters } from '@nestjs/common';
 import {
   OnGatewayConnection,
   OnGatewayDisconnect,
@@ -26,6 +26,7 @@ import { JwtPayloadDto } from 'src/auth/dto/jwt-payload';
 import { RoomsService } from 'src/rooms/rooms.service';
 import { User } from 'src/users/entities/user.entity';
 import { Room, RoomStatus } from 'src/rooms/room';
+import { SocketInformation } from './interfaces/socket-information.interface';
 
 @UseFilters(ConversationEventsFilter)
 @WebSocketGateway(3001, {
@@ -161,7 +162,13 @@ export class ConversationEventsGateway
         break;
       case RoomStatus.CREATOR_OUT:
       case RoomStatus.PARTICIPANT_OUT:
-        const beforInformation = room.creatorInformation;
+        let beforInformation: SocketInformation;
+        if (room.status == RoomStatus.CREATOR_OUT) {
+          beforInformation = room.creatorInformation;
+        } else {
+          beforInformation = room.participantInformation;
+        }
+
         if (beforInformation.userPk != user.pk) {
           throw new Error(
             `이미 개최중이거나 종료중인 방입니다: ${room.status}`,
