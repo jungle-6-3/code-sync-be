@@ -17,7 +17,10 @@ export class RoomsService {
     const roomUuid = _uuid();
     const newRoom = new Room(roomUuid, creator, prUrl);
     this.setRoom(newRoom, roomUuid);
-    newRoom.timeoutId = setTimeout(() => this.deleteRoom(newRoom), 3600000); // 1hour
+    newRoom.globalTimeoutId = setTimeout(
+      () => this.deleteRoom(newRoom),
+      3600000,
+    ); // 1hour
     return roomUuid;
   }
 
@@ -50,8 +53,7 @@ export class RoomsService {
   }
 
   async deleteRoom(room: Room) {
-    clearTimeout(room.timeoutId);
-    room.timeoutId = undefined;
+    room.clearTimeOut();
 
     const { creatorSocket, participantSocket } = room;
     room.status = RoomStatus.DELETED;

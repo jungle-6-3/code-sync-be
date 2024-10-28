@@ -30,7 +30,11 @@ export class Room {
 
   prUrl: string;
 
-  timeoutId: NodeJS.Timeout;
+  globalTimeoutId: NodeJS.Timeout;
+
+  creatorTimeoutId: NodeJS.Timeout;
+
+  participantTimeoutId: NodeJS.Timeout;
 
   // TODO: data의 타입이 정해지면 수정 해야함
   data: any;
@@ -42,5 +46,15 @@ export class Room {
     this.prUrl = prUrl;
     this.startedAt = new Date();
     this.watingSockets = [];
+  }
+
+  clearTimeOut() {
+    clearTimeout(this.globalTimeoutId);
+    clearTimeout(this.creatorTimeoutId);
+    clearTimeout(this.participantTimeoutId);
+
+    this.globalTimeoutId = undefined;
+    this.creatorTimeoutId = undefined;
+    this.participantTimeoutId = undefined;
   }
 }
