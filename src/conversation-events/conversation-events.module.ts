@@ -4,7 +4,7 @@ import { UsersModule } from 'src/users/users.module';
 import { AuthModule } from 'src/auth/auth.module';
 import { RoomsModule } from 'src/rooms/rooms.module';
 import { EventsHandlerModule } from './events-handler/events-handler.module';
-import { DisconnectedSocketsService } from './disconnected-sockets.service';
+import { ConversationEventsService } from './conversation-events.service';
 
 @Module({
   imports: [
@@ -14,7 +14,7 @@ import { DisconnectedSocketsService } from './disconnected-sockets.service';
     forwardRef(() => EventsHandlerModule),
   ],
   controllers: [],
-  providers: [ConversationEventsGateway, DisconnectedSocketsService],
+  providers: [ConversationEventsGateway, ConversationEventsService],
   exports: [ConversationEventsGateway],
 })
 export class ConversationEventsModule {}
