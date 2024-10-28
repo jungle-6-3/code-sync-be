@@ -49,7 +49,7 @@ export class ConversationEventsGateway
   logger: Logger = new Logger('ConnectionAndDisconnectionEventGateway');
 
   afterInit(server: Server) {
-    this.logger.log('Initialize WebSocket Server Done');
+    this.logger.log('Initialize Connectoin and Disconnection Gateway Done');
   }
 
   async handleConnection(client: RoomSocket, ...args: any[]) {
