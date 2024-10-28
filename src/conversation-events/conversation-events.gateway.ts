@@ -98,6 +98,9 @@ export class ConversationEventsGateway
     if (client.status == undefined || client.status == SocketStatus.REFLASING) {
       return;
     }
+    this.logger.log(
+      `${client.user.name}이 다음 상태에서 종료: ${client.status}`,
+    );
     // TODO: type에 따라서 방의 상태도 바꾸기
     const room: Room = client.room;
     const user: User = client.user;
