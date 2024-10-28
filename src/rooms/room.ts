@@ -51,8 +51,8 @@ export class Room {
 
   clearTimeout() {
     clearTimeout(this.globalTimeoutId);
-    clearTimeout(this.creatorInformation.timeoutId);
-    clearTimeout(this.participantInformation.timeoutId);
+    this.creatorInformation.clearTimeout();
+    this.participantInformation.clearTimeout();
 
     this.globalTimeoutId = undefined;
     this.creatorInformation.timeoutId = undefined;
