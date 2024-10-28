@@ -42,7 +42,7 @@ export class RoomsService {
       return room.participantSocket;
     }
     const sameWaitingUser = room.watingSockets.find(
-      async (socket) => socket.user.pk == user.pk,
+      (socket) => socket.user.pk == user.pk,
     );
     return sameWaitingUser;
   }
