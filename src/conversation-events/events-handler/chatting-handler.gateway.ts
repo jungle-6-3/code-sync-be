@@ -8,6 +8,7 @@ import {
 
 import { RoomSocket } from '../interfaces/room-socket.interface';
 import { Server } from 'socket.io';
+import { CreateMessage } from '../dto/create-message';
 
 @WebSocketGateway(3001, {
   cors: {
@@ -26,11 +27,12 @@ export class ChattingHandlerGateway {
     @ConnectedSocket() client: RoomSocket,
     @MessageBody() message: any,
   ) {
-    // TODO : 메시지를 큐에 넣는 기능 구현
-    // TODO : 보낸 메시지를 클라이언트에게 보내는 기능
     // TODO :채팅이 끝나면 저장하는 기능
     this.handleChattingMessage(client, message);
     this.loggingMessage(client, message);
+    const return_msg = this.messageDto(client, message);
+
+    return return_msg;
   }
   async handleChattingMessage(client: RoomSocket, message: any) {
     console.log('message:', message);
@@ -47,6 +49,16 @@ export class ChattingHandlerGateway {
     const chat = { date: time, name, content: message };
     client.room.data.chat.addChat(chat);
   }
+
+  messageDto(client: RoomSocket, message: string) {
+    const time = this.createDate();
+    const name = client.user.name;
+    const content = message;
+
+    const newMessage = new CreateMessage(time, name, content);
+    return newMessage;
+  }
+
   createDate() {
     const now = new Date().toLocaleString('ko-KR', {
       timeZone: 'Asia/Seoul',
