@@ -16,7 +16,6 @@ import {
 import { Server } from 'socket.io';
 import { ValidateUserIsJoiningPipe } from '../pipes/validate-user-is-joining.pipe';
 import { RoomSocket } from '../interfaces/room-socket.interface';
-import { PeerJsService } from './peer-js.service';
 
 @UseFilters(ConversationEventsFilter)
 @WebSocketGateway(3001, {
@@ -28,12 +27,9 @@ import { PeerJsService } from './peer-js.service';
   },
 })
 export class PeerJsGateway {
-  constructor(
-    @Inject(forwardRef(() => PeerJsService))
-    private peerJsService: PeerJsService,
-  ) {}
+  constructor() {}
   @WebSocketServer() server: Server;
-  logger: Logger = new Logger('RoomEventGateway');
+  logger: Logger = new Logger('PeerJsEventGateway');
 
   @UsePipes(ValidateUserIsJoiningPipe)
   @SubscribeMessage('share-peer-id')
@@ -41,7 +37,19 @@ export class PeerJsGateway {
     @ConnectedSocket() client: RoomSocket,
     @MessageBody() { peerId }: { peerId: string },
   ) {
-    this.peerJsService.sharePeerIdHandler(client, peerId);
+    const room = client.room;
+    client.peerId = peerId;
+    this.logger.log(
+      `${room.uuid}에 ${client.user.name}의 peer Id ${peerId}를 공유합니다.`,
+    );
+    this.server.to(room.uuid).emit('new-peer-id', {
+      message: '화면 공유 요청이 왔습니다.',
+      data: {
+        email: client.user.email,
+        peerId: peerId,
+      },
+    });
+
     return {
       sucess: true,
       message: 'Peer Id를 등록했습니다.',
