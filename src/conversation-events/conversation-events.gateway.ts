@@ -87,59 +87,9 @@ export class ConversationEventsGateway
     this.logger.log(
       `${client.user.name}이 다음 상태에서 종료: ${client.status}`,
     );
-    // TODO: type에 따라서 방의 상태도 바꾸기
-    const room: Room = client.room;
-    const user: User = client.user;
-    if (client.status == SocketStatus.CREATOR) {
-      room.creatorSocket = undefined;
-      room.status = RoomStatus.CLOSING;
-      room.finishedAt = new Date();
-
-      room.watingSockets.forEach((socket) => {
-        socket.emit('invite-rejected', {
-          message: '초대 요청이 거절되었습니다',
-        });
-        socket.disconnect(true);
-      });
-
-      room.watingSockets = [];
-
-      this.server.to(room.uuid).emit('uesr-disconnected', {
-        message: '상대방이 나갔습니다',
-        data: {
-          name: user.name,
-          email: user.email,
-          peerId: client.peerId,
-        },
-      });
-      this.server.to(room.uuid).disconnectSockets(true);
-    } else if (client.status == SocketStatus.PARTICIPANT) {
-      room.participantSocket = undefined;
-      room.status = RoomStatus.CLOSING;
-
-      this.server.to(room.uuid).emit('uesr-disconnected', {
-        message: '상대방이 나갔습니다',
-        data: {
-          name: user.name,
-          email: user.email,
-          peerId: client.peerId,
-        },
-      });
-      this.server.to(room.uuid).disconnectSockets(true);
-    } else if (client.status == SocketStatus.WAITER) {
-      if (room.watingSockets.length == 0) {
-        return;
-      }
-      const indexToRemove = room.watingSockets.findIndex(
-        (socket) => socket.user.pk == user.pk,
-      );
-      if (indexToRemove == -1) {
-        this.logger.error(
-          `WAITER가 disconnect되기 전에 목록에서 사라짐 ${user.name} in ${room.uuid}`,
-        );
-        return;
-      }
-      room.watingSockets.splice(indexToRemove);
-    }
+    await this.conversationEventsService.setClientDisconnect(
+      this.server,
+      client,
+    );
   }
 }
