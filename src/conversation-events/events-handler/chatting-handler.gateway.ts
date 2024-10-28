@@ -26,12 +26,15 @@ export class ChattingHandlerGateway {
   handleMessage(
     @ConnectedSocket() client: RoomSocket,
     @MessageBody() message: any,
+    callback: Function,
   ) {
     // TODO :채팅이 끝나면 저장하는 기능
     this.handleChattingMessage(client, message);
     this.loggingMessage(client, message);
     const return_msg = this.messageDto(client, message);
+    console.log(return_msg);
 
+    callback(return_msg);
     return return_msg;
   }
   async handleChattingMessage(client: RoomSocket, message: any) {
