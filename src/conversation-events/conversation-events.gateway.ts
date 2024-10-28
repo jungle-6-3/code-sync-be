@@ -48,18 +48,18 @@ export class ConversationEventsGateway
   @WebSocketServer() server: Server;
   logger: Logger = new Logger('RoomEventGateway');
 
-  @UsePipes(ValidateUserIsJoiningPipe)
-  @SubscribeMessage('share-peer-id')
-  async handleSubscribeMessage(
-    @ConnectedSocket() client: RoomSocket,
-    @MessageBody() { peerId }: { peerId: string },
-  ) {
-    this.peerJsService.sharePeerIdHandler(client, peerId);
-    return {
-      sucess: true,
-      message: 'Peer Id를 등록했습니다.',
-    };
-  }
+  // @UsePipes(ValidateUserIsJoiningPipe)
+  // @SubscribeMessage('share-peer-id')
+  // async handleSubscribeMessage(
+  //   @ConnectedSocket() client: RoomSocket,
+  //   @MessageBody() { peerId }: { peerId: string },
+  // ) {
+  //   this.peerJsService.sharePeerIdHandler(client, peerId);
+  //   return {
+  //     sucess: true,
+  //     message: 'Peer Id를 등록했습니다.',
+  //   };
+  // }
 
   @UsePipes(ValidateUserIsCreatorPipe)
   @SubscribeMessage('invite-user')
