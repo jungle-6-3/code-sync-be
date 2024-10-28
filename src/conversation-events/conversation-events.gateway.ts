@@ -58,25 +58,7 @@ export class ConversationEventsGateway
     let room: Room;
     try {
       ({ user, room } = await this.getUserAndRoom(client.handshake));
-      const beforeSocket = await this.roomsService.findRoomSocket(room, user);
-      // 다시 참여하는 경우
-      if (beforeSocket) {
-        copyFromBeforeSocket(beforeSocket, client);
-        disconnectBeforeSocket(beforeSocket);
-      }
-      // 방장이 입장하지 않은 방인 경우
-      else if (room.status == RoomStatus.WATING) {
-        if (room.creatorPk != user.pk) {
-          throw new Error('방장이 입장하지 않습니다.');
-        }
-        client.status = SocketStatus.CREATOR;
-      }
-      // 방장이 입장한 방인 경우
-      else if (room.status == RoomStatus.INVITING) {
-        client.status = SocketStatus.WAITER;
-      } else {
-        throw new Error(`이미 개최중이거나 종료중인 방입니다: ${room.status}`);
-      }
+      await this.setClientStatus(client, user, room);
     } catch (error) {
       // socket 연결에 실패하는 경우
       this.logger.log(
@@ -154,6 +136,32 @@ export class ConversationEventsGateway
         return;
       }
       room.watingSockets.splice(indexToRemove);
+    }
+  }
+
+  private async setClientStatus(client: RoomSocket, user: User, room: Room) {
+    const beforeSocket = await this.roomsService.findRoomSocket(room, user);
+    // 이전 연결을 유지한 채로 다시 참여하는 경우
+    if (beforeSocket) {
+      copyFromBeforeSocket(beforeSocket, client);
+      disconnectBeforeSocket(beforeSocket);
+      return;
+    }
+    //TODO: 이전 연결이 끊긴 채로 다시 참여하는 경우
+    switch (room.status) {
+      // 방장이 입장하지 않은 방인 경우
+      case RoomStatus.WATING:
+        if (room.creatorPk != user.pk) {
+          throw new Error('방장이 입장하지 않습니다.');
+        }
+        client.status = SocketStatus.CREATOR;
+        break;
+      // 방장이 초대 중인 경우
+      case RoomStatus.INVITING:
+        client.status = SocketStatus.WAITER;
+        break;
+      default:
+        throw new Error(`이미 개최중이거나 종료중인 방입니다: ${room.status}`);
     }
   }
 
