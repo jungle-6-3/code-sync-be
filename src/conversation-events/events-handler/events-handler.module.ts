@@ -5,6 +5,7 @@ import { ConversationEventsModule } from '../conversation-events.module';
 import { AuthModule } from 'src/auth/auth.module';
 import { UsersModule } from 'src/users/users.module';
 import { RoomsModule } from 'src/rooms/rooms.module';
+import { PeerJsGateway } from './peer-js.gateway';
 
 @Module({
   imports: [
@@ -13,7 +14,7 @@ import { RoomsModule } from 'src/rooms/rooms.module';
     UsersModule,
     RoomsModule,
   ],
-  providers: [RoomService, PeerJsService],
+  providers: [RoomService, PeerJsService, PeerJsGateway],
   exports: [RoomService, PeerJsService],
 })
 export class EventsHandlerModule {}
