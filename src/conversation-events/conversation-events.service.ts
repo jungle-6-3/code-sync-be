@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import {
   copyFromBeforeSocket,
+  disconenctRoomSocket,
   disconnectBeforeSocket,
   RoomSocket,
   SocketStatus,
@@ -156,10 +157,7 @@ export class ConversationEventsService {
         room.finishedAt = new Date();
 
         room.watingSockets.forEach((socket) => {
-          socket.emit('invite-rejected', {
-            message: '초대 요청이 거절되었습니다',
-          });
-          socket.disconnect(true);
+          disconenctRoomSocket(socket);
         });
 
         room.watingSockets = [];
@@ -172,6 +170,7 @@ export class ConversationEventsService {
             peerId: client.peerId,
           },
         });
+        // TODO: change this part
         server.to(room.uuid).disconnectSockets(true);
         break;
       case SocketStatus.PARTICIPANT:

@@ -10,7 +10,12 @@ import {
 import { ConversationEventsFilter } from '../conversation-events.filter';
 import { Logger, UseFilters, UsePipes } from '@nestjs/common';
 import { ValidateUserIsCreatorPipe } from '../pipes/validate-user-is-creator.pipe';
-import { RoomSocket, SocketStatus } from '../interfaces/room-socket.interface';
+import {
+  disconenctRoomSocket,
+  disconnectBeforeSocket,
+  RoomSocket,
+  SocketStatus,
+} from '../interfaces/room-socket.interface';
 import { RoomStatus } from 'src/rooms/room';
 import { Server } from 'socket.io';
 import { SocketInformation } from '../interfaces/socket-information.interface';
@@ -51,15 +56,12 @@ export class RoomGateway implements OnGatewayInit {
     const disconnectSockets: RoomSocket[] = [];
     room.watingSockets.forEach((socket) => {
       if (socket != participantSocket) {
-        socket.emit('invite-rejected', {
-          message: '초대 요청이 거절되었습니다',
-        });
         disconnectSockets.push(socket);
       }
     });
     room.watingSockets = [];
     disconnectSockets.forEach((socket) => {
-      socket.disconnect(true);
+      disconnectBeforeSocket(socket);
     });
 
     participantSocket.status = SocketStatus.PARTICIPANT;
@@ -92,10 +94,7 @@ export class RoomGateway implements OnGatewayInit {
     if (!rejectedSocket) {
       throw new WsException('email에 해당되는 participant를 못 찾겠어요');
     }
-    rejectedSocket.emit('invite-rejected', {
-      message: '초대 요청이 거절되었습니다.',
-    });
-    rejectedSocket.disconnect(true);
+    disconenctRoomSocket(rejectedSocket);
 
     return {
       sucess: true,

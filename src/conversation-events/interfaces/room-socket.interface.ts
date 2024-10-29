@@ -39,11 +39,14 @@ export function disconnectBeforeSocket(beforeSocket: RoomSocket) {
   if (beforeSocket.status != SocketStatus.WAITER) {
     beforeSocket.status = SocketStatus.REFLASING;
   }
-  beforeSocket.disconnect(true);
+  disconenctRoomSocket(beforeSocket);
 }
 
 // server가 일방적으로 connection을 종료하는 경우
 export function disconenctRoomSocket(socket: RoomSocket) {
+  if (!socket) {
+    return;
+  }
   switch (socket.status) {
     case SocketStatus.WAITER:
       socket.emit('invite-rejected', {

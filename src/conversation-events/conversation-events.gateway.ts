@@ -8,7 +8,11 @@ import {
   WsException,
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
-import { initRoomSocket, RoomSocket } from './interfaces/room-socket.interface';
+import {
+  disconenctRoomSocket,
+  initRoomSocket,
+  RoomSocket,
+} from './interfaces/room-socket.interface';
 import {
   ConversationEventsFilter,
   ConversationException,
@@ -54,7 +58,7 @@ export class ConversationEventsGateway
       );
       this.logger.debug((error as Error).stack);
       client.emit('exception', error.message);
-      client.disconnect(true);
+      disconenctRoomSocket(client);
       return;
     }
     initRoomSocket(client, user, room);

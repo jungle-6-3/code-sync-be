@@ -2,7 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { Room, RoomStatus } from './room';
 import { v4 as _uuid } from 'uuid';
 import { User } from 'src/users/entities/user.entity';
-import { RoomSocket } from 'src/conversation-events/interfaces/room-socket.interface';
+import {
+  disconenctRoomSocket,
+  RoomSocket,
+} from 'src/conversation-events/interfaces/room-socket.interface';
 import { SocketInformation } from 'src/conversation-events/interfaces/socket-information.interface';
 
 @Injectable()
@@ -69,14 +72,11 @@ export class RoomsService {
     room.clearTimeout();
 
     const { creatorSocket, participantSocket } = room;
-    room.status = RoomStatus.DELETED;
-    if (creatorSocket) {
-      creatorSocket.disconnect(true);
-    }
-    if (participantSocket) {
-      participantSocket.disconnect(true);
-    }
-    room.watingSockets.forEach((socket) => socket.disconnect(true));
+
+    disconenctRoomSocket(creatorSocket);
+    disconenctRoomSocket(participantSocket);
+
+    room.watingSockets.forEach((socket) => disconenctRoomSocket(socket));
     this.roomsById.delete(room.uuid);
 
     room = null;
@@ -86,14 +86,11 @@ export class RoomsService {
     room.clearTimeout();
 
     const { creatorSocket, participantSocket } = room;
-    room.status = RoomStatus.DELETED;
-    if (creatorSocket) {
-      creatorSocket.disconnect(true);
-    }
-    if (participantSocket) {
-      participantSocket.disconnect(true);
-    }
-    room.watingSockets.forEach((socket) => socket.disconnect(true));
+
+    disconenctRoomSocket(creatorSocket);
+    disconenctRoomSocket(participantSocket);
+
+    room.watingSockets.forEach((socket) => disconenctRoomSocket(socket));
 
     this.deleteRoomAfter(room, 30);
   }
