@@ -37,10 +37,23 @@ export class RoomsService {
   }
 
   deleteRoomAfter(room: Room, minute: number) {
+    if (room.globalTimeoutId) {
+      console.log('deleteRoomAfter 하기 전에 timeoutId가 설정 됨');
+    }
     room.globalTimeoutId = setTimeout(
       () => this.deleteRoom(room),
       minute * 60 * 1000,
-    ); // 30 min
+    );
+  }
+
+  closeRoomAfter(room: Room, minute: number) {
+    if (room.globalTimeoutId) {
+      console.log('closeRoomAfter 하기 전에 timeoutId가 설정 됨');
+    }
+    room.globalTimeoutId = setTimeout(
+      () => this.closeRoom(room),
+      minute * 60 * 1000,
+    );
   }
 
   async findRoomSocket(room: Room, user: User): Promise<RoomSocket> {
@@ -71,6 +84,23 @@ export class RoomsService {
     this.roomsById.delete(room.uuid);
 
     room = null;
+  }
+
+  async closeRoom(room: Room) {
+    room.clearTimeout();
+
+    const { creatorSocket, participantSocket } = room;
+    room.status = RoomStatus.DELETED;
+    if (creatorSocket) {
+      creatorSocket.disconnect(true);
+    }
+    if (participantSocket) {
+      participantSocket.disconnect(true);
+    }
+    room.watingSockets.forEach((socket) => socket.disconnect(true));
+    this.roomsById.delete(room.uuid);
+
+    this.deleteRoomAfter(room, 30);
   }
 
   setInformationTimeoutId(socketInformation: SocketInformation) {
