@@ -16,7 +16,7 @@ export class RoomsService {
   async createRoom(creator: User, prUrl: string): Promise<string> {
     const roomUuid = _uuid();
     const newRoom = new Room(roomUuid, creator, prUrl);
-    this.setRoom(newRoom, roomUuid);
+    this.roomsById.set(roomUuid, newRoom);
     this.deleteRoomAfter(newRoom, 30);
     return roomUuid;
   }
@@ -30,10 +30,6 @@ export class RoomsService {
 
   async findRoombyUuid(uuid: string): Promise<Room> {
     return this.roomsById.get(uuid);
-  }
-
-  async setRoom(room: Room, uuid: string) {
-    this.roomsById.set(uuid, room);
   }
 
   deleteRoomAfter(room: Room, minute: number) {
