@@ -63,6 +63,7 @@ export class RoomGateway implements OnGatewayInit {
     participantSocket.status = SocketStatus.PARTICIPANT;
     participantSocket.join(room.uuid);
     room.participantSocket = participantSocket;
+    room.participantPk = participantSocket.user.pk;
     room.status = RoomStatus.RUNNING;
     room.clearTimeout();
     this.logger.log(`Now ${room.uuid} room is Running`);

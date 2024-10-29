@@ -19,6 +19,8 @@ export class Room {
 
   creatorPk: number;
 
+  participantPk: number;
+
   creatorSocket: RoomSocket;
 
   participantSocket: RoomSocket;
