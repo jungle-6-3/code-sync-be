@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Conversation } from 'src/conversations/entities/conversation.entity';
+import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class ConversationDatas {
@@ -28,4 +29,10 @@ export class ConversationDatas {
 
   @Column()
   shareUuid: boolean;
+
+  @OneToOne(
+    (type) => Conversation,
+    (conversation) => conversation.conversationDatas,
+  )
+  conversation: Conversation;
 }
