@@ -48,15 +48,19 @@ export class RoomGateway implements OnGatewayInit {
     if (!participantSocket) {
       throw new WsException('email에 해당되는 participant를 못 찾겠어요');
     }
+    const disconnectSockets: RoomSocket[] = [];
     room.watingSockets.forEach((socket) => {
       if (socket != participantSocket) {
         socket.emit('invite-rejected', {
           message: '초대 요청이 거절되었습니다',
         });
-        socket.disconnect(true);
+        disconnectSockets.push(socket);
       }
     });
     room.watingSockets = [];
+    disconnectSockets.forEach((socket) => {
+      socket.disconnect(true);
+    });
 
     participantSocket.status = SocketStatus.PARTICIPANT;
     participantSocket.join(room.uuid);
