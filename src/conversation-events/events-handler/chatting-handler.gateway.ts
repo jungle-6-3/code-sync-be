@@ -9,6 +9,7 @@ import {
 import { RoomSocket } from '../interfaces/room-socket.interface';
 import { Server } from 'socket.io';
 import { CreateMessage } from '../dto/create-message';
+import { Logger } from '@nestjs/common';
 
 @WebSocketGateway(3001, {
   cors: {
@@ -18,9 +19,15 @@ import { CreateMessage } from '../dto/create-message';
     transports: ['polling', 'websocket'],
   },
 })
-export class ChattingHandlerGateway {
+export class ChattingHandlerGateway implements OnGatewayInit {
   @WebSocketServer()
   server: Server;
+
+  logger = new Logger('ChattingEventGateway');
+
+  afterInit(server: Server) {
+    this.logger.log('Initalize Chatting Gateway Done');
+  }
 
   @SubscribeMessage('chatting')
   handleMessage(
