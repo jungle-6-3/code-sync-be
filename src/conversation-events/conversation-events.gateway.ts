@@ -9,17 +9,14 @@ import {
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
 import {
+  disconenctRoomSocket,
   initRoomSocket,
   RoomSocket,
-  SocketStatus,
 } from './interfaces/room-socket.interface';
 import {
   ConversationEventsFilter,
   ConversationException,
 } from './conversation-events.filter';
-import { AuthService } from 'src/auth/auth.service';
-import { UsersService } from 'src/users/users.service';
-import { RoomsService } from 'src/rooms/rooms.service';
 import { User } from 'src/users/entities/user.entity';
 import { Room } from 'src/rooms/room';
 import { ConversationEventsService } from './conversation-events.service';
@@ -36,12 +33,7 @@ import { ConversationEventsService } from './conversation-events.service';
 export class ConversationEventsGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
-  constructor(
-    private authService: AuthService,
-    private usersService: UsersService,
-    private roomsService: RoomsService,
-    private conversationEventsService: ConversationEventsService,
-  ) {}
+  constructor(private conversationEventsService: ConversationEventsService) {}
 
   @WebSocketServer() server: Server;
   logger: Logger = new Logger('ConnectionAndDisconnectionEventGateway');
@@ -66,7 +58,7 @@ export class ConversationEventsGateway
       );
       this.logger.debug((error as Error).stack);
       client.emit('exception', error.message);
-      client.disconnect(true);
+      disconenctRoomSocket(client);
       return;
     }
     initRoomSocket(client, user, room);
@@ -87,6 +79,7 @@ export class ConversationEventsGateway
     this.logger.log(
       `${client.user.name}이 다음 상태에서 종료: ${client.status}`,
     );
+    this.logger.log(`${client.room.uuid}에 속한 상태: ${client.room.status}`);
     await this.conversationEventsService.setClientDisconnect(
       this.server,
       client,

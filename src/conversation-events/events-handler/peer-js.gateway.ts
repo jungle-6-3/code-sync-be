@@ -7,13 +7,7 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { ConversationEventsFilter } from '../conversation-events.filter';
-import {
-  forwardRef,
-  Inject,
-  Logger,
-  UseFilters,
-  UsePipes,
-} from '@nestjs/common';
+import { Logger, UseFilters, UsePipes } from '@nestjs/common';
 import { Server } from 'socket.io';
 import { ValidateUserIsJoiningPipe } from '../pipes/validate-user-is-joining.pipe';
 import { RoomSocket } from '../interfaces/room-socket.interface';

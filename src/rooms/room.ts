@@ -2,6 +2,9 @@ import { SocketInformation } from 'src/conversation-events/interfaces/socket-inf
 import { ChatData } from 'src/conversation-datas/data/chatting';
 import { RoomSocket } from 'src/conversation-events/interfaces/room-socket.interface';
 import { User } from 'src/users/entities/user.entity';
+import { Logger } from '@nestjs/common';
+
+export const logger = new Logger('Room');
 
 export enum RoomStatus {
   WATING = 'Wating',
@@ -10,7 +13,6 @@ export enum RoomStatus {
   CREATOR_OUT = 'CreatorOut',
   PARTICIPANT_OUT = 'ParticipantOut',
   CLOSING = 'Closing',
-  DELETED = 'Deleted',
 }
 
 export class Room {
@@ -19,6 +21,8 @@ export class Room {
   status: RoomStatus;
 
   creatorPk: number;
+
+  participantPk: number;
 
   creatorSocket: RoomSocket;
 
@@ -34,9 +38,7 @@ export class Room {
 
   globalTimeoutId: NodeJS.Timeout;
 
-  creatorInformation: SocketInformation;
-
-  participantInformation: SocketInformation;
+  outSocketInformation: SocketInformation;
 
   // TODO: data의 타입이 정해지면 수정 해야함
   data: RoomData;
@@ -54,13 +56,10 @@ export class Room {
   }
 
   clearTimeout() {
+    logger.log(`${this.uuid}의 timeout이 제거되었습니다.`);
     clearTimeout(this.globalTimeoutId);
-    this.creatorInformation.clearTimeout();
-    this.participantInformation.clearTimeout();
-
     this.globalTimeoutId = undefined;
-    this.creatorInformation.timeoutId = undefined;
-    this.participantInformation.timeoutId = undefined;
+    this.outSocketInformation?.clearTimeout();
   }
   // TODO: 데이터 넣는 로직 추가.
 }

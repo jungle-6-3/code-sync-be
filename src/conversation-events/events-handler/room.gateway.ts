@@ -10,10 +10,15 @@ import {
 import { ConversationEventsFilter } from '../conversation-events.filter';
 import { Logger, UseFilters, UsePipes } from '@nestjs/common';
 import { ValidateUserIsCreatorPipe } from '../pipes/validate-user-is-creator.pipe';
-import { RoomSocket, SocketStatus } from '../interfaces/room-socket.interface';
-import { RoomStatus } from 'src/rooms/room';
+import {
+  disconenctRoomSocket,
+  disconnectBeforeSocket,
+  RoomSocket,
+  SocketStatus,
+} from '../interfaces/room-socket.interface';
+import { Room, RoomStatus } from 'src/rooms/room';
 import { Server } from 'socket.io';
-import { SocketInformation } from '../interfaces/socket-information.interface';
+import { RoomsService } from 'src/rooms/rooms.service';
 
 @UseFilters(ConversationEventsFilter)
 @WebSocketGateway(3001, {
@@ -25,7 +30,7 @@ import { SocketInformation } from '../interfaces/socket-information.interface';
   },
 })
 export class RoomGateway implements OnGatewayInit {
-  constructor() {}
+  constructor(private roomsService: RoomsService) {}
 
   @WebSocketServer() server: Server;
   logger = new Logger('RoomEventGateway');
@@ -40,7 +45,7 @@ export class RoomGateway implements OnGatewayInit {
     @ConnectedSocket() client: RoomSocket,
     @MessageBody() { email }: { email: string },
   ) {
-    const room = client.room;
+    const room: Room = client.room;
 
     const participantSocket: RoomSocket = room.watingSockets.find(
       (socket) => socket.user.email == email,
@@ -48,29 +53,26 @@ export class RoomGateway implements OnGatewayInit {
     if (!participantSocket) {
       throw new WsException('email에 해당되는 participant를 못 찾겠어요');
     }
-    room.watingSockets.forEach((socket) => {
+    const disconnectSockets: RoomSocket[] = room.watingSockets;
+    room.watingSockets = [];
+    disconnectSockets.forEach((socket) => {
       if (socket != participantSocket) {
-        socket.emit('invite-rejected', {
-          message: '초대 요청이 거절되었습니다',
-        });
-        socket.disconnect(true);
+        disconnectBeforeSocket(socket);
       }
     });
-    room.watingSockets = [];
 
     participantSocket.status = SocketStatus.PARTICIPANT;
     participantSocket.join(room.uuid);
     room.participantSocket = participantSocket;
-
-    room.creatorInformation = new SocketInformation(room.creatorSocket);
-    room.participantInformation = new SocketInformation(room.participantSocket);
+    room.participantPk = participantSocket.user.pk;
+    room.status = RoomStatus.RUNNING;
+    room.clearTimeout();
+    this.logger.log(`초대로 인해 ${room.uuid}의 상태가 Running이 되었습니다.`);
 
     participantSocket.emit('invite-accepted', {
       message: '대화를 시작합니다.',
+      prUrl: room.prUrl,
     });
-
-    this.logger.log(`Now ${room.uuid} room is Running`);
-    room.status = RoomStatus.RUNNING;
 
     return {
       sucess: true,
@@ -91,14 +93,19 @@ export class RoomGateway implements OnGatewayInit {
     if (!rejectedSocket) {
       throw new WsException('email에 해당되는 participant를 못 찾겠어요');
     }
-    rejectedSocket.emit('invite-rejected', {
-      message: '초대 요청이 거절되었습니다.',
-    });
-    rejectedSocket.disconnect(true);
+    disconenctRoomSocket(rejectedSocket);
 
     return {
       sucess: true,
       message: '참가 요청을 거절했습니다.',
     };
+  }
+
+  @UsePipes(ValidateUserIsCreatorPipe)
+  @SubscribeMessage('close-room')
+  async handleCloseRoom(@ConnectedSocket() client: RoomSocket) {
+    const room = client.room;
+    await this.roomsService.closeRoom(room);
+    return;
   }
 }

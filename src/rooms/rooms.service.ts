@@ -1,13 +1,17 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Room, RoomStatus } from './room';
 import { v4 as _uuid } from 'uuid';
 import { User } from 'src/users/entities/user.entity';
-import { RoomSocket } from 'src/conversation-events/interfaces/room-socket.interface';
+import {
+  disconenctRoomSocket,
+  RoomSocket,
+} from 'src/conversation-events/interfaces/room-socket.interface';
 import { SocketInformation } from 'src/conversation-events/interfaces/socket-information.interface';
 
 @Injectable()
 export class RoomsService {
   private roomsById: Map<string, Room>;
+  logger: Logger = new Logger('RoomsService');
 
   constructor() {
     this.roomsById = new Map();
@@ -16,16 +20,15 @@ export class RoomsService {
   async createRoom(creator: User, prUrl: string): Promise<string> {
     const roomUuid = _uuid();
     const newRoom = new Room(roomUuid, creator, prUrl);
-    this.setRoom(newRoom, roomUuid);
-    newRoom.globalTimeoutId = setTimeout(
-      () => this.deleteRoom(newRoom),
-      3600000,
-    ); // 1hour
+    this.roomsById.set(roomUuid, newRoom);
+    this.deleteRoomAfter(newRoom, 30);
+    this.logger.log(`${creator.name}가 ${roomUuid}를 생성`);
     return roomUuid;
   }
 
   // TODO: room 내용을 저장하는 행위를 해야함.
   async saveRoom(room: Room, creator: User): Promise<boolean> {
+    this.logger.log(`${creator.name}가 ${room.uuid}를 저장`);
     // 저장하는 행위....
     this.deleteRoom(room);
     return true;
@@ -35,8 +38,29 @@ export class RoomsService {
     return this.roomsById.get(uuid);
   }
 
-  async setRoom(room: Room, uuid: string) {
-    this.roomsById.set(uuid, room);
+  deleteRoomAfter(room: Room, minute: number) {
+    this.logger.log(`${room.uuid}가 ${minute} 후에 삭제`);
+    if (room.globalTimeoutId) {
+      this.logger.error(
+        `deleteRoomAfter 하기 전에 timeoutId가 설정 됨: ${room.uuid}`,
+      );
+    }
+    room.globalTimeoutId = setTimeout(
+      () => this.deleteRoom(room),
+      minute * 60 * 1000,
+    );
+  }
+
+  closeRoomAfter(room: Room, client: RoomSocket, minute: number) {
+    room.clearTimeout();
+
+    this.logger.log(`${room.uuid}가 ${minute} 후에 닫힘`);
+    room.outSocketInformation = new SocketInformation(client);
+
+    room.outSocketInformation.timeoutId = setTimeout(
+      () => this.closeRoom(room),
+      minute * 60 * 1000,
+    );
   }
 
   async findRoomSocket(room: Room, user: User): Promise<RoomSocket> {
@@ -55,23 +79,32 @@ export class RoomsService {
   async deleteRoom(room: Room) {
     room.clearTimeout();
 
+    this.logger.log(`${room.uuid}가 삭제됨`);
     const { creatorSocket, participantSocket } = room;
-    room.status = RoomStatus.DELETED;
-    if (creatorSocket) {
-      creatorSocket.disconnect(true);
-    }
-    if (participantSocket) {
-      participantSocket.disconnect(true);
-    }
-    room.watingSockets.forEach((socket) => socket.disconnect(true));
+
+    disconenctRoomSocket(creatorSocket);
+    disconenctRoomSocket(participantSocket);
+
+    room.watingSockets.forEach((socket) => disconenctRoomSocket(socket));
     this.roomsById.delete(room.uuid);
 
     room = null;
   }
 
-  setInformationTimeoutId(socketInformation: SocketInformation) {
-    socketInformation.timeoutId = setTimeout(() =>
-      this.deleteRoom(socketInformation.room),
-    );
+  async closeRoom(room: Room) {
+    room.clearTimeout();
+
+    this.logger.log(`${room.uuid}가 닫힘`);
+    room.status = RoomStatus.CLOSING;
+    room.finishedAt = new Date();
+
+    const { creatorSocket, participantSocket } = room;
+
+    disconenctRoomSocket(creatorSocket);
+    disconenctRoomSocket(participantSocket);
+
+    room.watingSockets.forEach((socket) => disconenctRoomSocket(socket));
+
+    this.deleteRoomAfter(room, 30);
   }
 }

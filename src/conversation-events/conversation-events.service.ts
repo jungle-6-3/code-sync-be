@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import {
   copyFromBeforeSocket,
+  disconenctRoomSocket,
   disconnectBeforeSocket,
   RoomSocket,
   SocketStatus,
@@ -10,7 +11,6 @@ import { Room, RoomStatus } from 'src/rooms/room';
 import { AuthService } from 'src/auth/auth.service';
 import { UsersService } from 'src/users/users.service';
 import { RoomsService } from 'src/rooms/rooms.service';
-import { SocketInformation } from './interfaces/socket-information.interface';
 import { Handshake } from 'socket.io/dist/socket-types';
 import { JwtPayloadDto } from 'src/auth/dto/jwt-payload';
 import { WsException } from '@nestjs/websockets';
@@ -45,22 +45,17 @@ export class ConversationEventsService {
       case RoomStatus.INVITING:
         client.status = SocketStatus.WAITER;
         break;
+      // Running인 방에서 나간 사람이 돌아온 경우
       case RoomStatus.CREATOR_OUT:
       case RoomStatus.PARTICIPANT_OUT:
-        let beforInformation: SocketInformation;
-        if (room.status == RoomStatus.CREATOR_OUT) {
-          beforInformation = room.creatorInformation;
-        } else {
-          beforInformation = room.participantInformation;
-        }
-
-        if (beforInformation.userPk != user.pk) {
+        if (room.outSocketInformation?.userPk != user.pk) {
           throw new Error(
             `이미 개최중이거나 종료중인 방입니다: ${room.status}`,
           );
         }
-        beforInformation.clearTimeout();
-        beforInformation.setSocket(client);
+        room.outSocketInformation.clearTimeout();
+        room.outSocketInformation.setSocket(client);
+        room.outSocketInformation = undefined;
         room.status = RoomStatus.RUNNING;
         break;
       default:
@@ -132,7 +127,6 @@ export class ConversationEventsService {
   }
 
   async setClientDisconnect(server: Server, client: RoomSocket) {
-    // TODO: type에 따라서 방의 상태도 바꾸기
     const room: Room = client.room;
     const user: User = client.user;
     switch (client.status) {
@@ -158,31 +152,65 @@ export class ConversationEventsService {
         break;
       case SocketStatus.CREATOR:
         room.creatorSocket = undefined;
-        room.status = RoomStatus.CLOSING;
-        room.finishedAt = new Date();
-
-        room.watingSockets.forEach((socket) => {
-          socket.emit('invite-rejected', {
-            message: '초대 요청이 거절되었습니다',
-          });
-          socket.disconnect(true);
-        });
-
-        room.watingSockets = [];
-
-        server.to(room.uuid).emit('uesr-disconnected', {
-          message: '상대방이 나갔습니다',
-          data: {
-            name: user.name,
-            email: user.email,
-            peerId: client.peerId,
-          },
-        });
-        server.to(room.uuid).disconnectSockets(true);
+        switch (room.status) {
+          case RoomStatus.WATING:
+          case RoomStatus.INVITING:
+            this.roomsService.deleteRoom(room);
+            break;
+          case RoomStatus.PARTICIPANT_OUT:
+            this.roomsService.closeRoom(room);
+            break;
+          case RoomStatus.RUNNING:
+            room.status = RoomStatus.CREATOR_OUT;
+            this.roomsService.closeRoomAfter(room, client, 5);
+            server.to(room.uuid).emit('uesr-disconnected', {
+              message: '상대방이 나갔습니다',
+              data: {
+                name: user.name,
+                email: user.email,
+                peerId: client.peerId,
+              },
+            });
+            break;
+          case RoomStatus.CLOSING:
+            break;
+          default:
+            this.logger.error(
+              `${client.user.name}이 creator로 나가는데 방의 status가 ${room.status}`,
+            );
+            break;
+        }
         break;
       case SocketStatus.PARTICIPANT:
+        room.participantSocket = undefined;
+        switch (room.status) {
+          case RoomStatus.CREATOR_OUT:
+            this.roomsService.closeRoom(room);
+            break;
+          case RoomStatus.RUNNING:
+            room.status = RoomStatus.PARTICIPANT_OUT;
+            this.roomsService.closeRoomAfter(room, client, 5);
+            server.to(room.uuid).emit('uesr-disconnected', {
+              message: '상대방이 나갔습니다',
+              data: {
+                name: user.name,
+                email: user.email,
+                peerId: client.peerId,
+              },
+            });
+            break;
+          case RoomStatus.CLOSING:
+            break;
+          default:
+            this.logger.error(
+              `${client.user.name}이 participant 나가는데 방의 status가 ${room.status}`,
+            );
+            break;
+        }
+        break;
       default:
-        throw new WsException('머임?');
+        throw new WsException(`disconnect 과정에서 예상 못 한 case\
+          ${client.user.name}: ${client.status}, ${room.uuid}: ${room.status}`);
     }
   }
 }
