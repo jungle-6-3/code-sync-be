@@ -26,5 +26,6 @@ export class ChatData {
 interface chat {
   date: string;
   name: string;
-  content: string;
+  email: string;
+  message: string;
 }
