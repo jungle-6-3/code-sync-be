@@ -11,7 +11,6 @@ import { Room, RoomStatus } from 'src/rooms/room';
 import { AuthService } from 'src/auth/auth.service';
 import { UsersService } from 'src/users/users.service';
 import { RoomsService } from 'src/rooms/rooms.service';
-import { SocketInformation } from './interfaces/socket-information.interface';
 import { Handshake } from 'socket.io/dist/socket-types';
 import { JwtPayloadDto } from 'src/auth/dto/jwt-payload';
 import { WsException } from '@nestjs/websockets';

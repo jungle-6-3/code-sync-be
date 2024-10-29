@@ -18,7 +18,6 @@ import {
 } from '../interfaces/room-socket.interface';
 import { Room, RoomStatus } from 'src/rooms/room';
 import { Server } from 'socket.io';
-import { SocketInformation } from '../interfaces/socket-information.interface';
 
 @UseFilters(ConversationEventsFilter)
 @WebSocketGateway(3001, {
