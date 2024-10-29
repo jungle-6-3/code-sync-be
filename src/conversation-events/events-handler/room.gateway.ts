@@ -16,7 +16,7 @@ import {
   RoomSocket,
   SocketStatus,
 } from '../interfaces/room-socket.interface';
-import { RoomStatus } from 'src/rooms/room';
+import { Room, RoomStatus } from 'src/rooms/room';
 import { Server } from 'socket.io';
 import { SocketInformation } from '../interfaces/socket-information.interface';
 
@@ -45,7 +45,7 @@ export class RoomGateway implements OnGatewayInit {
     @ConnectedSocket() client: RoomSocket,
     @MessageBody() { email }: { email: string },
   ) {
-    const room = client.room;
+    const room: Room = client.room;
 
     const participantSocket: RoomSocket = room.watingSockets.find(
       (socket) => socket.user.email == email,
@@ -67,13 +67,14 @@ export class RoomGateway implements OnGatewayInit {
     participantSocket.status = SocketStatus.PARTICIPANT;
     participantSocket.join(room.uuid);
     room.participantSocket = participantSocket;
+    room.status = RoomStatus.RUNNING;
+    room.clearTimeout();
+    this.logger.log(`Now ${room.uuid} room is Running`);
 
     participantSocket.emit('invite-accepted', {
       message: '대화를 시작합니다.',
+      prUrl: room.prUrl,
     });
-
-    this.logger.log(`Now ${room.uuid} room is Running`);
-    room.status = RoomStatus.RUNNING;
 
     return {
       sucess: true,
