@@ -1,7 +1,9 @@
+import { Conversation } from 'src/conversations/entities/conversation.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   Unique,
 } from 'typeorm';
@@ -23,4 +25,10 @@ export class User {
 
   @CreateDateColumn()
   createAt: string;
+
+  @OneToMany((type) => Conversation, (conversation) => conversation.creator)
+  createConversations: Conversation[];
+
+  @OneToMany((type) => Conversation, (conversation) => conversation.participant)
+  particimentConversations: Conversation[];
 }
