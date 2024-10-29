@@ -1,6 +1,7 @@
 import {
   ConnectedSocket,
   MessageBody,
+  OnGatewayInit,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
@@ -9,6 +10,7 @@ import {
 import { RoomSocket } from '../interfaces/room-socket.interface';
 import { Server } from 'socket.io';
 import { CreateMessage } from '../dto/create-message';
+import { Logger } from '@nestjs/common';
 
 @WebSocketGateway(3001, {
   cors: {
@@ -18,19 +20,25 @@ import { CreateMessage } from '../dto/create-message';
     transports: ['polling', 'websocket'],
   },
 })
-export class ChattingHandlerGateway {
+export class ChattingHandlerGateway implements OnGatewayInit {
   @WebSocketServer()
   server: Server;
+
+  logger = new Logger('ChattingEventGateway');
+
+  afterInit(server: Server) {
+    this.logger.log('Initalize Chatting Gateway Done');
+  }
 
   @SubscribeMessage('chatting')
   handleMessage(
     @ConnectedSocket() client: RoomSocket,
     @MessageBody() message: any,
   ) {
-    // TODO :채팅이 끝나면 저장하는 기능
-    this.handleChattingMessage(client, message);
-    this.loggingMessage(client, message);
-    const return_msg = this.messageDto(client, message);
+    const msg = message.message;
+    this.handleChattingMessage(client, msg);
+    this.loggingMessage(client, msg);
+    const return_msg = this.messageDto(client, msg);
     console.log(return_msg);
 
     return return_msg;
@@ -39,7 +47,7 @@ export class ChattingHandlerGateway {
     console.log('message:', message);
     client.broadcast.to(client.room.uuid).emit('chatting', {
       email: client.user.email,
-      message: message.message,
+      message: message,
       date: this.createDate(),
     });
   }
@@ -54,9 +62,8 @@ export class ChattingHandlerGateway {
   messageDto(client: RoomSocket, message: string) {
     const time = this.createDate();
     const name = client.user.name;
-    const content = message;
 
-    const newMessage = new CreateMessage(time, name, content);
+    const newMessage = new CreateMessage(time, name, message);
     return newMessage;
   }
 
