@@ -41,7 +41,9 @@ export class RoomsService {
   deleteRoomAfter(room: Room, minute: number) {
     this.logger.log(`${room.uuid}가 ${minute} 후에 삭제`);
     if (room.globalTimeoutId) {
-      console.log('deleteRoomAfter 하기 전에 timeoutId가 설정 됨');
+      this.logger.error(
+        `deleteRoomAfter 하기 전에 timeoutId가 설정 됨: ${room.uuid}`,
+      );
     }
     room.globalTimeoutId = setTimeout(
       () => this.deleteRoom(room),
@@ -90,8 +92,9 @@ export class RoomsService {
 
   async closeRoom(room: Room) {
     this.logger.log(`${room.uuid}가 닫힘`);
-    room.clearTimeout();
+    room.status = RoomStatus.CLOSING;
     room.finishedAt = new Date();
+    room.clearTimeout();
 
     const { creatorSocket, participantSocket } = room;
 
