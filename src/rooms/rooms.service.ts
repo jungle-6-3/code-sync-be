@@ -52,8 +52,9 @@ export class RoomsService {
   }
 
   closeRoomAfter(room: Room, client: RoomSocket, minute: number) {
-    this.logger.log(`${room.uuid}가 ${minute} 후에 닫힘`);
     room.clearTimeout();
+
+    this.logger.log(`${room.uuid}가 ${minute} 후에 닫힘`);
     room.outSocketInformation = new SocketInformation(client);
 
     room.outSocketInformation.timeoutId = setTimeout(
@@ -76,9 +77,9 @@ export class RoomsService {
   }
 
   async deleteRoom(room: Room) {
-    this.logger.log(`${room.uuid}가 삭제됨`);
     room.clearTimeout();
 
+    this.logger.log(`${room.uuid}가 삭제됨`);
     const { creatorSocket, participantSocket } = room;
 
     disconenctRoomSocket(creatorSocket);
@@ -91,10 +92,11 @@ export class RoomsService {
   }
 
   async closeRoom(room: Room) {
+    room.clearTimeout();
+
     this.logger.log(`${room.uuid}가 닫힘`);
     room.status = RoomStatus.CLOSING;
     room.finishedAt = new Date();
-    room.clearTimeout();
 
     const { creatorSocket, participantSocket } = room;
 

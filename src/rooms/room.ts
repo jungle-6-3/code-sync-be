@@ -2,6 +2,9 @@ import { SocketInformation } from 'src/conversation-events/interfaces/socket-inf
 import { ChatData } from 'src/conversation-datas/data/chatting';
 import { RoomSocket } from 'src/conversation-events/interfaces/room-socket.interface';
 import { User } from 'src/users/entities/user.entity';
+import { Logger } from '@nestjs/common';
+
+export const logger = new Logger('Room');
 
 export enum RoomStatus {
   WATING = 'Wating',
@@ -53,6 +56,7 @@ export class Room {
   }
 
   clearTimeout() {
+    logger.log(`${this.uuid}의 timeout이 제거되었습니다.`);
     clearTimeout(this.globalTimeoutId);
     this.globalTimeoutId = undefined;
     this.outSocketInformation?.clearTimeout();

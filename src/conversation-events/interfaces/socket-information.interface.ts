@@ -1,4 +1,4 @@
-import { Room } from 'src/rooms/room';
+import { logger } from 'src/rooms/room';
 import { RoomSocket, SocketStatus } from './room-socket.interface';
 
 //TODO: 여기 다른 것 추가해야하는지 front에게 묻기
@@ -15,6 +15,7 @@ export class SocketInformation {
   }
 
   clearTimeout() {
+    logger.log(`재진입으로 인한 timeout 제거`);
     if (this.timeoutId) {
       clearTimeout(this.timeoutId);
       this.timeoutId = undefined;
