@@ -93,10 +93,4 @@ export class RoomsService {
 
     this.deleteRoomAfter(room, 30);
   }
-
-  setInformationTimeoutId(socketInformation: SocketInformation) {
-    socketInformation.timeoutId = setTimeout(() =>
-      this.deleteRoom(socketInformation.room),
-    );
-  }
 }
