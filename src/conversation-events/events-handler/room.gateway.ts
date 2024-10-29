@@ -66,9 +66,6 @@ export class RoomGateway implements OnGatewayInit {
     participantSocket.join(room.uuid);
     room.participantSocket = participantSocket;
 
-    room.creatorInformation = new SocketInformation(room.creatorSocket);
-    room.participantInformation = new SocketInformation(room.participantSocket);
-
     participantSocket.emit('invite-accepted', {
       message: '대화를 시작합니다.',
     });
