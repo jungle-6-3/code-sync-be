@@ -5,11 +5,12 @@ import {
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
+  WsException,
 } from '@nestjs/websockets';
 
 import { RoomSocket } from '../interfaces/room-socket.interface';
 import { Server } from 'socket.io';
-import { CreateMessage } from '../dto/create-message';
+import { MessageResponseDto } from '../dto/message-response.dto';
 import { Logger } from '@nestjs/common';
 
 @WebSocketGateway(3001, {
@@ -35,49 +36,31 @@ export class ChattingHandlerGateway implements OnGatewayInit {
     @ConnectedSocket() client: RoomSocket,
     @MessageBody() message: any,
   ) {
+    if (
+      message == null ||
+      message == undefined ||
+      message.message == null ||
+      message.message == undefined
+    ) {
+      throw new WsException('메시지에 값이 없습니다.');
+    }
+
     const msg = message.message;
-    this.handleChattingMessage(client, msg);
-    this.loggingMessage(client, msg);
-    const return_msg = this.messageDto(client, msg);
+    const return_msg = new MessageResponseDto(
+      client.user.name,
+      msg,
+      client.user.email,
+    );
+    this.handleChattingMessage(client, return_msg);
+    this.loggingMessage(client, return_msg);
     console.log(return_msg);
 
     return return_msg;
   }
-  async handleChattingMessage(client: RoomSocket, message: any) {
-    console.log('message:', message);
-    client.broadcast.to(client.room.uuid).emit('chatting', {
-      email: client.user.email,
-      message: message,
-      date: this.createDate(),
-    });
+  async handleChattingMessage(client: RoomSocket, message: MessageResponseDto) {
+    client.broadcast.to(client.room.uuid).emit('chatting', message);
   }
-  // TODO: 메세지 로깅 구현 (시간, 발신자, 내용으로)
-  async loggingMessage(client: RoomSocket, message: string) {
-    const time = this.createDate();
-    const name = client.user.name;
-    const chat = { date: time, name, content: message };
-    client.room.data.chat.addChat(chat);
-  }
-
-  messageDto(client: RoomSocket, message: string) {
-    const time = this.createDate();
-    const name = client.user.name;
-
-    const newMessage = new CreateMessage(time, name, message);
-    return newMessage;
-  }
-
-  createDate() {
-    const now = new Date().toLocaleString('ko-KR', {
-      timeZone: 'Asia/Seoul',
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: false,
-    });
-    return now;
+  async loggingMessage(client: RoomSocket, message: MessageResponseDto) {
+    client.room.data.chat.addChat(message);
   }
 }
