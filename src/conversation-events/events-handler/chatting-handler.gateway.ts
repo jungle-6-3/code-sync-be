@@ -34,10 +34,10 @@ export class ChattingHandlerGateway implements OnGatewayInit {
     @ConnectedSocket() client: RoomSocket,
     @MessageBody() message: any,
   ) {
-    // TODO :채팅이 끝나면 저장하는 기능
-    this.handleChattingMessage(client, message);
-    this.loggingMessage(client, message);
-    const return_msg = this.messageDto(client, message);
+    const msg = message.message;
+    this.handleChattingMessage(client, msg);
+    this.loggingMessage(client, msg);
+    const return_msg = this.messageDto(client, msg);
     console.log(return_msg);
 
     return return_msg;
@@ -46,7 +46,7 @@ export class ChattingHandlerGateway implements OnGatewayInit {
     console.log('message:', message);
     client.broadcast.to(client.room.uuid).emit('chatting', {
       email: client.user.email,
-      message: message.message,
+      message: message,
       date: this.createDate(),
     });
   }
@@ -61,9 +61,8 @@ export class ChattingHandlerGateway implements OnGatewayInit {
   messageDto(client: RoomSocket, message: string) {
     const time = this.createDate();
     const name = client.user.name;
-    const content = message;
 
-    const newMessage = new CreateMessage(time, name, content);
+    const newMessage = new CreateMessage(time, name, message);
     return newMessage;
   }
 
