@@ -13,6 +13,7 @@ import { ValidateUserIsCreatorPipe } from '../pipes/validate-user-is-creator.pip
 import { RoomSocket, SocketStatus } from '../interfaces/room-socket.interface';
 import { RoomStatus } from 'src/rooms/room';
 import { Server } from 'socket.io';
+import { SocketInformation } from '../interfaces/socket-information.interface';
 
 @UseFilters(ConversationEventsFilter)
 @WebSocketGateway(3001, {
@@ -60,6 +61,10 @@ export class RoomGateway implements OnGatewayInit {
     participantSocket.status = SocketStatus.PARTICIPANT;
     participantSocket.join(room.uuid);
     room.participantSocket = participantSocket;
+
+    room.creatorInformation = new SocketInformation(room.creatorSocket);
+    room.participantInformation = new SocketInformation(room.participantSocket);
+
     participantSocket.emit('invite-accepted', {
       message: '대화를 시작합니다.',
     });

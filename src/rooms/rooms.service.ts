@@ -3,6 +3,7 @@ import { Room, RoomStatus } from './room';
 import { v4 as _uuid } from 'uuid';
 import { User } from 'src/users/entities/user.entity';
 import { RoomSocket } from 'src/conversation-events/interfaces/room-socket.interface';
+import { SocketInformation } from 'src/conversation-events/interfaces/socket-information.interface';
 
 @Injectable()
 export class RoomsService {
@@ -16,6 +17,10 @@ export class RoomsService {
     const roomUuid = _uuid();
     const newRoom = new Room(roomUuid, creator, prUrl);
     this.setRoom(newRoom, roomUuid);
+    newRoom.globalTimeoutId = setTimeout(
+      () => this.deleteRoom(newRoom),
+      3600000,
+    ); // 1hour
     return roomUuid;
   }
 
@@ -47,19 +52,26 @@ export class RoomsService {
     return sameWaitingUser;
   }
 
-  // TODO: 이거 나중에 수정해야 함
   async deleteRoom(room: Room) {
+    room.clearTimeout();
+
     const { creatorSocket, participantSocket } = room;
     room.status = RoomStatus.DELETED;
     if (creatorSocket) {
-      creatorSocket.disconnect();
+      creatorSocket.disconnect(true);
     }
     if (participantSocket) {
-      participantSocket.disconnect();
+      participantSocket.disconnect(true);
     }
-    // 경우에 따라서 waiter 처리도 해야함
+    room.watingSockets.forEach((socket) => socket.disconnect(true));
     this.roomsById.delete(room.uuid);
 
     room = null;
+  }
+
+  setInformationTimeoutId(socketInformation: SocketInformation) {
+    socketInformation.timeoutId = setTimeout(() =>
+      this.deleteRoom(socketInformation.room),
+    );
   }
 }

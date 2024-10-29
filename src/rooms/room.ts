@@ -1,3 +1,4 @@
+import { SocketInformation } from 'src/conversation-events/interfaces/socket-information.interface';
 import { ChatData } from 'src/conversation-datas/data/chatting';
 import { RoomSocket } from 'src/conversation-events/interfaces/room-socket.interface';
 import { User } from 'src/users/entities/user.entity';
@@ -6,8 +7,9 @@ export enum RoomStatus {
   WATING = 'Wating',
   INVITING = 'Inviting',
   RUNNING = 'Running',
-  CLOSING1 = 'Closing1',
-  CLOSING2 = 'Closing2',
+  CREATOR_OUT = 'CreatorOut',
+  PARTICIPANT_OUT = 'ParticipantOut',
+  CLOSING = 'Closing',
   DELETED = 'Deleted',
 }
 
@@ -30,6 +32,12 @@ export class Room {
 
   prUrl: string;
 
+  globalTimeoutId: NodeJS.Timeout;
+
+  creatorInformation: SocketInformation;
+
+  participantInformation: SocketInformation;
+
   // TODO: data의 타입이 정해지면 수정 해야함
   data: RoomData;
 
@@ -45,6 +53,15 @@ export class Room {
     };
   }
 
+  clearTimeout() {
+    clearTimeout(this.globalTimeoutId);
+    this.creatorInformation.clearTimeout();
+    this.participantInformation.clearTimeout();
+
+    this.globalTimeoutId = undefined;
+    this.creatorInformation.timeoutId = undefined;
+    this.participantInformation.timeoutId = undefined;
+  }
   // TODO: 데이터 넣는 로직 추가.
 }
 
