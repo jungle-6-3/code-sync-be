@@ -128,7 +128,6 @@ export class ConversationEventsService {
   }
 
   async setClientDisconnect(server: Server, client: RoomSocket) {
-    // TODO: type에 따라서 방의 상태도 바꾸기
     const room: Room = client.room;
     const user: User = client.user;
     switch (client.status) {
@@ -184,8 +183,35 @@ export class ConversationEventsService {
         }
         break;
       case SocketStatus.PARTICIPANT:
+        room.participantSocket = undefined;
+        switch (room.status) {
+          case RoomStatus.CREATOR_OUT:
+            room.status = RoomStatus.CLOSING;
+            this.roomsService.deleteRoomAfter(room, 30);
+            break;
+          case RoomStatus.RUNNING:
+            room.status = RoomStatus.PARTICIPANT_OUT;
+            room.finishedAt = new Date();
+            this.roomsService.closeRoomAfter(room, 30);
+            server.to(room.uuid).emit('uesr-disconnected', {
+              message: '상대방이 나갔습니다',
+              data: {
+                name: user.name,
+                email: user.email,
+                peerId: client.peerId,
+              },
+            });
+            break;
+          default:
+            this.logger.error(
+              `${client.user.name}이 participant 나가는데 방의 status가 ${room.status}`,
+            );
+            break;
+        }
+        break;
       default:
-        throw new WsException('머임?');
+        throw new WsException(`disconnect 과정에서 예상 못 한 case\
+          ${client.user.name}: ${client.status}, ${room.uuid}: ${room.status}`);
     }
   }
 }
