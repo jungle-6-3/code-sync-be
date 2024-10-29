@@ -66,7 +66,7 @@ export class RoomGateway implements OnGatewayInit {
     room.participantPk = participantSocket.user.pk;
     room.status = RoomStatus.RUNNING;
     room.clearTimeout();
-    this.logger.log(`Now ${room.uuid} room is Running`);
+    this.logger.log(`초대로 인해 ${room.uuid}의 상태가 Running이 되었습니다.`);
 
     participantSocket.emit('invite-accepted', {
       message: '대화를 시작합니다.',
