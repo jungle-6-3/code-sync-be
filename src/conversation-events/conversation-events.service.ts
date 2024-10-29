@@ -172,6 +172,8 @@ export class ConversationEventsService {
               },
             });
             break;
+          case RoomStatus.CLOSING:
+            break;
           default:
             this.logger.error(
               `${client.user.name}이 creator로 나가는데 방의 status가 ${room.status}`,
@@ -196,6 +198,8 @@ export class ConversationEventsService {
                 peerId: client.peerId,
               },
             });
+            break;
+          case RoomStatus.CLOSING:
             break;
           default:
             this.logger.error(

@@ -18,6 +18,7 @@ import {
 } from '../interfaces/room-socket.interface';
 import { Room, RoomStatus } from 'src/rooms/room';
 import { Server } from 'socket.io';
+import { RoomsService } from 'src/rooms/rooms.service';
 
 @UseFilters(ConversationEventsFilter)
 @WebSocketGateway(3001, {
@@ -29,7 +30,7 @@ import { Server } from 'socket.io';
   },
 })
 export class RoomGateway implements OnGatewayInit {
-  constructor() {}
+  constructor(private roomsService: RoomsService) {}
 
   @WebSocketServer() server: Server;
   logger = new Logger('RoomEventGateway');
@@ -98,5 +99,13 @@ export class RoomGateway implements OnGatewayInit {
       sucess: true,
       message: '참가 요청을 거절했습니다.',
     };
+  }
+
+  @UsePipes(ValidateUserIsCreatorPipe)
+  @SubscribeMessage('close-room')
+  async handleCloseRoom(@ConnectedSocket() client: RoomSocket) {
+    const room = client.room;
+    await this.roomsService.closeRoom(room);
+    return;
   }
 }
