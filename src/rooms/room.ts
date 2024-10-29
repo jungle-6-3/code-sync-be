@@ -10,7 +10,6 @@ export enum RoomStatus {
   CREATOR_OUT = 'CreatorOut',
   PARTICIPANT_OUT = 'ParticipantOut',
   CLOSING = 'Closing',
-  DELETED = 'Deleted',
 }
 
 export class Room {

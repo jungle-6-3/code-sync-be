@@ -46,9 +46,7 @@ export class RoomsService {
   }
 
   closeRoomAfter(room: Room, minute: number) {
-    if (room.globalTimeoutId) {
-      console.log('closeRoomAfter 하기 전에 timeoutId가 설정 됨');
-    }
+    room.clearTimeout();
     room.globalTimeoutId = setTimeout(
       () => this.closeRoom(room),
       minute * 60 * 1000,

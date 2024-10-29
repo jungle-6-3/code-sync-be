@@ -154,25 +154,34 @@ export class ConversationEventsService {
         break;
       case SocketStatus.CREATOR:
         room.creatorSocket = undefined;
-        room.status = RoomStatus.CLOSING;
-        room.finishedAt = new Date();
-
-        room.watingSockets.forEach((socket) => {
-          disconenctRoomSocket(socket);
-        });
-
-        room.watingSockets = [];
-
-        server.to(room.uuid).emit('uesr-disconnected', {
-          message: '상대방이 나갔습니다',
-          data: {
-            name: user.name,
-            email: user.email,
-            peerId: client.peerId,
-          },
-        });
-        // TODO: change this part
-        server.to(room.uuid).disconnectSockets(true);
+        switch (room.status) {
+          case RoomStatus.WATING:
+          case RoomStatus.INVITING:
+            this.roomsService.deleteRoom(room);
+            break;
+          case RoomStatus.PARTICIPANT_OUT:
+            room.status = RoomStatus.CLOSING;
+            this.roomsService.deleteRoomAfter(room, 30);
+            break;
+          case RoomStatus.RUNNING:
+            room.status = RoomStatus.CREATOR_OUT;
+            room.finishedAt = new Date();
+            this.roomsService.closeRoomAfter(room, 30);
+            server.to(room.uuid).emit('uesr-disconnected', {
+              message: '상대방이 나갔습니다',
+              data: {
+                name: user.name,
+                email: user.email,
+                peerId: client.peerId,
+              },
+            });
+            break;
+          default:
+            this.logger.error(
+              `${client.user.name}이 creator로 나가는데 방의 status가 ${room.status}`,
+            );
+            break;
+        }
         break;
       case SocketStatus.PARTICIPANT:
       default:
