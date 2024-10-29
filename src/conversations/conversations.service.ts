@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { CreateConversationDto } from './dto/create-conversation.dto';
 import { UpdateConversationDto } from './dto/update-conversation.dto';
+import { ConversationDto } from './dto/conversation.dto';
 
 @Injectable()
 export class ConversationsService {
-  create(createConversationDto: CreateConversationDto) {
+  create(createConversationDto: ConversationDto) {
     return 'This action adds a new conversation';
   }
 
