@@ -21,7 +21,7 @@ import { AuthService } from 'src/auth/auth.service';
 import { UsersService } from 'src/users/users.service';
 import { RoomsService } from 'src/rooms/rooms.service';
 import { User } from 'src/users/entities/user.entity';
-import { Room, RoomStatus } from 'src/rooms/room';
+import { Room } from 'src/rooms/room';
 import { ConversationEventsService } from './conversation-events.service';
 
 @UseFilters(ConversationEventsFilter)
@@ -81,7 +81,7 @@ export class ConversationEventsGateway
 
   async handleDisconnect(client: RoomSocket) {
     this.logger.log(`Client Disconnected : ${client.id}`);
-    if (client.status == undefined || client.status == SocketStatus.REFLASING) {
+    if (client.status == undefined) {
       return;
     }
     this.logger.log(

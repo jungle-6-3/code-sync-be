@@ -136,6 +136,26 @@ export class ConversationEventsService {
     const room: Room = client.room;
     const user: User = client.user;
     switch (client.status) {
+      case SocketStatus.REFLASING:
+        break;
+      case SocketStatus.WAITER:
+        if (room.watingSockets.length == 0) {
+          break;
+        }
+        const indexToRemove = room.watingSockets.findIndex(
+          (socket) => socket.user.pk == user.pk,
+        );
+        if (indexToRemove == -1) {
+          this.logger.error(
+            `WAITER가 disconnect되기 전에 목록에서 사라짐 ${user.name} in ${room.uuid}`,
+          );
+          throw new WsException(
+            '대기자를 disconenct 과정에서 먼가 문제가 생겼습니다.\
+            백앤드를 불러주세요.',
+          );
+        }
+        room.watingSockets.splice(indexToRemove);
+        break;
       case SocketStatus.CREATOR:
         room.creatorSocket = undefined;
         room.status = RoomStatus.CLOSING;
@@ -161,20 +181,6 @@ export class ConversationEventsService {
         server.to(room.uuid).disconnectSockets(true);
         break;
       case SocketStatus.PARTICIPANT:
-        if (room.watingSockets.length == 0) {
-          return;
-        }
-        const indexToRemove = room.watingSockets.findIndex(
-          (socket) => socket.user.pk == user.pk,
-        );
-        if (indexToRemove == -1) {
-          this.logger.error(
-            `WAITER가 disconnect되기 전에 목록에서 사라짐 ${user.name} in ${room.uuid}`,
-          );
-          return;
-        }
-        room.watingSockets.splice(indexToRemove);
-        break;
       default:
         throw new WsException('머임?');
     }
