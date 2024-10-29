@@ -87,6 +87,7 @@ export class ConversationEventsGateway
     this.logger.log(
       `${client.user.name}이 다음 상태에서 종료: ${client.status}`,
     );
+    this.logger.log(`${client.room.uuid}에 속한 상태: ${client.room.status}`);
     await this.conversationEventsService.setClientDisconnect(
       this.server,
       client,
