@@ -94,7 +94,6 @@ export class RoomsService {
       participantSocket.disconnect(true);
     }
     room.watingSockets.forEach((socket) => socket.disconnect(true));
-    this.roomsById.delete(room.uuid);
 
     this.deleteRoomAfter(room, 30);
   }
