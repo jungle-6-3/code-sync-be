@@ -46,6 +46,7 @@ export class ConversationEventsService {
       case RoomStatus.INVITING:
         client.status = SocketStatus.WAITER;
         break;
+      // Running인 방에서 나간 사람이 돌아온 경우
       case RoomStatus.CREATOR_OUT:
       case RoomStatus.PARTICIPANT_OUT:
         if (room.outSocketInformation.userPk != user.pk) {

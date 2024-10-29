@@ -39,7 +39,7 @@ export function disconnectBeforeSocket(beforeSocket: RoomSocket) {
   if (beforeSocket.status != SocketStatus.WAITER) {
     beforeSocket.status = SocketStatus.REFLASING;
   }
-  disconenctRoomSocket(beforeSocket);
+  beforeSocket.disconnect(true);
 }
 
 // server가 일방적으로 connection을 종료하는 경우
