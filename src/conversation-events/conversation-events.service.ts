@@ -159,12 +159,10 @@ export class ConversationEventsService {
             this.roomsService.deleteRoom(room);
             break;
           case RoomStatus.PARTICIPANT_OUT:
-            room.status = RoomStatus.CLOSING;
-            this.roomsService.deleteRoomAfter(room, 30);
+            this.roomsService.closeRoom(room);
             break;
           case RoomStatus.RUNNING:
             room.status = RoomStatus.CREATOR_OUT;
-            room.finishedAt = new Date();
             this.roomsService.closeRoomAfter(room, 30);
             server.to(room.uuid).emit('uesr-disconnected', {
               message: '상대방이 나갔습니다',
@@ -186,12 +184,10 @@ export class ConversationEventsService {
         room.participantSocket = undefined;
         switch (room.status) {
           case RoomStatus.CREATOR_OUT:
-            room.status = RoomStatus.CLOSING;
-            this.roomsService.deleteRoomAfter(room, 30);
+            this.roomsService.closeRoom(room);
             break;
           case RoomStatus.RUNNING:
             room.status = RoomStatus.PARTICIPANT_OUT;
-            room.finishedAt = new Date();
             this.roomsService.closeRoomAfter(room, 30);
             server.to(room.uuid).emit('uesr-disconnected', {
               message: '상대방이 나갔습니다',

@@ -82,6 +82,7 @@ export class RoomsService {
 
   async closeRoom(room: Room) {
     room.clearTimeout();
+    room.finishedAt = new Date();
 
     const { creatorSocket, participantSocket } = room;
 
