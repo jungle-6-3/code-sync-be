@@ -17,10 +17,7 @@ export class RoomsService {
     const roomUuid = _uuid();
     const newRoom = new Room(roomUuid, creator, prUrl);
     this.setRoom(newRoom, roomUuid);
-    newRoom.globalTimeoutId = setTimeout(
-      () => this.deleteRoom(newRoom),
-      3600000,
-    ); // 1hour
+    this.deleteRoomAfter(newRoom, 30);
     return roomUuid;
   }
 
@@ -37,6 +34,13 @@ export class RoomsService {
 
   async setRoom(room: Room, uuid: string) {
     this.roomsById.set(uuid, room);
+  }
+
+  deleteRoomAfter(room: Room, minute: number) {
+    room.globalTimeoutId = setTimeout(
+      () => this.deleteRoom(room),
+      minute * 60 * 1000,
+    ); // 30 min
   }
 
   async findRoomSocket(room: Room, user: User): Promise<RoomSocket> {
