@@ -48,7 +48,7 @@ export class ConversationEventsService {
       // Running인 방에서 나간 사람이 돌아온 경우
       case RoomStatus.CREATOR_OUT:
       case RoomStatus.PARTICIPANT_OUT:
-        if (room.outSocketInformation.userPk != user.pk) {
+        if (room.outSocketInformation?.userPk != user.pk) {
           throw new Error(
             `이미 개최중이거나 종료중인 방입니다: ${room.status}`,
           );
@@ -162,7 +162,7 @@ export class ConversationEventsService {
             break;
           case RoomStatus.RUNNING:
             room.status = RoomStatus.CREATOR_OUT;
-            this.roomsService.closeRoomAfter(room, 30);
+            this.roomsService.closeRoomAfter(room, client, 5);
             server.to(room.uuid).emit('uesr-disconnected', {
               message: '상대방이 나갔습니다',
               data: {
@@ -187,7 +187,7 @@ export class ConversationEventsService {
             break;
           case RoomStatus.RUNNING:
             room.status = RoomStatus.PARTICIPANT_OUT;
-            this.roomsService.closeRoomAfter(room, 30);
+            this.roomsService.closeRoomAfter(room, client, 5);
             server.to(room.uuid).emit('uesr-disconnected', {
               message: '상대방이 나갔습니다',
               data: {

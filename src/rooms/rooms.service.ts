@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Room, RoomStatus } from './room';
 import { v4 as _uuid } from 'uuid';
 import { User } from 'src/users/entities/user.entity';
@@ -11,6 +11,7 @@ import { SocketInformation } from 'src/conversation-events/interfaces/socket-inf
 @Injectable()
 export class RoomsService {
   private roomsById: Map<string, Room>;
+  logger: Logger = new Logger('RoomsService');
 
   constructor() {
     this.roomsById = new Map();
@@ -21,11 +22,13 @@ export class RoomsService {
     const newRoom = new Room(roomUuid, creator, prUrl);
     this.roomsById.set(roomUuid, newRoom);
     this.deleteRoomAfter(newRoom, 30);
+    this.logger.log(`${creator.name}가 ${roomUuid}를 생성`);
     return roomUuid;
   }
 
   // TODO: room 내용을 저장하는 행위를 해야함.
   async saveRoom(room: Room, creator: User): Promise<boolean> {
+    this.logger.log(`${creator.name}가 ${room.uuid}를 저장`);
     // 저장하는 행위....
     this.deleteRoom(room);
     return true;
@@ -36,6 +39,7 @@ export class RoomsService {
   }
 
   deleteRoomAfter(room: Room, minute: number) {
+    this.logger.log(`${room.uuid}가 ${minute} 후에 삭제`);
     if (room.globalTimeoutId) {
       console.log('deleteRoomAfter 하기 전에 timeoutId가 설정 됨');
     }
@@ -45,9 +49,12 @@ export class RoomsService {
     );
   }
 
-  closeRoomAfter(room: Room, minute: number) {
+  closeRoomAfter(room: Room, client: RoomSocket, minute: number) {
+    this.logger.log(`${room.uuid}가 ${minute} 후에 닫힘`);
     room.clearTimeout();
-    room.globalTimeoutId = setTimeout(
+    room.outSocketInformation = new SocketInformation(client);
+
+    room.outSocketInformation.timeoutId = setTimeout(
       () => this.closeRoom(room),
       minute * 60 * 1000,
     );
@@ -67,6 +74,7 @@ export class RoomsService {
   }
 
   async deleteRoom(room: Room) {
+    this.logger.log(`${room.uuid}가 삭제됨`);
     room.clearTimeout();
 
     const { creatorSocket, participantSocket } = room;
@@ -81,6 +89,7 @@ export class RoomsService {
   }
 
   async closeRoom(room: Room) {
+    this.logger.log(`${room.uuid}가 닫힘`);
     room.clearTimeout();
     room.finishedAt = new Date();
 
