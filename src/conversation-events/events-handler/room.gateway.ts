@@ -72,6 +72,7 @@ export class RoomGateway implements OnGatewayInit {
     participantSocket.emit('invite-accepted', {
       message: '대화를 시작합니다.',
       prUrl: room.prUrl,
+      role: 'participant',
     });
 
     return {
