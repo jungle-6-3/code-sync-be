@@ -1,16 +1,19 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import {
   disconenctRoomSocket,
   RoomSocket,
 } from 'src/conversation-events/interfaces/room-socket.interface';
-import { logger, RoomStatus } from './item/room-event';
+import { logger, RoomStatus } from '.';
 import { SocketInformation } from 'src/conversation-events/interfaces/socket-information.interface';
 import { User } from 'src/users/entities/user.entity';
-import { RoomsService } from './rooms.service';
-import { Room } from './item';
+import { Room } from '..';
+import { RoomsService } from 'src/rooms/rooms.service';
 @Injectable()
-export class RoomEventsService {
-  constructor(private roomsService: RoomsService) {}
+export class RoomEventService {
+  constructor(
+    @Inject(forwardRef(() => RoomsService))
+    private roomsService: RoomsService,
+  ) {}
   private logger = logger;
 
   deleteRoomAfter(room: Room, minute: number) {
@@ -64,7 +67,8 @@ export class RoomEventsService {
 
     this.logger.log(`${room.uuid}가 삭제됨`);
     this.disconnectRoomsSockets(room);
-    await this.roomsService.deleteRoomByUuid(room.uuid);
+
+    this.roomsService.deleteRoombyUuid(room.uuid);
   }
 
   async closeRoom(room: Room) {

@@ -16,6 +16,7 @@ export class RoomEvent {
   constructor(uuid: string) {
     this.uuid = uuid;
     this.status = RoomStatus.WATING;
+    this.watingSockets = [];
   }
 }
 

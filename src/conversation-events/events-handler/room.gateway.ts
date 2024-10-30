@@ -16,9 +16,10 @@ import {
   RoomSocket,
   SocketStatus,
 } from '../interfaces/room-socket.interface';
-import { Room, RoomStatus } from 'src/rooms/item';
+import { Room } from 'src/rooms/item';
+import { RoomStatus } from 'src/rooms/item/room-event';
 import { Server } from 'socket.io';
-import { RoomsService } from 'src/rooms/rooms.service';
+import { RoomEventService } from 'src/rooms/item/room-event/room-event.service';
 
 @UseFilters(ConversationEventsFilter)
 @WebSocketGateway(3001, {
@@ -30,7 +31,7 @@ import { RoomsService } from 'src/rooms/rooms.service';
   },
 })
 export class RoomGateway implements OnGatewayInit {
-  constructor(private roomsService: RoomsService) {}
+  constructor(private roomEventsService: RoomEventService) {}
 
   @WebSocketServer() server: Server;
   logger = new Logger('RoomEventGateway');
@@ -66,7 +67,7 @@ export class RoomGateway implements OnGatewayInit {
     room.participantSocket = participantSocket;
     room.participantPk = participantSocket.user.pk;
     room.status = RoomStatus.RUNNING;
-    room.clearTimeout();
+    this.roomEventsService.clearTimeout(room);
     this.logger.log(`초대로 인해 ${room.uuid}의 상태가 Running이 되었습니다.`);
 
     participantSocket.emit('invite-accepted', {
@@ -106,7 +107,7 @@ export class RoomGateway implements OnGatewayInit {
   @SubscribeMessage('close-room')
   async handleCloseRoom(@ConnectedSocket() client: RoomSocket) {
     const room = client.room;
-    await this.roomsService.closeRoom(room);
+    await this.roomEventsService.closeRoom(room);
     return;
   }
 }
