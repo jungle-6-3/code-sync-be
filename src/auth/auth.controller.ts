@@ -67,8 +67,11 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   logOut(@Req() req: Request, @Res() res: Response) {
     // res.cookie('token', '', { maxAge: 0 });
-    res.clearCookie('token');
-
+    res.clearCookie('token', {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+    });
     return res.send({
       message: 'success',
     });
