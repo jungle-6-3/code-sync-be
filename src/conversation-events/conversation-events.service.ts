@@ -50,15 +50,7 @@ export class ConversationEventsService {
       // Running인 방에서 나간 사람이 돌아온 경우
       case RoomStatus.CREATOR_OUT:
       case RoomStatus.PARTICIPANT_OUT:
-        if (room.outSocketInformation?.userPk != user.pk) {
-          throw new Error(
-            `이미 개최중이거나 종료중인 방입니다: ${room.status}`,
-          );
-        }
-        room.outSocketInformation.clearTimeout();
-        room.outSocketInformation.setSocket(client);
-        room.outSocketInformation = undefined;
-        room.status = RoomStatus.RUNNING;
+        this.roomEventsService.rejoinClientInRoom(room, client);
         break;
       default:
         throw new Error(`이미 개최중이거나 종료중인 방입니다: ${room.status}`);

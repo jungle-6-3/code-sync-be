@@ -1,7 +1,7 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { RoomSocket } from 'src/conversation-events/room-socket';
 import { logger, RoomStatus } from '.';
-import { SocketInformation } from 'src/conversation-events/socket-information';
+import { SocketInformation } from 'src/rooms/item/room-event/socket-information';
 import { User } from 'src/users/entities/user.entity';
 import { Room } from '..';
 import { RoomsService } from 'src/rooms/rooms.service';
@@ -58,7 +58,22 @@ export class RoomEventService {
     logger.log(`${room.uuid}의 timeout이 제거되었습니다.`);
     clearTimeout(room.globalTimeoutId);
     room.globalTimeoutId = undefined;
-    room.outSocketInformation?.clearTimeout();
+    if (room.outSocketInformation) {
+      room.outSocketInformation.clearTimeout();
+      room.outSocketInformation = undefined;
+    }
+  }
+
+  rejoinClientInRoom(room: Room, client: RoomSocket) {
+    const { outSocketInformation } = room;
+    if (outSocketInformation?.userPk != client.user.pk) {
+      throw new Error(`이미 개최중이거나 종료중인 방입니다: ${room.status}`);
+    }
+    outSocketInformation.clearTimeout();
+    outSocketInformation.setSocket(client);
+    room.outSocketInformation = undefined;
+
+    room.status = RoomStatus.RUNNING;
   }
 
   async deleteRoom(room: Room) {
@@ -74,11 +89,12 @@ export class RoomEventService {
     this.clearTimeout(room);
 
     this.logger.log(`${room.uuid}가 닫힘`);
-    room.status = RoomStatus.CLOSING;
-    room.finishedAt = new Date();
 
     await this.disconnectRoomsSockets(room);
     this.deleteRoomAfter(room, 30);
+    room.finishedAt = new Date();
+
+    room.status = RoomStatus.CLOSING;
   }
 
   private async disconnectRoomsSockets(room: Room) {

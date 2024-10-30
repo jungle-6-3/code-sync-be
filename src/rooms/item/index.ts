@@ -2,7 +2,7 @@ import { ChatData } from 'src/conversation-datas/data/chatting';
 import { User } from 'src/users/entities/user.entity';
 import { initRoomEvent, RoomEvent, RoomStatus } from './room-event';
 import { RoomSocket } from 'src/conversation-events/room-socket';
-import { SocketInformation } from 'src/conversation-events/socket-information';
+import { SocketInformation } from 'src/rooms/item/room-event/socket-information';
 
 export class Room implements RoomEvent {
   creatorPk: number;
