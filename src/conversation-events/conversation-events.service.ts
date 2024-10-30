@@ -1,10 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import {
-  copyFromBeforeSocket,
-  disconnectBeforeSocket,
-  RoomSocket,
-  SocketStatus,
-} from './room-socket';
+import { RoomSocket, SocketStatus } from './room-socket';
 import { User } from 'src/users/entities/user.entity';
 import { Room } from 'src/rooms/item';
 import { RoomStatus } from 'src/rooms/item/room-event';
@@ -16,6 +11,7 @@ import { JwtPayloadDto } from 'src/auth/dto/jwt-payload';
 import { WsException } from '@nestjs/websockets';
 import { Server } from 'socket.io';
 import { RoomEventService } from 'src/rooms/item/room-event/room-event.service';
+import { RoomSocketService } from './room-socket/room-socket.service';
 
 @Injectable()
 export class ConversationEventsService {
@@ -24,6 +20,7 @@ export class ConversationEventsService {
     private usersService: UsersService,
     private roomsService: RoomsService,
     private roomEventsService: RoomEventService,
+    private roomSocketService: RoomSocketService,
   ) {}
   logger: Logger = new Logger('ConnectionAndDisconnectionEventGateway');
 
@@ -34,8 +31,7 @@ export class ConversationEventsService {
       user,
     );
     if (beforeSocket) {
-      copyFromBeforeSocket(beforeSocket, client);
-      disconnectBeforeSocket(beforeSocket);
+      this.roomSocketService.copyAndHandleBeforeSocket(beforeSocket, client);
       return;
     }
     switch (room.status) {

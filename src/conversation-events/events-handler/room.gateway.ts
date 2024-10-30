@@ -10,12 +10,7 @@ import {
 import { ConversationEventsFilter } from '../conversation-events.filter';
 import { Logger, UseFilters, UsePipes } from '@nestjs/common';
 import { ValidateUserIsCreatorPipe } from '../pipes/validate-user-is-creator.pipe';
-import {
-  disconenctRoomSocket,
-  disconnectBeforeSocket,
-  RoomSocket,
-  SocketStatus,
-} from '../room-socket';
+import { disconenctRoomSocket, RoomSocket, SocketStatus } from '../room-socket';
 import { Room } from 'src/rooms/item';
 import { RoomStatus } from 'src/rooms/item/room-event';
 import { Server } from 'socket.io';
@@ -58,7 +53,7 @@ export class RoomGateway implements OnGatewayInit {
     room.watingSockets = [];
     disconnectSockets.forEach((socket) => {
       if (socket != participantSocket) {
-        disconnectBeforeSocket(socket);
+        disconenctRoomSocket(socket);
       }
     });
 
