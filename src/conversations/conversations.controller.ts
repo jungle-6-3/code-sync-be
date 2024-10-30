@@ -5,24 +5,46 @@ import {
   Body,
   Patch,
   Param,
+  Request,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { ConversationsService } from './conversations.service';
 import { UpdateConversationDto } from './dto/update-conversation.dto';
-import { ConversationDto } from './dto/conversation.dto';
+import { JwtPayloadDto } from 'src/auth/dto/jwt-payload';
+import { UsersService } from 'src/users/users.service';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ConversationResponseDto } from './dto/conversation-response.dto';
 
 @Controller('conversations')
 export class ConversationsController {
-  constructor(private readonly conversationsService: ConversationsService) {}
-       
-  @Post()
-  create(@Body() createConversationDto: ConversationDto) {
-    return this.conversationsService.create(createConversationDto);
-  }
+  constructor(
+    private readonly conversationsService: ConversationsService,
+    private readonly userService: UsersService,
+  ) {}
 
+  @ApiOperation({
+    summary: '회의록 요청',
+    description: '내가 참여한 회의록을 요청한다..',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '회의록 요청 성공',
+    type: ConversationResponseDto,
+  })
+  @UseGuards(JwtAuthGuard)
   @Get()
-  findAll() {
-    return this.conversationsService.findAll();
+  async findAll(@Request() req: Request & { user: JwtPayloadDto }) {
+    const { email, name }: JwtPayloadDto = req.user;
+    const user = await this.userService.findOne(email);
+    console.log('this is find conversations');
+
+    return {
+      data: {
+        conversations: await this.conversationsService.findAll(user.pk),
+      },
+    };
   }
 
   @Get(':id')
