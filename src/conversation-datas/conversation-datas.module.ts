@@ -14,5 +14,6 @@ import { ConversationDatas } from './entities/conversations-data.entity';
   ],
   providers: [ConversationDatasService],
   controllers: [ConversationDatasController],
+  exports: [ConversationDatasService],
 })
 export class ConversationDatasModule {}
