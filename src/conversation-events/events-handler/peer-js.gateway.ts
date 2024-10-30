@@ -10,7 +10,7 @@ import { ConversationEventsFilter } from '../conversation-events.filter';
 import { Logger, UseFilters, UsePipes } from '@nestjs/common';
 import { Server } from 'socket.io';
 import { ValidateUserIsJoiningPipe } from '../pipes/validate-user-is-joining.pipe';
-import { RoomSocket } from '../interfaces/room-socket.interface';
+import { RoomSocket } from '../room-socket';
 
 @UseFilters(ConversationEventsFilter)
 @WebSocketGateway(3001, {

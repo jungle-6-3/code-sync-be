@@ -12,7 +12,7 @@ import {
   disconenctRoomSocket,
   initRoomSocket,
   RoomSocket,
-} from './interfaces/room-socket.interface';
+} from './room-socket';
 import {
   ConversationEventsFilter,
   ConversationException,

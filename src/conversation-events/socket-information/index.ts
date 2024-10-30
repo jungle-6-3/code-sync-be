@@ -1,5 +1,5 @@
 import { logger } from 'src/rooms/item/room-event';
-import { RoomSocket, SocketStatus } from './room-socket.interface';
+import { RoomSocket, SocketStatus } from '../room-socket';
 
 //TODO: 여기 다른 것 추가해야하는지 front에게 묻기
 export class SocketInformation {

@@ -15,7 +15,7 @@ import {
   disconnectBeforeSocket,
   RoomSocket,
   SocketStatus,
-} from '../interfaces/room-socket.interface';
+} from '../room-socket';
 import { Room } from 'src/rooms/item';
 import { RoomStatus } from 'src/rooms/item/room-event';
 import { Server } from 'socket.io';

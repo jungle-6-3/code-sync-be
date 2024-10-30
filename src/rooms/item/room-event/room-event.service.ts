@@ -2,9 +2,9 @@ import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import {
   disconenctRoomSocket,
   RoomSocket,
-} from 'src/conversation-events/interfaces/room-socket.interface';
+} from 'src/conversation-events/room-socket';
 import { logger, RoomStatus } from '.';
-import { SocketInformation } from 'src/conversation-events/interfaces/socket-information.interface';
+import { SocketInformation } from 'src/conversation-events/socket-information';
 import { User } from 'src/users/entities/user.entity';
 import { Room } from '..';
 import { RoomsService } from 'src/rooms/rooms.service';

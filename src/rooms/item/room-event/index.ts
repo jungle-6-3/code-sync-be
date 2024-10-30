@@ -1,6 +1,6 @@
 import { Logger } from '@nestjs/common';
-import { RoomSocket } from 'src/conversation-events/interfaces/room-socket.interface';
-import { SocketInformation } from 'src/conversation-events/interfaces/socket-information.interface';
+import { RoomSocket } from 'src/conversation-events/room-socket';
+import { SocketInformation } from 'src/conversation-events/socket-information';
 
 export const logger = new Logger('RoomEvent');
 

@@ -8,7 +8,7 @@ import {
   WsException,
 } from '@nestjs/websockets';
 
-import { RoomSocket } from '../interfaces/room-socket.interface';
+import { RoomSocket } from '../room-socket';
 import { Server } from 'socket.io';
 import { MessageResponseDto } from '../dto/message-response.dto';
 import { Logger } from '@nestjs/common';

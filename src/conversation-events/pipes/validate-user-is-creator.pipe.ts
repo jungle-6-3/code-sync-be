@@ -1,5 +1,5 @@
 import { ArgumentMetadata, Injectable, PipeTransform } from '@nestjs/common';
-import { RoomSocket, SocketStatus } from '../interfaces/room-socket.interface';
+import { RoomSocket, SocketStatus } from '../room-socket';
 import { WsException } from '@nestjs/websockets';
 
 @Injectable()

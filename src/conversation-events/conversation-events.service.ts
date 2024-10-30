@@ -5,7 +5,7 @@ import {
   disconnectBeforeSocket,
   RoomSocket,
   SocketStatus,
-} from './interfaces/room-socket.interface';
+} from './room-socket';
 import { User } from 'src/users/entities/user.entity';
 import { Room } from 'src/rooms/item';
 import { RoomStatus } from 'src/rooms/item/room-event';
