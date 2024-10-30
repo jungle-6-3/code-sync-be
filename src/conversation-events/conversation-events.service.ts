@@ -12,6 +12,7 @@ import { WsException } from '@nestjs/websockets';
 import { Server } from 'socket.io';
 import { RoomEventService } from 'src/rooms/item/room-event/room-event.service';
 import { RoomSocketService } from './room-socket/room-socket.service';
+import { joinClientInRoom } from 'src/rooms/item/room-event/join-client-in-room.function';
 
 @Injectable()
 export class ConversationEventsService {
@@ -64,57 +65,16 @@ export class ConversationEventsService {
     }
   }
 
-  async joinClientInRoom(room: Room, server: Server, client: RoomSocket) {
-    switch (client.status) {
-      case SocketStatus.CREATOR:
-        // 처음 방장이 입장한 경우
-        if (room.status == RoomStatus.WATING) {
-          room.status = RoomStatus.INVITING;
-          this.logger.log(`${room.uuid}에서 초대를 시작합니다`);
-        }
-        room.creatorSocket = client;
-        client.join(room.uuid);
-        setTimeout(() => {
-          client.emit('invite-accepted', {
-            message: '대화를 시작합니다.',
-            prUrl: room.prUrl,
-            role: 'creator',
-          });
-        }, 2000);
-        this.logger.log('방장이 되었습니다.');
-        break;
-      case SocketStatus.PARTICIPANT:
-        room.participantSocket = client;
-        client.join(room.uuid);
-        setTimeout(() => {
-          client.emit('invite-accepted', {
-            message: '대화를 시작합니다.',
-            prUrl: room.prUrl,
-            role: 'creator',
-          });
-        }, 2000);
-        this.logger.log(`참가자가 되었습니다.`);
-        break;
-      case SocketStatus.WAITER:
-        room.watingSockets.push(client);
-        client.to(room.uuid).emit('join-request-by', {
-          message: '참가 요청이 왔습니다.',
-          data: {
-            participant: {
-              name: client.user.name,
-              email: client.user.email,
-            },
-          },
-        });
-        this.logger.log('대기자에 추가되었습니다.');
-        break;
-      default:
-        this.logger.error(`동일한 connect 요청 과정에서 예상하지 못 한 에러`);
-        this.logger.error(`${client.status}`);
-        throw new WsException(
-          '동일한 connect 요청 과정에서 문제가 생겼습니다. 백앤드를 불러주세요.',
-        );
+  async joinClientInRoom(room: Room, client: RoomSocket) {
+    const joinAction = joinClientInRoom[client.status];
+    if (!joinAction) {
+      this.logger.error(`동일한 connect 요청 과정에서 예상하지 못 한 에러`);
+      this.logger.error(`${client.status}`);
+      throw new WsException(
+        '동일한 connect 요청 과정에서 문제가 생겼습니다. 백앤드를 불러주세요.',
+      );
     }
+    joinAction(room, client, this.logger);
   }
 
   async getUserAndRoom(handshake: Handshake) {

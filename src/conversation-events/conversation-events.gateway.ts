@@ -62,11 +62,7 @@ export class ConversationEventsGateway
       return;
     }
     initRoomSocket(client, user, room);
-    await this.conversationEventsService.joinClientInRoom(
-      room,
-      this.server,
-      client,
-    );
+    await this.conversationEventsService.joinClientInRoom(room, client);
 
     this.logger.log(`연결된 Client id: ${client.id} status: ${client.status}`);
   }
