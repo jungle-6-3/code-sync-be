@@ -12,7 +12,7 @@ import { WsException } from '@nestjs/websockets';
 import { Server } from 'socket.io';
 import { RoomEventService } from 'src/rooms/item/room-event/room-event.service';
 import { RoomSocketService } from './room-socket/room-socket.service';
-import { joinClientInRoom } from 'src/rooms/item/room-event/join-client-in-room.function';
+import { joinClientInRoomAction } from 'src/rooms/item/room-event/join-client-in-room.action';
 import { RoomEventTimerService } from 'src/rooms/item/room-event/room-event.timer.service';
 
 @Injectable()
@@ -60,7 +60,7 @@ export class ConversationEventsService {
   }
 
   async joinClientInRoom(room: Room, client: RoomSocket) {
-    const joinAction = joinClientInRoom[client.status];
+    const joinAction = joinClientInRoomAction[client.status];
     if (!joinAction) {
       this.logger.error(`동일한 connect 요청 과정에서 예상하지 못 한 에러`);
       this.logger.error(`${client.status}`);

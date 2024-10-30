@@ -2,7 +2,7 @@ import { RoomSocket, SocketStatus } from 'src/conversation-events/room-socket';
 import { Room } from '..';
 import { RoomStatus } from '.';
 import { Logger } from '@nestjs/common';
-export const joinClientInRoom = {
+export const joinClientInRoomAction = {
   [SocketStatus.CREATOR]: joinAsCreator,
   [SocketStatus.PARTICIPANT]: joinAsParticipant,
   [SocketStatus.WAITER]: joinAsWaiter,
