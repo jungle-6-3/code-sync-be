@@ -1,8 +1,8 @@
 import { ArgumentsHost, Catch, ExceptionFilter } from '@nestjs/common';
 import { ValidDataException } from '../utils/validate-data-exception';
-import { AuthExceptionError } from './auth.service';
+import { GlobalHttpException } from 'src/utils/global-http-exception';
 
-@Catch(ValidDataException, AuthExceptionError)
+@Catch(ValidDataException, GlobalHttpException)
 export class AuthFilter<T> implements ExceptionFilter {
   catch(exception: T, host: ArgumentsHost) {
     const response = host.switchToHttp().getResponse();
@@ -10,7 +10,7 @@ export class AuthFilter<T> implements ExceptionFilter {
       response.status(exception.getStatus()).json(exception.getResponse());
       return;
     }
-    if (exception instanceof AuthExceptionError) {
+    if (exception instanceof GlobalHttpException) {
       response.status(exception.getStatus()).json(exception.getResponse());
       return;
     }
