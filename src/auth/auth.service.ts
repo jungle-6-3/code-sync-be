@@ -10,6 +10,7 @@ import { SignUpRequestDto } from './dto/signup-request.dto';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayloadDto } from './dto/jwt-payload';
+import { GlobalHttpException } from 'src/utils/global-http-exception';
 
 @Injectable()
 export class AuthService {
@@ -23,7 +24,7 @@ export class AuthService {
     const user = await this.userService.findOne(email);
 
     if (!user || !(await bcrypt.compare(password, user.hashedPassword))) {
-      throw new AuthExceptionError(
+      throw new GlobalHttpException(
         '아이디 또는 비밀번호가 틀립니다.',
         'AUTH_6',
       );
@@ -40,7 +41,7 @@ export class AuthService {
     signUpRequestDto.password = hashedPassword;
     const userData = await this.userService.createUser(signUpRequestDto);
     if (!userData) {
-      throw new AuthExceptionError('중복된 이메일이 있습니다.', 'AUTH_5');
+      throw new GlobalHttpException('중복된 이메일이 있습니다.', 'AUTH_5');
     }
   }
   // 패스워드 해쉬 함수
@@ -58,19 +59,5 @@ export class AuthService {
       throw new UnauthorizedException();
     }
     return decoded;
-  }
-}
-
-export class AuthExceptionError extends HttpException {
-  constructor(message: string, code: string) {
-    super(
-      {
-        success: false,
-        status: HttpStatus.BAD_REQUEST,
-        code,
-        message,
-      },
-      HttpStatus.BAD_REQUEST,
-    );
   }
 }
