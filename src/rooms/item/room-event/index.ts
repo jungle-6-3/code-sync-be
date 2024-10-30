@@ -4,7 +4,7 @@ import { SocketInformation } from 'src/conversation-events/interfaces/socket-inf
 
 export const logger = new Logger('RoomEvent');
 
-export class RoomEvent {
+export interface RoomEvent {
   uuid: string;
   status: RoomStatus;
   creatorSocket: RoomSocket;
@@ -12,12 +12,12 @@ export class RoomEvent {
   watingSockets: RoomSocket[];
   globalTimeoutId: NodeJS.Timeout;
   outSocketInformation: SocketInformation;
+}
 
-  constructor(uuid: string) {
-    this.uuid = uuid;
-    this.status = RoomStatus.WATING;
-    this.watingSockets = [];
-  }
+export function initRoomEvent(roomEvent: RoomEvent, uuid: string) {
+  roomEvent.uuid = uuid;
+  roomEvent.status = RoomStatus.WATING;
+  roomEvent.watingSockets = [];
 }
 
 export enum RoomStatus {
