@@ -73,21 +73,25 @@ export class ConversationEventsService {
         }
         room.creatorSocket = client;
         client.join(room.uuid);
-        client.emit('invite-accepted', {
-          message: '대화를 시작합니다.',
-          prUrl: room.prUrl,
-          role: 'creator',
-        });
+        setTimeout(() => {
+          client.emit('invite-accepted', {
+            message: '대화를 시작합니다.',
+            prUrl: room.prUrl,
+            role: 'creator',
+          });
+        }, 2000);
         this.logger.log('방장이 되었습니다.');
         break;
       case SocketStatus.PARTICIPANT:
         room.participantSocket = client;
         client.join(room.uuid);
-        client.emit('invite-accepted', {
-          message: '대화를 시작합니다.',
-          prUrl: room.prUrl,
-          role: 'participant',
-        });
+        setTimeout(() => {
+          client.emit('invite-accepted', {
+            message: '대화를 시작합니다.',
+            prUrl: room.prUrl,
+            role: 'creator',
+          });
+        }, 2000);
         this.logger.log(`참가자가 되었습니다.`);
         break;
       case SocketStatus.WAITER:
