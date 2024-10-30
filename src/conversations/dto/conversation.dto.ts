@@ -1,14 +1,53 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty } from 'class-validator';
+import { ApiExtraModels, ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
+import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
+
+class UserDto {
+  @ApiProperty({
+    example: '지창근',
+    description: 'creators email/회의 참석자 이름',
+  })
+  @IsString()
+  name: string;
+
+  @ApiProperty({
+    example: 'pig19980@github.com',
+    description: 'creators email/회의 참석자 이름',
+  })
+  @IsEmail()
+  email: string;
+}
 
 // TODO: 하나만 조회하거나 하나의 conversation에 대해서 확인하는 로직없다면 ConversationListResponseDto에 합친다.
+@ApiExtraModels(UserDto)
 export class ConversationDto {
   @ApiProperty({
-    example: '4069e5fa-7e24-4be0-958b-999aa8922e13',
-    description: 'Conversation UUID / 회의 UUID',
+    example: '1',
+    description: '회의록 pk',
   })
   @IsNotEmpty()
-  uuid: string;
+  pk: number;
+
+  @ApiProperty({
+    example: '1',
+    description: 'creator pk',
+  })
+  @IsNotEmpty()
+  creatorPk: number;
+
+  @ApiProperty({
+    example: '1',
+    description: 'participant pk',
+  })
+  @IsNotEmpty()
+  participantPk: number;
+
+  @ApiProperty({
+    example: '1',
+    description: 'conversationDatas Pk',
+  })
+  @IsNotEmpty()
+  dataPk: number;
 
   @ApiProperty({
     example: '10월 17일 로그인 구현 PR',
@@ -31,46 +70,9 @@ export class ConversationDto {
   @IsNotEmpty()
   finishedAt: Date;
 
-  @ApiProperty({
-    example: '4069e5fa-7e24-4be0-958b-999aa8922e13',
-    description: '회의록 공유 Url',
-  })
   @IsNotEmpty()
-  shareUrl: string;
+  creator: UserDto;
 
-  @ApiProperty({
-    example: 'true',
-    description: '회의 공유 가능 여부',
-  })
   @IsNotEmpty()
-  canShared: boolean;
-
-  @ApiProperty({
-    example: 'whguddnr9@github.com',
-    description: 'creators email/회의 개설자 이메일',
-  })
-  @IsNotEmpty()
-  creatorEmail: string;
-
-  @ApiProperty({
-    example: 'whguddnr9@github.com',
-    description: 'creators email/회의 개설자 이름',
-  })
-  @IsNotEmpty()
-  creatorName: string;
-
-  @ApiProperty({
-    example: 'pig19980@github.com',
-    description: 'creators email/회의 참석자 이메일',
-  })
-  @IsNotEmpty()
-  @IsNotEmpty()
-  participantEmail: string;
-
-  @ApiProperty({
-    example: '지창근',
-    description: 'creators email/회의 참석자 이름',
-  })
-  @IsNotEmpty()
-  partipantName: string;
+  participant: UserDto;
 }

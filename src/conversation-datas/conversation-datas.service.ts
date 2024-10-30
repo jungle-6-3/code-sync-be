@@ -14,7 +14,7 @@ export class ConversationDatasService {
   constructor(
     private configService: ConfigService,
     @InjectRepository(ConversationDatas)
-    private conversationDatasReoisitory: Repository<ConversationDatas>,
+    private conversationDatasRepository: Repository<ConversationDatas>,
   ) {
     this.s3Client = new S3Client({
       region: this.configService.get('AWS_REGION'),
@@ -71,11 +71,22 @@ export class ConversationDatasService {
   async createConversationDatas(saveData: SaveDatasDto) {
     try {
       const conversationDatas =
-        await this.conversationDatasReoisitory.create(saveData);
-      await this.conversationDatasReoisitory.save(conversationDatas);
+        await this.conversationDatasRepository.create(saveData);
+      await this.conversationDatasRepository.save(conversationDatas);
       return true;
     } catch (error) {
       console.log(error);
+      return false;
+    }
+  }
+
+  async getConversationDatas(pk: number) {
+    try {
+      const conversationDatas = this.conversationDatasRepository.findOneBy({
+        pk,
+      });
+      return conversationDatas;
+    } catch (error) {
       return false;
     }
   }
