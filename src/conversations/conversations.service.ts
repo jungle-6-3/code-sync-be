@@ -1,6 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { UpdateConversationDto } from './dto/update-conversation.dto';
 import { ConversationDto } from './dto/conversation.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Conversation } from './entities/conversation.entity';
+import { Repository } from 'typeorm';
+import { ConversationDatas } from 'src/conversation-datas/entities/conversations-data.entity';
+import { ConversationDatasService } from 'src/conversation-datas/conversation-datas.service';
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class ConversationsService {
@@ -40,8 +46,30 @@ export class ConversationsService {
     return conversations;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} conversation`;
+  async getConversationDatas(user, dataPk: number) {
+    const conversation = await this.conversationRepository.findOneBy({
+      dataPk,
+    });
+    const conversationDatas =
+      this.conversationDatasService.getConversationDatas(dataPk);
+    // TODO: Custom Exception으로 처리 (에러 코드와 함께 처리)
+    if (!conversation || !conversationDatas) {
+      throw new HttpException(
+        '회의가 종료되지 않았습니다.',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const userPk = (await this.usersServie.findOne(user.email)).pk;
+
+    if (conversation.creatorPk != userPk) {
+      throw new HttpException(
+        '참여하지 않은 회의입니다.',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    console.log(conversation);
+    return conversationDatas;
   }
 
   update(id: number, updateConversationDto: UpdateConversationDto) {
