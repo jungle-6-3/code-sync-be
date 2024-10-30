@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Room, RoomStatus } from './item';
+import { Room } from './item';
+import { RoomStatus } from './item/room-event';
 import { v4 as _uuid } from 'uuid';
 import { User } from 'src/users/entities/user.entity';
 import {
