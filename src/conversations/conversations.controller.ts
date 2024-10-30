@@ -59,17 +59,20 @@ export class ConversationsController {
   ) {
     return this.conversationsService.getConversationDatas(req.user, dataPk);
   }
-
-  @Patch(':id')
+  @ApiOperation({
+    summary: '회의록 데이터 요청',
+    description: '회의록에 대한 회의 내용을 요청한다.',
+  })
+  @Patch(':dataPk')
   update(
-    @Param('id') id: string,
+    @Param('dataPk') dataPk: number,
     @Body() updateConversationDto: UpdateConversationDto,
   ) {
-    return this.conversationsService.update(+id, updateConversationDto);
+    return this.conversationsService.update(dataPk, updateConversationDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.conversationsService.remove(+id);
+  @Delete(':dataPk')
+  remove(@Param('dataPk') dataPk: number) {
+    return this.conversationsService.remove(dataPk);
   }
 }
