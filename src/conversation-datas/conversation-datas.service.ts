@@ -71,8 +71,8 @@ export class ConversationDatasService {
   async createConversationDatas(saveData: SaveDatasDto) {
     try {
       const conversationDatas =
-        await this.conversationDatasReoisitory.create(saveData);
-      await this.conversationDatasReoisitory.save(conversationDatas);
+        await this.conversationDatasRepository.create(saveData);
+      await this.conversationDatasRepository.save(conversationDatas);
       return true;
     } catch (error) {
       console.log(error);
