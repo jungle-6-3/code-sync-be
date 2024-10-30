@@ -9,7 +9,14 @@ import { RoomSocketModule } from './room-socket/room-socket.module';
 import { SocketInformationModule } from './socket-information/socket-information.module';
 
 @Module({
-  imports: [UsersModule, AuthModule, RoomsModule, RoomEventModule, RoomSocketModule, SocketInformationModule],
+  imports: [
+    UsersModule,
+    AuthModule,
+    RoomsModule,
+    RoomEventModule,
+    RoomSocketModule,
+    SocketInformationModule,
+  ],
   providers: [ConversationEventsGateway, ConversationEventsService],
 })
 export class ConversationEventsModule {}
