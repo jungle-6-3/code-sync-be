@@ -79,4 +79,15 @@ export class ConversationDatasService {
       return false;
     }
   }
+
+  async getConversationDatas(pk: number) {
+    try {
+      const conversationDatas = this.conversationDatasRepository.findOneBy({
+        pk,
+      });
+      return conversationDatas;
+    } catch (error) {
+      return false;
+    }
+  }
 }
