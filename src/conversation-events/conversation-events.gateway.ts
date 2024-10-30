@@ -8,11 +8,7 @@ import {
   WsException,
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
-import {
-  disconenctRoomSocket,
-  initRoomSocket,
-  RoomSocket,
-} from './room-socket';
+import { initRoomSocket, RoomSocket } from './room-socket';
 import {
   ConversationEventsFilter,
   ConversationException,
@@ -20,6 +16,7 @@ import {
 import { User } from 'src/users/entities/user.entity';
 import { Room } from 'src/rooms/item';
 import { ConversationEventsService } from './conversation-events.service';
+import { RoomSocketService } from './room-socket/room-socket.service';
 
 @UseFilters(ConversationEventsFilter)
 @WebSocketGateway(3001, {
@@ -33,7 +30,10 @@ import { ConversationEventsService } from './conversation-events.service';
 export class ConversationEventsGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
-  constructor(private conversationEventsService: ConversationEventsService) {}
+  constructor(
+    private conversationEventsService: ConversationEventsService,
+    private roomSocketService: RoomSocketService,
+  ) {}
 
   @WebSocketServer() server: Server;
   logger: Logger = new Logger('ConnectionAndDisconnectionEventGateway');
@@ -58,7 +58,7 @@ export class ConversationEventsGateway
       );
       this.logger.debug((error as Error).stack);
       client.emit('exception', error.message);
-      disconenctRoomSocket(client);
+      this.roomSocketService.disconenctRoomSocket(client);
       return;
     }
     initRoomSocket(client, user, room);

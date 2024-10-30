@@ -3,5 +3,6 @@ import { RoomSocketService } from './room-socket.service';
 
 @Module({
   providers: [RoomSocketService],
+  exports: [RoomSocketService],
 })
 export class RoomSocketModule {}

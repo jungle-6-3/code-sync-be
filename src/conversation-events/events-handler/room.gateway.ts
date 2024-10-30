@@ -10,11 +10,12 @@ import {
 import { ConversationEventsFilter } from '../conversation-events.filter';
 import { Logger, UseFilters, UsePipes } from '@nestjs/common';
 import { ValidateUserIsCreatorPipe } from '../pipes/validate-user-is-creator.pipe';
-import { disconenctRoomSocket, RoomSocket, SocketStatus } from '../room-socket';
+import { RoomSocket, SocketStatus } from '../room-socket';
 import { Room } from 'src/rooms/item';
 import { RoomStatus } from 'src/rooms/item/room-event';
 import { Server } from 'socket.io';
 import { RoomEventService } from 'src/rooms/item/room-event/room-event.service';
+import { RoomSocketService } from '../room-socket/room-socket.service';
 
 @UseFilters(ConversationEventsFilter)
 @WebSocketGateway(3001, {
@@ -26,7 +27,10 @@ import { RoomEventService } from 'src/rooms/item/room-event/room-event.service';
   },
 })
 export class RoomGateway implements OnGatewayInit {
-  constructor(private roomEventsService: RoomEventService) {}
+  constructor(
+    private roomEventsService: RoomEventService,
+    private roomSocketService: RoomSocketService,
+  ) {}
 
   @WebSocketServer() server: Server;
   logger = new Logger('RoomEventGateway');
@@ -53,7 +57,7 @@ export class RoomGateway implements OnGatewayInit {
     room.watingSockets = [];
     disconnectSockets.forEach((socket) => {
       if (socket != participantSocket) {
-        disconenctRoomSocket(socket);
+        this.roomSocketService.disconenctRoomSocket(socket);
       }
     });
 
@@ -90,7 +94,7 @@ export class RoomGateway implements OnGatewayInit {
     if (!rejectedSocket) {
       throw new WsException('email에 해당되는 participant를 못 찾겠어요');
     }
-    disconenctRoomSocket(rejectedSocket);
+    this.roomSocketService.disconenctRoomSocket(rejectedSocket);
 
     return {
       sucess: true,
