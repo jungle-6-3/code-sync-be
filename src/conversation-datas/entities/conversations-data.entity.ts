@@ -1,7 +1,7 @@
 import { Conversation } from 'src/conversations/entities/conversation.entity';
 import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity()
+@Entity('ConversationDatas')
 export class ConversationDatas {
   @PrimaryGeneratedColumn()
   pk: number;

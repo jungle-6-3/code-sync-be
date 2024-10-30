@@ -3,12 +3,13 @@ import { User } from 'src/users/entities/user.entity';
 import {
   Column,
   Entity,
+  JoinColumn,
   ManyToOne,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
-@Entity()
+@Entity('Conversation')
 export class Conversation {
   @PrimaryGeneratedColumn()
   pk: number;
@@ -38,7 +39,9 @@ export class Conversation {
     (Type) => ConversationDatas,
     (conversationDatas) => conversationDatas.conversation,
   )
-  conversationDatas: ConversationDatas[];
+  @JoinColumn({ name: 'dataPk' })
+  conversationDatas: ConversationDatas;
+
   @ManyToOne((type) => User, (user) => user.createConversations)
   creator: User;
 
