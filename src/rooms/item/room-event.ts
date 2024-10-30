@@ -2,7 +2,7 @@ import { Logger } from '@nestjs/common';
 import { RoomSocket } from 'src/conversation-events/interfaces/room-socket.interface';
 import { SocketInformation } from 'src/conversation-events/interfaces/socket-information.interface';
 
-export const logger = new Logger('Room');
+export const logger = new Logger('RoomEvent');
 
 export class RoomEvent {
   uuid: string;
@@ -16,13 +16,6 @@ export class RoomEvent {
   constructor(uuid: string) {
     this.uuid = uuid;
     this.status = RoomStatus.WATING;
-  }
-
-  clearTimeout() {
-    logger.log(`${this.uuid}의 timeout이 제거되었습니다.`);
-    clearTimeout(this.globalTimeoutId);
-    this.globalTimeoutId = undefined;
-    this.outSocketInformation?.clearTimeout();
   }
 }
 

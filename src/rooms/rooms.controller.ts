@@ -32,7 +32,7 @@ export class RoomsController {
     @Request() req: Request & { user: JwtPayloadDto },
   ) {
     const user = await this.usersService.findUserbyPayload(req.user);
-    const room = await this.roomsService.findRoombyUuid(roomUuid);
+    const room = await this.roomsService.findRoomByUuid(roomUuid);
     await this.roomsService.saveRoom(room, user);
     return {
       success: true,

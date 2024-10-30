@@ -132,7 +132,7 @@ export class ConversationEventsService {
     }
     this.logger.log(`유저 정보 ${user.email} ${user.name}`);
     this.logger.log(`받은 room uuid ${roomUuid}`);
-    const room = await this.roomsService.findRoombyUuid(roomUuid);
+    const room = await this.roomsService.findRoomByUuid(roomUuid);
     if (!room) {
       throw new Error('방이 존재하지 않습니다.');
     }
