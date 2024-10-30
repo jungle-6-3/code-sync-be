@@ -14,7 +14,7 @@ export class ConversationDatasService {
   constructor(
     private configService: ConfigService,
     @InjectRepository(ConversationDatas)
-    private conversationDatasReoisitory: Repository<ConversationDatas>,
+    private conversationDatasRepository: Repository<ConversationDatas>,
   ) {
     this.s3Client = new S3Client({
       region: this.configService.get('AWS_REGION'),
