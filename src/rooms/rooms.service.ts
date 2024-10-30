@@ -1,4 +1,4 @@
-import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Room } from './item';
 import { v4 as _uuid } from 'uuid';
 import { User } from 'src/users/entities/user.entity';
@@ -19,7 +19,6 @@ export class RoomsService {
     this.roomsById.set(roomUuid, newRoom);
     this.roomEventsService.deleteRoomAfter(newRoom, 30);
     this.logger.log(`${creator.name}가 ${roomUuid}를 생성`);
-    console.log(this.roomsById);
     return roomUuid;
   }
 
@@ -36,7 +35,7 @@ export class RoomsService {
   }
 
   async deleteRoombyUuid(uuid: string) {
+    this.logger.log(`${uuid}을 map에서 제거`);
     this.roomsById.delete(uuid);
-    console.log(this.roomsById);
   }
 }
