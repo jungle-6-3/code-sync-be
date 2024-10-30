@@ -17,30 +17,17 @@ export enum RoomStatus {
 
 export class Room {
   uuid: string;
-
   status: RoomStatus;
-
   creatorPk: number;
-
   participantPk: number;
-
   creatorSocket: RoomSocket;
-
   participantSocket: RoomSocket;
-
   watingSockets: RoomSocket[];
-
   startedAt: Date;
-
   finishedAt: Date;
-
   prUrl: string;
-
   globalTimeoutId: NodeJS.Timeout;
-
   outSocketInformation: SocketInformation;
-
-  // TODO: data의 타입이 정해지면 수정 해야함
   data: RoomData;
 
   constructor(uuid: string, creator: User, prUrl: string) {
@@ -61,7 +48,6 @@ export class Room {
     this.globalTimeoutId = undefined;
     this.outSocketInformation?.clearTimeout();
   }
-  // TODO: 데이터 넣는 로직 추가.
 }
 
 interface RoomData {

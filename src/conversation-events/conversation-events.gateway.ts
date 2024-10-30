@@ -18,7 +18,7 @@ import {
   ConversationException,
 } from './conversation-events.filter';
 import { User } from 'src/users/entities/user.entity';
-import { Room } from 'src/rooms/room';
+import { Room } from 'src/rooms/item';
 import { ConversationEventsService } from './conversation-events.service';
 
 @UseFilters(ConversationEventsFilter)

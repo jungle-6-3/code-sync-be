@@ -7,7 +7,7 @@ import {
   SocketStatus,
 } from './interfaces/room-socket.interface';
 import { User } from 'src/users/entities/user.entity';
-import { Room, RoomStatus } from 'src/rooms/room';
+import { Room, RoomStatus } from 'src/rooms/item';
 import { AuthService } from 'src/auth/auth.service';
 import { UsersService } from 'src/users/users.service';
 import { RoomsService } from 'src/rooms/rooms.service';

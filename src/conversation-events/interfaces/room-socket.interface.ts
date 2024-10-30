@@ -1,5 +1,5 @@
 import { Socket } from 'socket.io';
-import { Room } from 'src/rooms/room';
+import { Room } from 'src/rooms/item';
 import { User } from 'src/users/entities/user.entity';
 
 export enum SocketStatus {

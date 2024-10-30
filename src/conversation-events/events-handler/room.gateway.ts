@@ -16,7 +16,7 @@ import {
   RoomSocket,
   SocketStatus,
 } from '../interfaces/room-socket.interface';
-import { Room, RoomStatus } from 'src/rooms/room';
+import { Room, RoomStatus } from 'src/rooms/item';
 import { Server } from 'socket.io';
 import { RoomsService } from 'src/rooms/rooms.service';
 
