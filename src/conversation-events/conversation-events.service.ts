@@ -7,7 +7,8 @@ import {
   SocketStatus,
 } from './interfaces/room-socket.interface';
 import { User } from 'src/users/entities/user.entity';
-import { Room, RoomStatus } from 'src/rooms/room';
+import { Room } from 'src/rooms/item';
+import { RoomStatus } from 'src/rooms/item/room-event';
 import { AuthService } from 'src/auth/auth.service';
 import { UsersService } from 'src/users/users.service';
 import { RoomsService } from 'src/rooms/rooms.service';
@@ -15,6 +16,7 @@ import { Handshake } from 'socket.io/dist/socket-types';
 import { JwtPayloadDto } from 'src/auth/dto/jwt-payload';
 import { WsException } from '@nestjs/websockets';
 import { Server } from 'socket.io';
+import { RoomEventService } from 'src/rooms/item/room-event/room-event.service';
 
 @Injectable()
 export class ConversationEventsService {
@@ -22,12 +24,16 @@ export class ConversationEventsService {
     private authService: AuthService,
     private usersService: UsersService,
     private roomsService: RoomsService,
+    private roomEventsService: RoomEventService,
   ) {}
   logger: Logger = new Logger('ConnectionAndDisconnectionEventGateway');
 
   async setClientStatus(client: RoomSocket, user: User, room: Room) {
     // 이전 연결을 유지한 채로 다시 참여하는 경우
-    const beforeSocket = await this.roomsService.findRoomSocket(room, user);
+    const beforeSocket = await this.roomEventsService.findRoomSocket(
+      room,
+      user,
+    );
     if (beforeSocket) {
       copyFromBeforeSocket(beforeSocket, client);
       disconnectBeforeSocket(beforeSocket);
@@ -132,7 +138,7 @@ export class ConversationEventsService {
     }
     this.logger.log(`유저 정보 ${user.email} ${user.name}`);
     this.logger.log(`받은 room uuid ${roomUuid}`);
-    const room = await this.roomsService.findRoombyUuid(roomUuid);
+    const room = await this.roomsService.findRoomByUuid(roomUuid);
     if (!room) {
       throw new Error('방이 존재하지 않습니다.');
     }
@@ -169,14 +175,14 @@ export class ConversationEventsService {
         switch (room.status) {
           case RoomStatus.WATING:
           case RoomStatus.INVITING:
-            this.roomsService.deleteRoom(room);
+            this.roomEventsService.deleteRoom(room);
             break;
           case RoomStatus.PARTICIPANT_OUT:
-            this.roomsService.closeRoom(room);
+            this.roomEventsService.closeRoom(room);
             break;
           case RoomStatus.RUNNING:
             room.status = RoomStatus.CREATOR_OUT;
-            this.roomsService.closeRoomAfter(room, client, 5);
+            this.roomEventsService.closeRoomAfter(room, client, 5);
             server.to(room.uuid).emit('uesr-disconnected', {
               message: '상대방이 나갔습니다',
               data: {
@@ -199,11 +205,11 @@ export class ConversationEventsService {
         room.participantSocket = undefined;
         switch (room.status) {
           case RoomStatus.CREATOR_OUT:
-            this.roomsService.closeRoom(room);
+            this.roomEventsService.closeRoom(room);
             break;
           case RoomStatus.RUNNING:
             room.status = RoomStatus.PARTICIPANT_OUT;
-            this.roomsService.closeRoomAfter(room, client, 5);
+            this.roomEventsService.closeRoomAfter(room, client, 5);
             server.to(room.uuid).emit('uesr-disconnected', {
               message: '상대방이 나갔습니다',
               data: {

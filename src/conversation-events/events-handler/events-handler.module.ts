@@ -5,9 +5,10 @@ import { RoomsModule } from 'src/rooms/rooms.module';
 import { PeerJsGateway } from './peer-js.gateway';
 import { RoomGateway } from './room.gateway';
 import { ChattingHandlerGateway } from './chatting-handler.gateway';
+import { RoomEventModule } from 'src/rooms/item/room-event/room-event.module';
 
 @Module({
-  imports: [AuthModule, UsersModule, RoomsModule],
+  imports: [AuthModule, UsersModule, RoomsModule, RoomEventModule],
   providers: [PeerJsGateway, RoomGateway, ChattingHandlerGateway],
   exports: [],
 })
