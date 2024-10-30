@@ -66,7 +66,8 @@ export class AuthController {
   @Post('logout')
   @UseGuards(JwtAuthGuard)
   logOut(@Req() req: Request, @Res() res: Response) {
-    res.cookie('token', '', { maxAge: 0 });
+    // res.cookie('token', '', { maxAge: 0 });
+    res.clearCookie('token');
 
     return res.send({
       message: 'success',
