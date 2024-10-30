@@ -3,13 +3,17 @@ import { Room } from './item';
 import { v4 as _uuid } from 'uuid';
 import { User } from 'src/users/entities/user.entity';
 import { RoomEventService } from './item/room-event/room-event.service';
+import { RoomEventTimerService } from './item/room-event/room-event.timer.service';
 
 @Injectable()
 export class RoomsService {
   private roomsById: Map<string, Room>;
   logger: Logger = new Logger('RoomsService');
 
-  constructor(private roomEventsService: RoomEventService) {
+  constructor(
+    private roomEventsService: RoomEventService,
+    private roomEventTimerService: RoomEventTimerService,
+  ) {
     this.roomsById = new Map();
   }
 
@@ -17,7 +21,7 @@ export class RoomsService {
     const roomUuid = _uuid();
     const newRoom = new Room(roomUuid, creator, prUrl);
     this.roomsById.set(roomUuid, newRoom);
-    this.roomEventsService.deleteRoomAfter(newRoom, 30);
+    this.roomEventTimerService.deleteRoomAfter(newRoom, 30);
     this.logger.log(`${creator.name}가 ${roomUuid}를 생성`);
     return roomUuid;
   }

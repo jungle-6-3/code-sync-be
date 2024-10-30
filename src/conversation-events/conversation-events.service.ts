@@ -13,6 +13,7 @@ import { Server } from 'socket.io';
 import { RoomEventService } from 'src/rooms/item/room-event/room-event.service';
 import { RoomSocketService } from './room-socket/room-socket.service';
 import { joinClientInRoom } from 'src/rooms/item/room-event/join-client-in-room.function';
+import { RoomEventTimerService } from 'src/rooms/item/room-event/room-event.timer.service';
 
 @Injectable()
 export class ConversationEventsService {
@@ -22,6 +23,7 @@ export class ConversationEventsService {
     private roomsService: RoomsService,
     private roomEventsService: RoomEventService,
     private roomSocketService: RoomSocketService,
+    private roomEventTimerService: RoomEventTimerService,
   ) {}
   logger: Logger = new Logger('ConnectionAndDisconnectionEventGateway');
 
@@ -129,7 +131,7 @@ export class ConversationEventsService {
             break;
           case RoomStatus.RUNNING:
             room.status = RoomStatus.CREATOR_OUT;
-            this.roomEventsService.closeRoomAfter(room, client, 5);
+            this.roomEventTimerService.closeRoomAfter(room, client, 5);
             client.to(room.uuid).emit('uesr-disconnected', {
               message: '상대방이 나갔습니다',
               data: {
@@ -156,7 +158,7 @@ export class ConversationEventsService {
             break;
           case RoomStatus.RUNNING:
             room.status = RoomStatus.PARTICIPANT_OUT;
-            this.roomEventsService.closeRoomAfter(room, client, 5);
+            this.roomEventTimerService.closeRoomAfter(room, client, 5);
             client.to(room.uuid).emit('uesr-disconnected', {
               message: '상대방이 나갔습니다',
               data: {
