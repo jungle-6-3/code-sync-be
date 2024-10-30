@@ -97,7 +97,7 @@ export class ConversationEventsService {
         break;
       case SocketStatus.WAITER:
         room.watingSockets.push(client);
-        server.to(room.uuid).emit('join-request-by', {
+        client.to(room.uuid).emit('join-request-by', {
           message: '참가 요청이 왔습니다.',
           data: {
             participant: {
@@ -178,7 +178,7 @@ export class ConversationEventsService {
           case RoomStatus.RUNNING:
             room.status = RoomStatus.CREATOR_OUT;
             this.roomEventsService.closeRoomAfter(room, client, 5);
-            server.to(room.uuid).emit('uesr-disconnected', {
+            client.to(room.uuid).emit('uesr-disconnected', {
               message: '상대방이 나갔습니다',
               data: {
                 name: user.name,
@@ -205,7 +205,7 @@ export class ConversationEventsService {
           case RoomStatus.RUNNING:
             room.status = RoomStatus.PARTICIPANT_OUT;
             this.roomEventsService.closeRoomAfter(room, client, 5);
-            server.to(room.uuid).emit('uesr-disconnected', {
+            client.to(room.uuid).emit('uesr-disconnected', {
               message: '상대방이 나갔습니다',
               data: {
                 name: user.name,
