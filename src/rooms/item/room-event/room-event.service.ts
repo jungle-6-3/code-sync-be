@@ -1,18 +1,17 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
-import {
-  disconenctRoomSocket,
-  RoomSocket,
-} from 'src/conversation-events/room-socket';
+import { RoomSocket } from 'src/conversation-events/room-socket';
 import { logger, RoomStatus } from '.';
 import { SocketInformation } from 'src/conversation-events/socket-information';
 import { User } from 'src/users/entities/user.entity';
 import { Room } from '..';
 import { RoomsService } from 'src/rooms/rooms.service';
+import { RoomSocketService } from 'src/conversation-events/room-socket/room-socket.service';
 @Injectable()
 export class RoomEventService {
   constructor(
     @Inject(forwardRef(() => RoomsService))
     private roomsService: RoomsService,
+    private roomSocketService: RoomSocketService,
   ) {}
   private logger = logger;
 
@@ -85,8 +84,10 @@ export class RoomEventService {
   private async disconnectRoomsSockets(room: Room) {
     const { creatorSocket, participantSocket, watingSockets } = room;
 
-    disconenctRoomSocket(creatorSocket);
-    disconenctRoomSocket(participantSocket);
-    watingSockets.forEach((socket) => disconenctRoomSocket(socket));
+    this.roomSocketService.disconenctRoomSocket(creatorSocket);
+    this.roomSocketService.disconenctRoomSocket(participantSocket);
+    watingSockets.forEach((socket) =>
+      this.roomSocketService.disconenctRoomSocket(socket),
+    );
   }
 }
