@@ -47,9 +47,17 @@ export class ConversationsController {
     };
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.conversationsService.findOne(+id);
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({
+    summary: '회의록 데이터 요청',
+    description: '회의록에 대한 회의 내용을 요청한다.',
+  })
+  @Get(':dataPk')
+  getConversationDatas(
+    @Request() req: Request & { user: JwtPayloadDto },
+    @Param('dataPk') dataPk: number,
+  ) {
+    return this.conversationsService.getConversationDatas(req.user, dataPk);
   }
 
   @Patch(':id')
