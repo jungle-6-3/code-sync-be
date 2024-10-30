@@ -66,7 +66,7 @@ export class RoomEventService {
     this.clearTimeout(room);
 
     this.logger.log(`${room.uuid}가 삭제됨`);
-    this.disconnectRoomsSockets(room);
+    await this.disconnectRoomsSockets(room);
 
     this.roomsService.deleteRoombyUuid(room.uuid);
   }
@@ -78,11 +78,11 @@ export class RoomEventService {
     room.status = RoomStatus.CLOSING;
     room.finishedAt = new Date();
 
-    this.disconnectRoomsSockets(room);
+    await this.disconnectRoomsSockets(room);
     this.deleteRoomAfter(room, 30);
   }
 
-  private disconnectRoomsSockets(room: Room) {
+  private async disconnectRoomsSockets(room: Room) {
     const { creatorSocket, participantSocket, watingSockets } = room;
 
     disconenctRoomSocket(creatorSocket);
