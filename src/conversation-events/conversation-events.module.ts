@@ -4,7 +4,7 @@ import { UsersModule } from 'src/users/users.module';
 import { AuthModule } from 'src/auth/auth.module';
 import { RoomsModule } from 'src/rooms/rooms.module';
 import { ConversationEventsService } from './conversation-events.service';
-import { RoomEventModule } from 'src/rooms/item/room-event/room-event.module';
+import { RoomEventModule } from 'src/rooms/room-event/room-event.module';
 import { RoomSocketModule } from './room-socket/room-socket.module';
 
 @Module({

@@ -11,12 +11,12 @@ import { ConversationEventsFilter } from '../conversation-events.filter';
 import { Logger, UseFilters, UsePipes } from '@nestjs/common';
 import { ValidateUserIsCreatorPipe } from '../pipes/validate-user-is-creator.pipe';
 import { RoomSocket, SocketStatus } from '../room-socket';
-import { Room } from 'src/rooms/item';
-import { RoomStatus } from 'src/rooms/item/room-event';
+import { Room } from 'src/rooms/rooms.item';
+import { RoomStatus } from 'src/rooms/room-event';
 import { Server } from 'socket.io';
-import { RoomEventService } from 'src/rooms/item/room-event/room-event.service';
+import { RoomEventService } from 'src/rooms/room-event/room-event.service';
 import { RoomSocketService } from '../room-socket/room-socket.service';
-import { RoomEventTimerService } from 'src/rooms/item/room-event/room-event.timer.service';
+import { RoomEventTimerService } from 'src/rooms/room-event/room-event.timer.service';
 
 @UseFilters(ConversationEventsFilter)
 @WebSocketGateway(3001, {

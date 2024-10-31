@@ -1,5 +1,5 @@
 import { RoomSocket, SocketStatus } from 'src/conversation-events/room-socket';
-import { Room } from '..';
+import { Room } from '../rooms.item';
 import { RoomStatus } from '.';
 import { Logger } from '@nestjs/common';
 export const joinClientInRoomAction = {

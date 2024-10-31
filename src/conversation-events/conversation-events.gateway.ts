@@ -14,7 +14,7 @@ import {
   ConversationException,
 } from './conversation-events.filter';
 import { User } from 'src/users/entities/user.entity';
-import { Room } from 'src/rooms/item';
+import { Room } from 'src/rooms/rooms.item';
 import { ConversationEventsService } from './conversation-events.service';
 import { RoomSocketService } from './room-socket/room-socket.service';
 

@@ -1,9 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Room } from './item';
+import { Room } from './rooms.item';
 import { v4 as _uuid } from 'uuid';
 import { User } from 'src/users/entities/user.entity';
-import { RoomEventService } from './item/room-event/room-event.service';
-import { RoomEventTimerService } from './item/room-event/room-event.timer.service';
+import { RoomEventService } from './room-event/room-event.service';
+import { RoomEventTimerService } from './room-event/room-event.timer.service';
 
 @Injectable()
 export class RoomsService {

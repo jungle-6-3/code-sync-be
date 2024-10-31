@@ -1,7 +1,7 @@
 import { ArgumentMetadata, Injectable, PipeTransform } from '@nestjs/common';
 import { RoomSocket, SocketStatus } from '../room-socket';
 import { WsException } from '@nestjs/websockets';
-import { RoomStatus } from 'src/rooms/item/room-event';
+import { RoomStatus } from 'src/rooms/room-event';
 
 @Injectable()
 export class ValidateUserIsJoiningPipe implements PipeTransform {

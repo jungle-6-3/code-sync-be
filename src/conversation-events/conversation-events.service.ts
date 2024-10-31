@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { RoomSocket, SocketStatus } from './room-socket';
 import { User } from 'src/users/entities/user.entity';
-import { Room } from 'src/rooms/item';
-import { RoomStatus } from 'src/rooms/item/room-event';
+import { Room } from 'src/rooms/rooms.item';
+import { RoomStatus } from 'src/rooms/room-event';
 import { AuthService } from 'src/auth/auth.service';
 import { UsersService } from 'src/users/users.service';
 import { RoomsService } from 'src/rooms/rooms.service';
@@ -10,10 +10,10 @@ import { Handshake } from 'socket.io/dist/socket-types';
 import { JwtPayloadDto } from 'src/auth/dto/jwt-payload';
 import { WsException } from '@nestjs/websockets';
 import { Server } from 'socket.io';
-import { RoomEventService } from 'src/rooms/item/room-event/room-event.service';
+import { RoomEventService } from 'src/rooms/room-event/room-event.service';
 import { RoomSocketService } from './room-socket/room-socket.service';
-import { joinClientInRoomAction } from 'src/rooms/item/room-event/join-client-in-room.action';
-import { RoomEventTimerService } from 'src/rooms/item/room-event/room-event.timer.service';
+import { joinClientInRoomAction } from 'src/rooms/room-event/join-client-in-room.action';
+import { RoomEventTimerService } from 'src/rooms/room-event/room-event.timer.service';
 
 @Injectable()
 export class ConversationEventsService {

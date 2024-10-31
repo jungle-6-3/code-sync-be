@@ -2,7 +2,7 @@ import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { RoomSocket } from 'src/conversation-events/room-socket';
 import { logger, RoomStatus } from '.';
 import { User } from 'src/users/entities/user.entity';
-import { Room } from '..';
+import { Room } from '../rooms.item';
 import { RoomsService } from 'src/rooms/rooms.service';
 import { RoomSocketService } from 'src/conversation-events/room-socket/room-socket.service';
 import { RoomEventTimerService } from './room-event.timer.service';
