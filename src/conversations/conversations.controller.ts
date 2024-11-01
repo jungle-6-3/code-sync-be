@@ -8,6 +8,7 @@ import {
   Request,
   Delete,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { ConversationsService } from './conversations.service';
 import { UpdateConversationDto } from './dto/update-conversation.dto';
@@ -35,16 +36,21 @@ export class ConversationsController {
   })
   @UseGuards(JwtAuthGuard)
   @Get()
-  async findAll(@Request() req: Request & { user: JwtPayloadDto }) {
+  async findAll(
+    @Request() req: Request & { user: JwtPayloadDto },
+    @Query('page') page: string,
+  ) {
     const { email, name }: JwtPayloadDto = req.user;
     const user = await this.userService.findOne(email);
-    console.log('this is find conversations');
+    const curPage = parseInt(page) || 1;
+    const limit = 8; // 추후 query 요청으로 오면 변경
 
-    return {
-      data: {
-        conversations: await this.conversationsService.findAll(user.pk),
-      },
-    };
+    const conversations = await this.conversationsService.findAll(
+      user.pk,
+      curPage,
+      limit,
+    );
+    return { success: true, data: conversations };
   }
 
   @UseGuards(JwtAuthGuard)
