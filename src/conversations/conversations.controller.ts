@@ -45,7 +45,12 @@ export class ConversationsController {
     const curPage = parseInt(page) || 1;
     const limit = 8; // 추후 query 요청으로 오면 변경
 
-    return await this.conversationsService.findAll(user.pk, curPage, limit);
+    const conversations = await this.conversationsService.findAll(
+      user.pk,
+      curPage,
+      limit,
+    );
+    return { success: true, data: conversations };
   }
 
   @UseGuards(JwtAuthGuard)
