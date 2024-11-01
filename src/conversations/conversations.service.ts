@@ -27,8 +27,10 @@ export class ConversationsService {
     }
   }
 
-  async findAll(userPk: number) {
-    const conversations = await this.conversationRepository
+  async findAll(userPk: number, page: number, limit: number) {
+    const skip = (page - 1) * limit;
+
+    const [conversations, total] = await this.conversationRepository
       .createQueryBuilder('conversation')
       .leftJoinAndSelect('conversation.creator', 'creator')
       .leftJoinAndSelect('conversation.participant', 'participant')
@@ -42,8 +44,10 @@ export class ConversationsService {
       .where('conversation.creatorPk =:userPk', { userPk })
       .orWhere('conversation.participantPk =:userPk', { userPk })
       .orderBy('conversation.startedAt', 'DESC')
-      .getMany();
-    return conversations;
+      .skip(skip)
+      .take(limit)
+      .getManyAndCount();
+    return { total: total, conversations };
   }
 
   async getConversationDatas(user, dataPk: number) {
