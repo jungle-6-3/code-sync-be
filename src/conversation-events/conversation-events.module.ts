@@ -6,7 +6,6 @@ import { RoomsModule } from 'src/rooms/rooms.module';
 import { EventsHandlerModule } from './events-handler/events-handler.module';
 import { ConversationEventsService } from './conversation-events.service';
 import { RoomEventModule } from 'src/rooms/item/room-event/room-event.module';
-import { ServerJoinHandlerModule } from './server-join-handler/server-join-handler.module';
 import { RoomHandlerGateway } from './room-handler.gateway';
 
 @Module({
@@ -16,7 +15,6 @@ import { RoomHandlerGateway } from './room-handler.gateway';
     RoomsModule,
     forwardRef(() => EventsHandlerModule),
     RoomEventModule,
-    ServerJoinHandlerModule,
   ],
   controllers: [],
   providers: [

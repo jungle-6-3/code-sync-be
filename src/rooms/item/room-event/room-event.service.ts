@@ -2,17 +2,20 @@ import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import {
   disconenctRoomSocket,
   RoomSocket,
+  SocketStatus,
 } from 'src/conversation-events/interfaces/room-socket.interface';
 import { logger, RoomStatus } from '.';
 import { SocketInformation } from 'src/conversation-events/interfaces/socket-information.interface';
 import { User } from 'src/users/entities/user.entity';
 import { Room } from '..';
 import { RoomsService } from 'src/rooms/rooms.service';
+import { ServerJoinHandlerService } from 'src/conversation-events/server-join-handler/server-join-handler.service';
 @Injectable()
 export class RoomEventService {
   constructor(
     @Inject(forwardRef(() => RoomsService))
     private roomsService: RoomsService,
+    private serverJoinHandlerService: ServerJoinHandlerService,
   ) {}
   private logger = logger;
 
@@ -80,6 +83,19 @@ export class RoomEventService {
 
     this.disconnectRoomsSockets(room);
     this.deleteRoomAfter(room, 30);
+
+    this.serverJoinHandlerService.finishServerJoin(room);
+  }
+
+  async runningRoomOnce(room: Room, participant: RoomSocket) {
+    participant.status = SocketStatus.PARTICIPANT;
+    participant.join(room.uuid);
+    room.participantSocket = participant;
+    room.participantPk = participant.user.pk;
+    room.status = RoomStatus.RUNNING;
+    this.clearTimeout(room);
+
+    this.serverJoinHandlerService.startServerJoin(room);
   }
 
   private disconnectRoomsSockets(room: Room) {

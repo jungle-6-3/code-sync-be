@@ -19,7 +19,6 @@ import { Room } from 'src/rooms/item';
 import { RoomStatus } from 'src/rooms/item/room-event';
 import { Server } from 'socket.io';
 import { RoomEventService } from 'src/rooms/item/room-event/room-event.service';
-import { ServerJoinHandlerService } from './server-join-handler/server-join-handler.service';
 
 @UseFilters(ConversationEventsFilter)
 @WebSocketGateway(3001, {
@@ -31,10 +30,7 @@ import { ServerJoinHandlerService } from './server-join-handler/server-join-hand
   },
 })
 export class RoomHandlerGateway implements OnGatewayInit {
-  constructor(
-    private roomEventsService: RoomEventService,
-    private serverJoinHandlerService: ServerJoinHandlerService,
-  ) {}
+  constructor(private roomEventsService: RoomEventService) {}
 
   @WebSocketServer() server: Server;
   logger = new Logger('RoomEventGateway');
@@ -65,12 +61,7 @@ export class RoomHandlerGateway implements OnGatewayInit {
       }
     });
 
-    participantSocket.status = SocketStatus.PARTICIPANT;
-    participantSocket.join(room.uuid);
-    room.participantSocket = participantSocket;
-    room.participantPk = participantSocket.user.pk;
-    room.status = RoomStatus.RUNNING;
-    this.roomEventsService.clearTimeout(room);
+    this.roomEventsService.runningRoomOnce(room, participantSocket);
     this.logger.log(`초대로 인해 ${room.uuid}의 상태가 Running이 되었습니다.`);
 
     participantSocket.emit('invite-accepted', {
