@@ -12,7 +12,6 @@ import { Logger, UseFilters, UsePipes } from '@nestjs/common';
 import { ValidateUserIsCreatorPipe } from './pipes/validate-user-is-creator.pipe';
 import {
   disconenctRoomSocket,
-  disconnectBeforeSocket,
   RoomSocket,
   SocketStatus,
 } from './interfaces/room-socket.interface';
@@ -20,6 +19,7 @@ import { Room } from 'src/rooms/item';
 import { RoomStatus } from 'src/rooms/item/room-event';
 import { Server } from 'socket.io';
 import { RoomEventService } from 'src/rooms/item/room-event/room-event.service';
+import { ServerJoinHandlerService } from './server-join-handler/server-join-handler.service';
 
 @UseFilters(ConversationEventsFilter)
 @WebSocketGateway(3001, {
@@ -31,7 +31,10 @@ import { RoomEventService } from 'src/rooms/item/room-event/room-event.service';
   },
 })
 export class RoomHandlerGateway implements OnGatewayInit {
-  constructor(private roomEventsService: RoomEventService) {}
+  constructor(
+    private roomEventsService: RoomEventService,
+    private serverJoinHandlerService: ServerJoinHandlerService,
+  ) {}
 
   @WebSocketServer() server: Server;
   logger = new Logger('RoomEventGateway');
@@ -48,17 +51,17 @@ export class RoomHandlerGateway implements OnGatewayInit {
   ) {
     const room: Room = client.room;
 
-    const participantSocket: RoomSocket = room.watingSockets.find(
+    const participantSocket: RoomSocket = room.waitingSockets.find(
       (socket) => socket.user.email == email,
     );
     if (!participantSocket) {
       throw new WsException('email에 해당되는 participant를 못 찾겠어요');
     }
-    const disconnectSockets: RoomSocket[] = room.watingSockets;
-    room.watingSockets = [];
+    const disconnectSockets: RoomSocket[] = room.waitingSockets;
+    room.waitingSockets = [];
     disconnectSockets.forEach((socket) => {
       if (socket != participantSocket) {
-        disconnectBeforeSocket(socket);
+        disconenctRoomSocket(socket);
       }
     });
 
@@ -89,7 +92,7 @@ export class RoomHandlerGateway implements OnGatewayInit {
     @MessageBody() { email }: { email: string },
   ) {
     const room = client.room;
-    const rejectedSocket: RoomSocket = room.watingSockets.find(
+    const rejectedSocket: RoomSocket = room.waitingSockets.find(
       (socket) => socket.user.email == email,
     );
     if (!rejectedSocket) {

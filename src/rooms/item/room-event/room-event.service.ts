@@ -42,14 +42,14 @@ export class RoomEventService {
   }
 
   async findRoomSocket(room: Room, user: User): Promise<RoomSocket> {
-    const { creatorSocket, participantSocket, watingSockets } = room;
+    const { creatorSocket, participantSocket, waitingSockets } = room;
     if (creatorSocket && creatorSocket.user.pk == user.pk) {
       return creatorSocket;
     }
     if (participantSocket && participantSocket.user.pk == user.pk) {
       return participantSocket;
     }
-    const sameWaitingUser = watingSockets.find(
+    const sameWaitingUser = waitingSockets.find(
       (socket) => socket.user.pk == user.pk,
     );
     return sameWaitingUser;
@@ -83,10 +83,10 @@ export class RoomEventService {
   }
 
   private disconnectRoomsSockets(room: Room) {
-    const { creatorSocket, participantSocket, watingSockets } = room;
+    const { creatorSocket, participantSocket, waitingSockets } = room;
 
     disconenctRoomSocket(creatorSocket);
     disconenctRoomSocket(participantSocket);
-    watingSockets.forEach((socket) => disconenctRoomSocket(socket));
+    waitingSockets.forEach((socket) => disconenctRoomSocket(socket));
   }
 }
