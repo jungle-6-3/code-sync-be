@@ -7,6 +7,7 @@ import { EventsHandlerModule } from './events-handler/events-handler.module';
 import { ConversationEventsService } from './conversation-events.service';
 import { RoomEventModule } from 'src/rooms/item/room-event/room-event.module';
 import { ServerJoinHandlerModule } from './server-join-handler/server-join-handler.module';
+import { RoomHandlerGateway } from './room-handler.gateway';
 
 @Module({
   imports: [
@@ -18,7 +19,11 @@ import { ServerJoinHandlerModule } from './server-join-handler/server-join-handl
     ServerJoinHandlerModule,
   ],
   controllers: [],
-  providers: [ConversationEventsGateway, ConversationEventsService],
+  providers: [
+    ConversationEventsGateway,
+    RoomHandlerGateway,
+    ConversationEventsService,
+  ],
   exports: [ConversationEventsGateway],
 })
 export class ConversationEventsModule {}

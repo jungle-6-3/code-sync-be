@@ -7,15 +7,15 @@ import {
   WebSocketServer,
   WsException,
 } from '@nestjs/websockets';
-import { ConversationEventsFilter } from '../conversation-events.filter';
+import { ConversationEventsFilter } from './conversation-events.filter';
 import { Logger, UseFilters, UsePipes } from '@nestjs/common';
-import { ValidateUserIsCreatorPipe } from '../pipes/validate-user-is-creator.pipe';
+import { ValidateUserIsCreatorPipe } from './pipes/validate-user-is-creator.pipe';
 import {
   disconenctRoomSocket,
   disconnectBeforeSocket,
   RoomSocket,
   SocketStatus,
-} from '../interfaces/room-socket.interface';
+} from './interfaces/room-socket.interface';
 import { Room } from 'src/rooms/item';
 import { RoomStatus } from 'src/rooms/item/room-event';
 import { Server } from 'socket.io';
@@ -30,7 +30,7 @@ import { RoomEventService } from 'src/rooms/item/room-event/room-event.service';
     transports: ['polling', 'websocket'],
   },
 })
-export class RoomGateway implements OnGatewayInit {
+export class RoomHandlerGateway implements OnGatewayInit {
   constructor(private roomEventsService: RoomEventService) {}
 
   @WebSocketServer() server: Server;
