@@ -6,6 +6,7 @@ import { RoomsModule } from 'src/rooms/rooms.module';
 import { EventsHandlerModule } from './events-handler/events-handler.module';
 import { ConversationEventsService } from './conversation-events.service';
 import { RoomEventModule } from 'src/rooms/item/room-event/room-event.module';
+import { RoomHandlerGateway } from './room-handler.gateway';
 
 @Module({
   imports: [
@@ -16,7 +17,11 @@ import { RoomEventModule } from 'src/rooms/item/room-event/room-event.module';
     RoomEventModule,
   ],
   controllers: [],
-  providers: [ConversationEventsGateway, ConversationEventsService],
+  providers: [
+    ConversationEventsGateway,
+    RoomHandlerGateway,
+    ConversationEventsService,
+  ],
   exports: [ConversationEventsGateway],
 })
 export class ConversationEventsModule {}

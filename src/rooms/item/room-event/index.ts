@@ -9,14 +9,14 @@ export class RoomEvent {
   status: RoomStatus;
   creatorSocket: RoomSocket;
   participantSocket: RoomSocket;
-  watingSockets: RoomSocket[];
+  waitingSockets: RoomSocket[];
   globalTimeoutId: NodeJS.Timeout;
   outSocketInformation: SocketInformation;
 
   constructor(uuid: string) {
     this.uuid = uuid;
     this.status = RoomStatus.WATING;
-    this.watingSockets = [];
+    this.waitingSockets = [];
   }
 }
 

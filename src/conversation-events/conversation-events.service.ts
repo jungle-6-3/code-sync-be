@@ -101,7 +101,7 @@ export class ConversationEventsService {
         this.logger.log(`참가자가 되었습니다.`);
         break;
       case SocketStatus.WAITER:
-        room.watingSockets.push(client);
+        room.waitingSockets.push(client);
         server.to(room.uuid).emit('join-request-by', {
           message: '참가 요청이 왔습니다.',
           data: {
@@ -153,10 +153,10 @@ export class ConversationEventsService {
       case SocketStatus.REFLASING:
         break;
       case SocketStatus.WAITER:
-        if (room.watingSockets.length == 0) {
+        if (room.waitingSockets.length == 0) {
           break;
         }
-        const indexToRemove = room.watingSockets.findIndex(
+        const indexToRemove = room.waitingSockets.findIndex(
           (socket) => socket.user.pk == user.pk,
         );
         if (indexToRemove == -1) {
@@ -168,7 +168,7 @@ export class ConversationEventsService {
             백앤드를 불러주세요.',
           );
         }
-        room.watingSockets.splice(indexToRemove);
+        room.waitingSockets.splice(indexToRemove);
         break;
       case SocketStatus.CREATOR:
         room.creatorSocket = undefined;

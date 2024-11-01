@@ -2,17 +2,20 @@ import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import {
   disconenctRoomSocket,
   RoomSocket,
+  SocketStatus,
 } from 'src/conversation-events/interfaces/room-socket.interface';
 import { logger, RoomStatus } from '.';
 import { SocketInformation } from 'src/conversation-events/interfaces/socket-information.interface';
 import { User } from 'src/users/entities/user.entity';
 import { Room } from '..';
 import { RoomsService } from 'src/rooms/rooms.service';
+import { ServerJoinHandlerService } from 'src/conversation-events/server-join-handler/server-join-handler.service';
 @Injectable()
 export class RoomEventService {
   constructor(
     @Inject(forwardRef(() => RoomsService))
     private roomsService: RoomsService,
+    private serverJoinHandlerService: ServerJoinHandlerService,
   ) {}
   private logger = logger;
 
@@ -42,14 +45,14 @@ export class RoomEventService {
   }
 
   async findRoomSocket(room: Room, user: User): Promise<RoomSocket> {
-    const { creatorSocket, participantSocket, watingSockets } = room;
+    const { creatorSocket, participantSocket, waitingSockets } = room;
     if (creatorSocket && creatorSocket.user.pk == user.pk) {
       return creatorSocket;
     }
     if (participantSocket && participantSocket.user.pk == user.pk) {
       return participantSocket;
     }
-    const sameWaitingUser = watingSockets.find(
+    const sameWaitingUser = waitingSockets.find(
       (socket) => socket.user.pk == user.pk,
     );
     return sameWaitingUser;
@@ -80,13 +83,26 @@ export class RoomEventService {
 
     this.disconnectRoomsSockets(room);
     this.deleteRoomAfter(room, 30);
+
+    this.serverJoinHandlerService.finishServerJoin(room);
+  }
+
+  async runningRoomOnce(room: Room, participant: RoomSocket) {
+    participant.status = SocketStatus.PARTICIPANT;
+    participant.join(room.uuid);
+    room.participantSocket = participant;
+    room.participantPk = participant.user.pk;
+    room.status = RoomStatus.RUNNING;
+    this.clearTimeout(room);
+
+    this.serverJoinHandlerService.startServerJoin(room);
   }
 
   private disconnectRoomsSockets(room: Room) {
-    const { creatorSocket, participantSocket, watingSockets } = room;
+    const { creatorSocket, participantSocket, waitingSockets } = room;
 
     disconenctRoomSocket(creatorSocket);
     disconenctRoomSocket(participantSocket);
-    watingSockets.forEach((socket) => disconenctRoomSocket(socket));
+    waitingSockets.forEach((socket) => disconenctRoomSocket(socket));
   }
 }
