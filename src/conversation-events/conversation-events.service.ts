@@ -183,7 +183,7 @@ export class ConversationEventsService {
           case RoomStatus.RUNNING:
             room.status = RoomStatus.CREATOR_OUT;
             this.roomEventsService.closeRoomAfter(room, client, 5);
-            server.to(room.uuid).emit('uesr-disconnected', {
+            server.to(room.uuid).emit('user-disconnected', {
               message: '상대방이 나갔습니다',
               data: {
                 name: user.name,
@@ -210,7 +210,7 @@ export class ConversationEventsService {
           case RoomStatus.RUNNING:
             room.status = RoomStatus.PARTICIPANT_OUT;
             this.roomEventsService.closeRoomAfter(room, client, 5);
-            server.to(room.uuid).emit('uesr-disconnected', {
+            server.to(room.uuid).emit('user-disconnected', {
               message: '상대방이 나갔습니다',
               data: {
                 name: user.name,
