@@ -2,6 +2,7 @@ import { ConversationDatas } from 'src/conversation-datas/entities/conversations
 import { User } from 'src/users/entities/user.entity';
 import {
   Column,
+  DeleteDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
@@ -32,12 +33,13 @@ export class Conversation {
   @Column()
   finishedAt: Date;
 
-  @Column()
+  @DeleteDateColumn()
   deletedAt: Date;
 
   @OneToOne(
     (Type) => ConversationDatas,
     (conversationDatas) => conversationDatas.conversation,
+    { cascade: true },
   )
   @JoinColumn({ name: 'dataPk' })
   conversationDatas: ConversationDatas;
