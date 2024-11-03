@@ -4,9 +4,9 @@ import { ConversationDto } from './dto/conversation.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Conversation } from './entities/conversation.entity';
 import { Repository } from 'typeorm';
-import { ConversationDatas } from 'src/conversation-datas/entities/conversations-data.entity';
 import { ConversationDatasService } from 'src/conversation-datas/conversation-datas.service';
 import { UsersService } from 'src/users/users.service';
+import { RoomSaveDto } from './dto/room-save.dto';
 
 @Injectable()
 export class ConversationsService {
@@ -16,15 +16,23 @@ export class ConversationsService {
     private conversationDatasService: ConversationDatasService,
     private usersServie: UsersService,
   ) {}
-  async createConversation(conversationDto: ConversationDto) {
+  async createConversation(roomSaveDto: RoomSaveDto) {
     // TODO : Exception 처리 하기
-    try {
-      const conversation = this.conversationRepository.create(conversationDto);
-      await this.conversationRepository.save(conversation);
-      return true;
-    } catch (error) {
-      return false;
-    }
+    const { creatorPk, participantPk, title, startedAt, finishedAt } =
+      roomSaveDto;
+    const conversationData =
+      await this.conversationDatasService.createConversationDatas(
+        roomSaveDto.data,
+      );
+    const conversation = this.conversationRepository.create({
+      creatorPk,
+      participantPk,
+      title,
+      startedAt,
+      finishedAt,
+      dataPk: conversationData.pk,
+    });
+    return await this.conversationRepository.save(conversation);
   }
 
   async findAll(userPk: number, page: number, limit: number) {
@@ -72,7 +80,6 @@ export class ConversationsService {
         HttpStatus.BAD_REQUEST,
       );
     }
-    console.log(conversation);
     return conversationDatas;
   }
 
