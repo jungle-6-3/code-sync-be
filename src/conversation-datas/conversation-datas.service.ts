@@ -44,36 +44,23 @@ export class ConversationDatasService {
     }
   }
 
-  async uploadFile(fileDto: FileInfoDto) {
-    const { fileName, file, extension, uuid } = fileDto;
+  async uploadData(conversationDataSaveDto: ConversationDataSaveDto, uuid) {
     try {
-      const command = new PutObjectCommand({
-        Bucket: this.configService.get('AWS_BUCKET_NAME'),
-        Key: `${uuid}/${fileName}`,
-        Body: file,
-        ContentType: extension,
-      });
+      const uploads = Object.entries(FileConfig.fileConfigs).map(
+        async ([filename, contentType]) => {
+          const uploadData = {
+            fileName: `${uuid}/${filename}`,
+            file: conversationDataSaveDto[filename].data,
+            contentType: contentType.ContentType,
+          };
 
-      await this.s3Client.send(command);
-
-      return {
-        key: command.input.Key,
-        url: `https://${this.configService.get('AWS_BUCKET_NAME')}.s3.${this.configService.get('AWS_REGION')}.amazonaws.com/${command.input.Key}`,
-      };
+          const url = await this.uploadFileService.uploadFile(uploadData);
+          return [filename, url];
+        },
+      );
+      return Object.fromEntries(await Promise.all(uploads));
     } catch (error) {
-      throw new Error('파일 업로드 실패');
-    }
-  }
-
-  async createConversationDatas(saveData: SaveDatasDto) {
-    try {
-      const conversationDatas =
-        await this.conversationDatasRepository.create(saveData);
-      await this.conversationDatasRepository.save(conversationDatas);
-      return true;
-    } catch (error) {
-      console.log(error);
-      return false;
+      throw new BadRequestException(`File upload failed: ${error.message}`);
     }
   }
 
