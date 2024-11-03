@@ -38,8 +38,17 @@ export class SaveDatasDto {
   chattingUrl: string;
 
   @ApiProperty({
+    example:
+      'https://code-sync-s3-datas.s3.ap-northeast-2.amazonaws.com/useruuid/chattingdata2',
+    description: 'Save Data S3 Url',
+  })
+  @IsString()
+  @IsNotEmpty()
+  voiceUrl: string;
+
+  @ApiProperty({
     example: 'true',
-    description: '공유 여부',
+    description: '노트 공유 여부',
   })
   @IsBoolean()
   @IsNotEmpty()
@@ -47,7 +56,7 @@ export class SaveDatasDto {
 
   @ApiProperty({
     example: 'true',
-    description: '공유 여부',
+    description: '그림판 공유 여부',
   })
   @IsBoolean()
   @IsNotEmpty()
@@ -55,7 +64,7 @@ export class SaveDatasDto {
 
   @ApiProperty({
     example: 'true',
-    description: '공유 여부',
+    description: '채팅 공유 여부',
   })
   @IsBoolean()
   @IsNotEmpty()
@@ -63,9 +72,17 @@ export class SaveDatasDto {
 
   @ApiProperty({
     example: 'true',
+    description: '영상/음성 공유 여부',
+  })
+  @IsBoolean()
+  @IsNotEmpty()
+  isVoiceShared: boolean;
+
+  @ApiProperty({
+    example: 'true',
     description: '공유 여부',
   })
   @IsBoolean()
   @IsNotEmpty()
-  shareUuid: boolean;
+  canShared: boolean;
 }
