@@ -1,11 +1,13 @@
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { FileInfoDto } from './dto/file-info.dto';
-import { SaveDatasDto } from './dto/save-data.dto';
 import { Repository } from 'typeorm';
 import { ConversationDatas } from './entities/conversations-data.entity';
-import { InjectRepository } from '@nestjs/typeorm';
+import { InjectRepository, TypeOrmModule } from '@nestjs/typeorm';
+import { ConversationDataSaveDto } from './dto/conversation-data-save.dto';
+import { FileConfig } from './data/fileconfig';
+import { v4 as uuidv4 } from 'uuid';
+import { FileUpload } from './file-upload.service';
 
 @Injectable()
 export class ConversationDatasService {
@@ -15,35 +17,30 @@ export class ConversationDatasService {
     private configService: ConfigService,
     @InjectRepository(ConversationDatas)
     private conversationDatasRepository: Repository<ConversationDatas>,
+    private uploadFileService: FileUpload,
+  ) {}
+  async createConversationDatas(
+    conversationDataSaveDto: ConversationDataSaveDto,
   ) {
-    this.s3Client = new S3Client({
-      region: this.configService.get('AWS_REGION'),
-      credentials: {
-        accessKeyId: this.configService.get('AWS_ACCESS_KEY_ID'),
-        secretAccessKey: this.configService.get('AWS_SECRET_ACCESS_KEY'),
-      },
-    });
-  }
-  async uploadClient(file: Express.Multer.File) {
+    const uuid = uuidv4();
+    const uploadKeys = await this.uploadData(conversationDataSaveDto, uuid);
     try {
-      const command = new PutObjectCommand({
-        Bucket: this.configService.get('AWS_BUCKET_NAME'),
-        Key: `tests/${Date.now()}_${file.filename}`,
-        Body: file.buffer,
-        ContentType: file.mimetype,
+      const saveDatas = this.conversationDatasRepository.create({
+        uuid,
+        noteUrl: uploadKeys.note,
+        drawBoardUrl: uploadKeys.board,
+        chattingUrl: uploadKeys.chat,
+        voiceUrl: uploadKeys.voice,
+        isNoteShared: conversationDataSaveDto.note.isShared,
+        isDrawBoardShared: conversationDataSaveDto.board.isShared,
+        isChattingShared: conversationDataSaveDto.chat.isShared,
+        isVoiceShared: conversationDataSaveDto.voice.isShared,
       });
 
-      await this.s3Client.send(command);
-
-      return {
-        originalName: file.originalname,
-        size: file.size,
-        mimeType: file.mimetype,
-        key: command.input.Key,
-        url: `https://${this.configService.get('AWS_BUCKET_NAME')}.s3.${this.configService.get('AWS_REGION')}.amazonaws.com/${command.input.Key}`,
-      };
+      const result = await this.conversationDatasRepository.save(saveDatas);
+      return result;
     } catch (error) {
-      throw new Error('파일 업로드 실패');
+      throw new Error('dberror');
     }
   }
 
