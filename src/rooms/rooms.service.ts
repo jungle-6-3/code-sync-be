@@ -37,6 +37,7 @@ export class RoomsService {
     const { creatorPk, participantPk, startedAt, finishedAt } = room;
     const participant = await this.usersService.fineOneByPk(room.participantPk);
     const title = `${participant.name}와의 대화`;
+    // TODO: data에 실제 data 넣는 작업 추가해야 함.
     const data: ConversationDataSaveDto = { canShared: false };
     const roomSaveDto: RoomSaveDto = {
       creatorPk,
