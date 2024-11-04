@@ -41,7 +41,7 @@ export class AuthService {
     const hashedPassword = await this.hashingPasswd(password);
     signUpRequestDto.password = hashedPassword;
     const userData = await this.userService.createUser(signUpRequestDto);
-    if (!userData) {
+    if (userData) {
       throw new GlobalHttpException(
         '중복된 이메일이 있습니다.',
         'AUTH_5',
