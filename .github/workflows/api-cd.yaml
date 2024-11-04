@@ -31,6 +31,7 @@ jobs:
           echo AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }} >> .env
           echo AWS_REGION=${{ secrets.AWS_REGION }} >> .env
           echo AWS_BUCKET_NAME=${{ secrets.AWS_BUCKET_NAME }} >> .env
+          echo YJS_URL=${{ secrets.YJS_URL }} >> .env
           cat .env
 
       - name: run deploy
