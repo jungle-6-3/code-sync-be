@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { YjsDocProvider } from './yjs-doc-provider.interface';
 import * as Y from 'yjs';
 import { WebsocketProvider } from 'y-websocket';
+import { fromUint8Array } from 'js-base64';
 
 @Injectable()
 export class YjsService {
@@ -36,5 +37,11 @@ export class YjsService {
     });
 
     return coppiedDoc;
+  }
+
+  encodeDoc(doc: Y.Doc) {
+    const documentState = Y.encodeStateAsUpdate(doc);
+    const base64Encoded = fromUint8Array(documentState);
+    return base64Encoded;
   }
 }
