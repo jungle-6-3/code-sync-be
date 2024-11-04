@@ -1,21 +1,17 @@
-export class ChatData {
+import { SaveDataDtoConversation } from './save-data-dto-convesation.interface';
+
+export class ChatData implements SaveDataDtoConversation {
   private chats: chat[];
 
   public addChat(chat: chat) {
     this.chats.push(chat);
   }
 
-  public toFile(uuid: string) {
-    const chat = JSON.stringify(this.chats);
-    const stringChat = Buffer.from(chat).toString('utf-8');
-    const fileData = {
-      fileName: 'Chat',
-      file: stringChat,
-      extension: 'txt',
-      uuid: uuid,
+  public toSaveDataDto() {
+    return {
+      data: JSON.stringify(this.chats),
+      isShared: false,
     };
-
-    return fileData;
   }
 
   constructor() {
