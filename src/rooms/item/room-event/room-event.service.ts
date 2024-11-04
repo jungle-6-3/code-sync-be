@@ -81,10 +81,11 @@ export class RoomEventService {
     room.status = RoomStatus.CLOSING;
     room.finishedAt = new Date();
 
-    this.disconnectRoomsSockets(room);
-    this.deleteRoomAfter(room, 30);
-
+    this.disconnectExceptCreator(room);
     this.serverJoinHandlerService.finishServerJoin(room);
+
+    this.saveRoom(room);
+    this.deleteRoom(room);
   }
 
   async runningRoomOnce(room: Room, participant: RoomSocket) {
@@ -104,5 +105,24 @@ export class RoomEventService {
     disconenctRoomSocket(creatorSocket);
     disconenctRoomSocket(participantSocket);
     waitingSockets.forEach((socket) => disconenctRoomSocket(socket));
+  }
+
+  private disconnectExceptCreator(room: Room) {
+    const { creatorSocket, participantSocket, waitingSockets } = room;
+
+    creatorSocket.emit('room-closed', {
+      message: '대화가 종료됩니다.',
+    });
+
+    disconenctRoomSocket(participantSocket);
+    waitingSockets.forEach((socket) => disconenctRoomSocket(socket));
+  }
+
+  private async saveRoom(room: Room) {
+    const dataPk = await this.roomsService.saveRoom(room);
+    room.creatorSocket?.emit('room-saved', {
+      message: '방이 저장되었습니다.',
+      dataPk,
+    });
   }
 }
