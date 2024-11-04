@@ -22,13 +22,17 @@ export class SaveDataDto {
 //TODO: data를 넣는 것을 구현한 후, @IsNotEmpty() 추가해야 함.
 @ApiExtraModels(SaveDataDto)
 export class ConversationDataSaveDto {
-  chat?: SaveDataDto;
+  @IsNotEmpty()
+  chat: SaveDataDto;
 
-  board?: SaveDataDto;
+  @IsNotEmpty()
+  board: SaveDataDto;
 
-  voice?: SaveDataDto;
+  @IsNotEmpty()
+  voice: SaveDataDto;
 
-  note?: SaveDataDto;
+  @IsNotEmpty()
+  note: SaveDataDto;
 
   @ApiProperty({
     example: 'true',

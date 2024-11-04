@@ -6,7 +6,10 @@ import { RoomEventService } from './item/room-event/room-event.service';
 import { ConversationsService } from 'src/conversations/conversations.service';
 import { RoomSaveDto } from 'src/conversations/dto/room-save.dto';
 import { UsersService } from 'src/users/users.service';
-import { ConversationDataSaveDto } from 'src/conversation-datas/dto/conversation-data-save.dto';
+import {
+  ConversationDataSaveDto,
+  SaveDataDto,
+} from 'src/conversation-datas/dto/conversation-data-save.dto';
 
 @Injectable()
 export class RoomsService {
@@ -37,7 +40,17 @@ export class RoomsService {
     const participant = await this.usersService.fineOneByPk(room.participantPk);
     const title = `${participant.name}와의 대화`;
     // TODO: data에 실제 data 넣는 작업 추가해야 함.
-    const data: ConversationDataSaveDto = { canShared: false };
+    const sampleData: SaveDataDto = {
+      data: 'datadata',
+      isShared: false,
+    };
+    const data: ConversationDataSaveDto = {
+      chat: sampleData,
+      board: sampleData,
+      voice: sampleData,
+      note: sampleData,
+      canShared: false,
+    };
     const roomSaveDto: RoomSaveDto = {
       creatorPk,
       participantPk,
