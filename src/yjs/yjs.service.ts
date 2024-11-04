@@ -1,16 +1,20 @@
 import { Injectable } from '@nestjs/common';
 import { YjsDocProvider } from './yjs-doc-provider.interface';
+import { ConfigService } from '@nestjs/config';
+import { Room } from 'src/rooms/item';
+
 import * as Y from 'yjs';
 import { WebsocketProvider } from 'y-websocket';
 import { fromUint8Array } from 'js-base64';
-import { Room } from 'src/rooms/item';
 
 @Injectable()
 export class YjsService {
+  constructor(private configService: ConfigService) {}
+
   initYjsDocProvider(room: Room) {
     const doc = new Y.Doc();
     const provider = new WebsocketProvider(
-      'wss://code-sync.net/yjs/',
+      this.configService.get('YJS_URL'),
       `${room.uuid}`,
       doc,
       {
