@@ -11,7 +11,8 @@ import {
 import { RoomSocket } from '../interfaces/room-socket.interface';
 import { Server } from 'socket.io';
 import { MessageResponseDto } from '../dto/message-response.dto';
-import { Logger } from '@nestjs/common';
+import { Logger, UsePipes } from '@nestjs/common';
+import { ValidateUserIsJoiningPipe } from '../pipes/validate-user-is-joining.pipe';
 
 @WebSocketGateway(3001, {
   cors: {
@@ -31,6 +32,7 @@ export class ChattingHandlerGateway implements OnGatewayInit {
     this.logger.log('Initalize Chatting Gateway Done');
   }
 
+  @UsePipes(new ValidateUserIsJoiningPipe())
   @SubscribeMessage('chatting')
   handleMessage(
     @ConnectedSocket() client: RoomSocket,
