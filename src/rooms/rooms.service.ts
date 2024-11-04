@@ -47,7 +47,7 @@ export class RoomsService {
     };
     const data: ConversationDataSaveDto = {
       chat: roomData.chat.toSaveDataDto(),
-      board: sampleData,
+      drawBoard: sampleData,
       voice: sampleData,
       note: sampleData,
       canShared: false,

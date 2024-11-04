@@ -3,7 +3,7 @@ export class FileConfig {
     chat: {
       ContentType: 'text/plain',
     },
-    board: {
+    drawBoard: {
       ContentType: 'application/json',
     },
     voice: {

@@ -28,7 +28,7 @@ export class ConversationDataSaveDto {
 
   @IsNotEmpty()
   @ApiProperty()
-  board: SaveDataDto;
+  drawBoard: SaveDataDto;
 
   @IsNotEmpty()
   @ApiProperty()
