@@ -38,6 +38,11 @@ export class UsersService {
     return user;
   }
 
+  async fineOneByPk(pk: number): Promise<User> {
+    const user = await this.usersRepository.findOneBy({ pk });
+    return user;
+  }
+
   update(id: number, updateUserDto: UpdateUserDto) {
     return `This action updates a #${id} user`;
   }
