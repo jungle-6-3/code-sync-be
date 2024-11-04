@@ -1,15 +1,15 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
 
 export class GlobalHttpException extends HttpException {
-  constructor(message: string, code: string) {
+  constructor(message: string, code: string, status: HttpStatus) {
     super(
       {
         success: false,
-        status: HttpStatus.BAD_REQUEST,
+        status: status,
         code,
         message,
       },
-      HttpStatus.BAD_REQUEST,
+      status,
     );
   }
 }

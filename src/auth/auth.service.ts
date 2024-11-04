@@ -27,6 +27,7 @@ export class AuthService {
       throw new GlobalHttpException(
         '아이디 또는 비밀번호가 틀립니다.',
         'AUTH_6',
+        HttpStatus.BAD_REQUEST,
       );
     }
     const payload = { email: user.email, name: user.name };
@@ -41,7 +42,11 @@ export class AuthService {
     signUpRequestDto.password = hashedPassword;
     const userData = await this.userService.createUser(signUpRequestDto);
     if (!userData) {
-      throw new GlobalHttpException('중복된 이메일이 있습니다.', 'AUTH_5');
+      throw new GlobalHttpException(
+        '중복된 이메일이 있습니다.',
+        'AUTH_5',
+        HttpStatus.BAD_REQUEST,
+      );
     }
   }
   // 패스워드 해쉬 함수

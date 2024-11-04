@@ -69,6 +69,7 @@ export class ConversationsService {
       throw new GlobalHttpException(
         '회의록이 존재하지 않습니다.',
         'CONVERSATION_01',
+        HttpStatus.BAD_REQUEST,
       );
     }
 
@@ -78,6 +79,7 @@ export class ConversationsService {
       throw new GlobalHttpException(
         '회의록이 존재하지 않습니다.',
         'CONVERSATION_02',
+        HttpStatus.BAD_REQUEST,
       );
     }
     return conversationDatas;
