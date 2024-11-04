@@ -7,6 +7,7 @@ import { Repository } from 'typeorm';
 import { ConversationDatasService } from 'src/conversation-datas/conversation-datas.service';
 import { UsersService } from 'src/users/users.service';
 import { RoomSaveDto } from './dto/room-save.dto';
+import { GlobalHttpException } from 'src/utils/global-http-exception';
 
 @Injectable()
 export class ConversationsService {
@@ -65,18 +66,18 @@ export class ConversationsService {
       this.conversationDatasService.getConversationDatas(dataPk);
     // TODO: Custom Exception으로 처리 (에러 코드와 함께 처리)
     if (!conversation || !conversationDatas) {
-      throw new HttpException(
-        '회의가 종료되지 않았습니다.',
-        HttpStatus.BAD_REQUEST,
+      throw new GlobalHttpException(
+        '회의록이 존재하지 않습니다.',
+        'CONVERSATION_01',
       );
     }
 
     const userPk = (await this.usersServie.findOne(user.email)).pk;
 
     if (conversation.creatorPk != userPk) {
-      throw new HttpException(
-        '참여하지 않은 회의입니다.',
-        HttpStatus.BAD_REQUEST,
+      throw new GlobalHttpException(
+        '회의록이 존재하지 않습니다.',
+        'CONVERSATION_02',
       );
     }
     return conversationDatas;
