@@ -21,17 +21,13 @@ export class SaveDataDto {
 
 @ApiExtraModels(SaveDataDto)
 export class ConversationDataSaveDto {
-  @IsNotEmpty()
-  chat: SaveDataDto;
+  chat?: SaveDataDto;
 
-  @IsNotEmpty()
-  board: SaveDataDto;
+  board?: SaveDataDto;
 
-  @IsNotEmpty()
-  voice: SaveDataDto;
+  voice?: SaveDataDto;
 
-  @IsNotEmpty()
-  note: SaveDataDto;
+  note?: SaveDataDto;
 
   @ApiProperty({
     example: 'true',
