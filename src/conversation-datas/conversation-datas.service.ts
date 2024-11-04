@@ -1,5 +1,10 @@
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpStatus,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Repository } from 'typeorm';
 import { ConversationDatas } from './entities/conversations-data.entity';
@@ -8,10 +13,12 @@ import { ConversationDataSaveDto } from './dto/conversation-data-save.dto';
 import { FileConfig } from './data/fileconfig';
 import { v4 as uuidv4 } from 'uuid';
 import { FileUpload } from './file-upload.service';
+import { GlobalHttpException } from 'src/utils/global-http-exception';
 
 @Injectable()
 export class ConversationDatasService {
   private s3Client: S3Client;
+  logger: Logger = new Logger('ConversationDataService');
 
   constructor(
     private configService: ConfigService,
@@ -40,7 +47,12 @@ export class ConversationDatasService {
       const result = await this.conversationDatasRepository.save(saveDatas);
       return result;
     } catch (error) {
-      throw new Error('dberror');
+      this.logger.debug(error.stack);
+      throw new GlobalHttpException(
+        'DB Error',
+        'CONVERSATIONDATA_DB',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
@@ -71,7 +83,12 @@ export class ConversationDatasService {
       });
       return conversationDatas;
     } catch (error) {
-      return false;
+      this.logger.debug(error.stack);
+      throw new GlobalHttpException(
+        'DB Error',
+        'CONVERSATIONDATA_DB',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 }
