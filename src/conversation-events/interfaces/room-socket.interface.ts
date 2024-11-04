@@ -1,5 +1,6 @@
 import { Socket } from 'socket.io';
 import { Room } from 'src/rooms/item';
+import { RoomStatus } from 'src/rooms/item/room-event';
 import { User } from 'src/users/entities/user.entity';
 
 export enum SocketStatus {
@@ -54,10 +55,16 @@ export function disconenctRoomSocket(socket: RoomSocket) {
       });
       break;
     case SocketStatus.PARTICIPANT:
-    case SocketStatus.CREATOR:
       socket.emit('room-closed', {
         message: '대화가 종료됩니다.',
       });
+      break;
+    case SocketStatus.CREATOR:
+      if (socket.room.status != RoomStatus.CLOSING) {
+        socket.emit('room-closed', {
+          message: '대화가 종료됩니다.',
+        });
+      }
       break;
     default:
       break;
