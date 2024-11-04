@@ -53,7 +53,6 @@ export class ChattingHandlerGateway implements OnGatewayInit {
     );
     this.handleChattingMessage(client, return_msg);
     this.loggingMessage(client, return_msg);
-    console.log(return_msg);
 
     return return_msg;
   }

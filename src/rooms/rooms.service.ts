@@ -27,7 +27,6 @@ export class RoomsService {
     this.roomsById.set(roomUuid, newRoom);
     this.roomEventsService.deleteRoomAfter(newRoom, 30);
     this.logger.log(`${creator.name}가 ${roomUuid}를 생성`);
-    console.log(this.roomsById);
     return roomUuid;
   }
 
@@ -60,6 +59,6 @@ export class RoomsService {
 
   async deleteRoombyUuid(uuid: string) {
     this.roomsById.delete(uuid);
-    console.log(this.roomsById);
+    this.logger.log(`${uuid}가 삭제 됨`);
   }
 }
