@@ -32,7 +32,7 @@ export class ChattingHandlerGateway implements OnGatewayInit {
     this.logger.log('Initalize Chatting Gateway Done');
   }
 
-  @UsePipes(new ValidateUserIsJoiningPipe())
+  @UsePipes(ValidateUserIsJoiningPipe)
   @SubscribeMessage('chatting')
   handleMessage(
     @ConnectedSocket() client: RoomSocket,
