@@ -61,7 +61,8 @@ export class RoomHandlerGateway implements OnGatewayInit {
       }
     });
 
-    this.roomEventsService.runningRoomOnce(room, participantSocket);
+    await this.roomEventsService.runningRoomOnce(room, participantSocket);
+
     this.logger.log(`초대로 인해 ${room.uuid}의 상태가 Running이 되었습니다.`);
 
     participantSocket.emit('invite-accepted', {

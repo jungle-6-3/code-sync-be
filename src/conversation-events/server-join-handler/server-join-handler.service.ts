@@ -10,14 +10,14 @@ export class ServerJoinHandlerService {
     private saveYjsService: SaveYjsService,
   ) {}
   //TODO: 방이 running이 되면 방에 참여하는 logic을 해야 함
-  startServerJoin(room: Room) {
-    this.saveVoiceService.startSaveVoice(room);
-    this.saveYjsService.startSaveYjs(room);
+  async startServerJoin(room: Room) {
+    await this.saveVoiceService.startSaveVoice(room);
+    await this.saveYjsService.startSaveYjs(room);
   }
 
   //TODO: 방이 closing이 되면 연결을 끊는 logic을 해야 함
-  finishServerJoin(room: Room) {
-    this.saveVoiceService.finishSaveVoice(room);
-    this.saveYjsService.finishSaveYjs(room);
+  async finishServerJoin(room: Room) {
+    await this.saveVoiceService.finishSaveVoice(room);
+    await this.saveYjsService.finishSaveYjs(room);
   }
 }

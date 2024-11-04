@@ -8,6 +8,7 @@ import { ConversationsModule } from './conversations/conversations.module';
 import { RoomsModule } from './rooms/rooms.module';
 import { ConversationDatasModule } from './conversation-datas/conversation-datas.module';
 import { EventsHandlerModule } from './conversation-events/events-handler/events-handler.module';
+import { YjsModule } from './yjs/yjs.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { EventsHandlerModule } from './conversation-events/events-handler/events
     RoomsModule,
     ConversationDatasModule,
     EventsHandlerModule,
+    YjsModule,
   ],
   controllers: [],
   providers: [],
