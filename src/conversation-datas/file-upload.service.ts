@@ -1,9 +1,6 @@
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { FileInfoDto } from './dto/file-info.dto';
 import { ConfigService } from '@nestjs/config';
-import { InjectRepository } from '@nestjs/typeorm';
-import { ConversationDatas } from './entities/conversations-data.entity';
-import { Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
@@ -26,7 +23,8 @@ export class FileUpload {
         Bucket: this.configService.get('AWS_BUCKET_NAME'),
         Key: fileName,
         Body: file,
-        ContentType: contentType,
+        ContentType: `${contentType}; charset=utf-8`,
+        ContentEncoding: 'utf-8',
       });
 
       await this.s3Client.send(command);

@@ -17,6 +17,7 @@ import { UsersService } from 'src/users/users.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { ConversationResponseDto } from './dto/conversation-response.dto';
+import { RoomSaveDto } from './dto/room-save.dto';
 
 @Controller('conversations')
 export class ConversationsController {
@@ -25,6 +26,11 @@ export class ConversationsController {
     private readonly userService: UsersService,
   ) {}
 
+  @Post('test')
+  async testConversationSave(@Body() saveDataDto: RoomSaveDto) {
+    return this.conversationsService.createConversation(saveDataDto);
+  }
+  
   @ApiOperation({
     summary: '회의록 요청',
     description: '내가 참여한 회의록을 요청한다..',
