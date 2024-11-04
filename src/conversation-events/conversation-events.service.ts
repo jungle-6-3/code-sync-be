@@ -1,7 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import {
   copyFromBeforeSocket,
-  disconenctRoomSocket,
   disconnectBeforeSocket,
   RoomSocket,
   SocketStatus,

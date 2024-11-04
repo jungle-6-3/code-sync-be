@@ -19,6 +19,7 @@ export class SaveDataDto {
   isShared: boolean;
 }
 
+//TODO: data를 넣는 것을 구현한 후, @IsNotEmpty() 추가해야 함.
 @ApiExtraModels(SaveDataDto)
 export class ConversationDataSaveDto {
   @IsNotEmpty()

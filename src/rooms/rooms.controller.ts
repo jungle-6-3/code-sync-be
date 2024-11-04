@@ -25,18 +25,4 @@ export class RoomsController {
       data: { roomUuid },
     };
   }
-
-  @Post('save/:roomUuid')
-  async saveRoom(
-    @Param('roomUuid') roomUuid: string,
-    @Request() req: Request & { user: JwtPayloadDto },
-  ) {
-    const user = await this.usersService.findUserbyPayload(req.user);
-    const room = await this.roomsService.findRoomByUuid(roomUuid);
-    await this.roomsService.saveRoom(room, user);
-    return {
-      success: true,
-      message: '저장에 성공했습니다.',
-    };
-  }
 }
