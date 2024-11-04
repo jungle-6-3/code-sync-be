@@ -19,6 +19,9 @@ export class ConversationDatas {
   chattingUrl: string;
 
   @Column()
+  voiceUrl: string;
+
+  @Column()
   isNoteShared: boolean;
 
   @Column()
@@ -28,7 +31,7 @@ export class ConversationDatas {
   isChattingShared: boolean;
 
   @Column()
-  shareUuid: boolean;
+  isVoiceShared: boolean;
 
   @OneToOne(
     (type) => Conversation,
