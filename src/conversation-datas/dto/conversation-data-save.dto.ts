@@ -3,7 +3,7 @@ import { IsBoolean, IsNotEmpty, IsString } from 'class-validator';
 
 export class SaveDataDto {
   @ApiProperty({
-    example: '{metadata}',
+    example: '{metadata, 회의 데이터들}',
     description: '저장할 데이터 내용',
   })
   @IsNotEmpty()
@@ -23,19 +23,23 @@ export class SaveDataDto {
 @ApiExtraModels(SaveDataDto)
 export class ConversationDataSaveDto {
   @IsNotEmpty()
+  @ApiProperty()
   chat: SaveDataDto;
 
   @IsNotEmpty()
+  @ApiProperty()
   board: SaveDataDto;
 
   @IsNotEmpty()
+  @ApiProperty()
   voice: SaveDataDto;
 
   @IsNotEmpty()
+  @ApiProperty()
   note: SaveDataDto;
 
   @ApiProperty({
-    example: 'true',
+    example: 'false',
     description: '회의정보 공유 여부',
   })
   @IsNotEmpty()

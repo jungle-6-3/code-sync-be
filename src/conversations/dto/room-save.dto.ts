@@ -1,8 +1,12 @@
 import { ApiExtraModels, ApiProperty } from '@nestjs/swagger';
 import { IsDate, IsNotEmpty, IsNumber, IsString } from 'class-validator';
-import { ConversationDataSaveDto } from 'src/conversation-datas/dto/conversation-data-save.dto';
+import {
+  ConversationDataSaveDto,
+  SaveDataDto,
+} from 'src/conversation-datas/dto/conversation-data-save.dto';
 
 @ApiExtraModels(ConversationDataSaveDto)
+@ApiExtraModels(SaveDataDto)
 export class RoomSaveDto {
   @ApiProperty({
     example: '1',
@@ -45,5 +49,6 @@ export class RoomSaveDto {
   finishedAt: Date;
 
   @IsNotEmpty()
+  @ApiProperty()
   data: ConversationDataSaveDto;
 }
