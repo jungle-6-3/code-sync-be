@@ -177,7 +177,7 @@ export class ConversationEventsService {
             this.roomEventsService.deleteRoom(room);
             break;
           case RoomStatus.PARTICIPANT_OUT:
-            this.roomEventsService.closeRoom(room);
+            await this.roomEventsService.closeRoom(room);
             break;
           case RoomStatus.RUNNING:
             room.status = RoomStatus.CREATOR_OUT;
@@ -204,7 +204,7 @@ export class ConversationEventsService {
         room.participantSocket = undefined;
         switch (room.status) {
           case RoomStatus.CREATOR_OUT:
-            this.roomEventsService.closeRoom(room);
+            await this.roomEventsService.closeRoom(room);
             break;
           case RoomStatus.RUNNING:
             room.status = RoomStatus.PARTICIPANT_OUT;

@@ -7,13 +7,13 @@ import { YjsService } from 'src/yjs/yjs.service';
 export class SaveYjsService {
   constructor(private yjsService: YjsService) {}
 
-  startSaveYjs(room: Room) {
-    this.yjsService.initYjsDocProvider(room);
+  async startSaveYjs(room: Room) {
+    await this.yjsService.initYjsDocProvider(room);
   }
 
-  finishSaveYjs(room: Room) {
+  async finishSaveYjs(room: Room) {
     const { yjsDocProvider } = room;
-    this.yjsService.closeYjsDocProvider(yjsDocProvider);
+    await this.yjsService.closeYjsDocProvider(yjsDocProvider);
     const roomData = room.data;
     roomData.drawBoard = new drawBoard(this.yjsService, yjsDocProvider);
   }

@@ -4,11 +4,11 @@ import { YjsService } from 'src/yjs/yjs.service';
 import { YjsDocProvider } from 'src/yjs/yjs-doc-provider.interface';
 
 export class drawBoard implements SaveDataDtoConversation {
-  private doc: Y.Doc;
+  private docPromise: Promise<Y.Doc>;
 
-  public toSaveDataDto() {
+  public async toSaveDataDto() {
     return {
-      data: this.yjsService.encodeDoc(this.doc),
+      data: await this.yjsService.encodeDoc(await this.docPromise),
       isShared: false,
     };
   }
@@ -17,6 +17,6 @@ export class drawBoard implements SaveDataDtoConversation {
     private yjsService: YjsService,
     yjsDocProvider: YjsDocProvider,
   ) {
-    this.doc = this.yjsService.getPartialDoc(yjsDocProvider, 'elements');
+    this.docPromise = this.yjsService.getPartialDoc(yjsDocProvider, 'elements');
   }
 }

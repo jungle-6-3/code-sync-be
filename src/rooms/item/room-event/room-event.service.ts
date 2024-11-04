@@ -82,7 +82,7 @@ export class RoomEventService {
     room.finishedAt = new Date();
 
     this.disconnectExceptCreator(room);
-    this.serverJoinHandlerService.finishServerJoin(room);
+    await this.serverJoinHandlerService.finishServerJoin(room);
 
     await this.saveRoom(room);
     await this.deleteRoom(room);
@@ -96,7 +96,7 @@ export class RoomEventService {
     room.status = RoomStatus.RUNNING;
     this.clearTimeout(room);
 
-    this.serverJoinHandlerService.startServerJoin(room);
+    await this.serverJoinHandlerService.startServerJoin(room);
   }
 
   private disconnectRoomsSockets(room: Room) {

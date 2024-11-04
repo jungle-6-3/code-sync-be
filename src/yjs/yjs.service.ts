@@ -11,7 +11,7 @@ import { fromUint8Array } from 'js-base64';
 export class YjsService {
   constructor(private configService: ConfigService) {}
 
-  initYjsDocProvider(room: Room) {
+  async initYjsDocProvider(room: Room) {
     const doc = new Y.Doc();
     const provider = new WebsocketProvider(
       this.configService.get('YJS_URL'),
@@ -26,12 +26,12 @@ export class YjsService {
     room.yjsDocProvider = { doc, provider };
   }
 
-  closeYjsDocProvider(yjsDocProvider: YjsDocProvider) {
+  async closeYjsDocProvider(yjsDocProvider: YjsDocProvider) {
     const { provider } = yjsDocProvider;
     provider.disconnect();
   }
 
-  getPartialDoc(yjsDocProvider: YjsDocProvider, key: string) {
+  async getPartialDoc(yjsDocProvider: YjsDocProvider, key: string) {
     const { doc } = yjsDocProvider;
     const coppiedDoc = new Y.Doc();
 
@@ -45,7 +45,7 @@ export class YjsService {
     return coppiedDoc;
   }
 
-  encodeDoc(doc: Y.Doc) {
+  async encodeDoc(doc: Y.Doc) {
     const documentState = Y.encodeStateAsUpdate(doc);
     const base64Encoded = fromUint8Array(documentState);
     return base64Encoded;
