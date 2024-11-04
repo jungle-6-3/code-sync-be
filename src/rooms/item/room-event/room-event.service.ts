@@ -84,8 +84,8 @@ export class RoomEventService {
     this.disconnectExceptCreator(room);
     this.serverJoinHandlerService.finishServerJoin(room);
 
-    this.saveRoom(room);
-    this.deleteRoom(room);
+    await this.saveRoom(room);
+    await this.deleteRoom(room);
   }
 
   async runningRoomOnce(room: Room, participant: RoomSocket) {
