@@ -102,6 +102,13 @@ export class RoomHandlerGateway implements OnGatewayInit {
   @SubscribeMessage('close-room')
   async handleCloseRoom(@ConnectedSocket() client: RoomSocket) {
     const room = client.room;
+    if (
+      room.status == RoomStatus.WATING ||
+      room.status == RoomStatus.INVITING
+    ) {
+      await this.roomEventsService.deleteRoom(room);
+      return;
+    }
     await this.roomEventsService.closeRoom(room);
     return;
   }
