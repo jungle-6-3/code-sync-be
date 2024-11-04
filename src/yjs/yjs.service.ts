@@ -3,21 +3,23 @@ import { YjsDocProvider } from './yjs-doc-provider.interface';
 import * as Y from 'yjs';
 import { WebsocketProvider } from 'y-websocket';
 import { fromUint8Array } from 'js-base64';
+import { Room } from 'src/rooms/item';
 
 @Injectable()
 export class YjsService {
-  initYjsDocProvider(yjsDocProvider: YjsDocProvider, uuid: string) {
-    yjsDocProvider.doc = new Y.Doc();
-    yjsDocProvider.provider = new WebsocketProvider(
+  initYjsDocProvider(room: Room) {
+    const doc = new Y.Doc();
+    const provider = new WebsocketProvider(
       'wss://code-sync.net/yjs/',
-      `${uuid}`,
-      yjsDocProvider.doc,
+      `${room.uuid}`,
+      doc,
       {
         WebSocketPolyfill: require('ws'),
         connect: true,
         maxBackoffTime: 2500,
       },
     );
+    room.yjsDocProvider = { doc, provider };
   }
 
   closeYjsDocProvider(yjsDocProvider: YjsDocProvider) {

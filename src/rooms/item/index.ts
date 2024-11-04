@@ -2,6 +2,7 @@ import { ChatData } from 'src/conversation-datas/data/chatting';
 import { User } from 'src/users/entities/user.entity';
 import { RoomEvent } from './room-event';
 import { YjsDocProvider } from 'src/yjs/yjs-doc-provider.interface';
+import { drawBoard } from 'src/conversation-datas/data/drawBoard';
 
 export class Room extends RoomEvent {
   creatorPk: number;
@@ -26,6 +27,7 @@ export class Room extends RoomEvent {
 
 interface RoomData {
   chat: ChatData;
+  drawBoard?: drawBoard;
   // note?: NoteData;
   // draw?: DrawData;
 }

@@ -110,7 +110,7 @@ export class RoomEventService {
   private disconnectExceptCreator(room: Room) {
     const { creatorSocket, participantSocket, waitingSockets } = room;
 
-    creatorSocket.emit('room-closed', {
+    creatorSocket?.emit('room-closed', {
       message: '대화가 종료됩니다.',
     });
 
