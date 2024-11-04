@@ -41,6 +41,7 @@ export class ConversationsService {
     const [conversations, total] = await this.conversationRepository
       .createQueryBuilder('conversation')
       .leftJoinAndSelect('conversation.creator', 'creator')
+      .where('conversation.creatorPk =:userPk', { userPk })
       .leftJoinAndSelect('conversation.participant', 'participant')
       .select([
         'conversation',
@@ -49,8 +50,6 @@ export class ConversationsService {
         'participant.name',
         'participant.email',
       ])
-      .where('conversation.creatorPk =:userPk', { userPk })
-      .orWhere('conversation.participantPk =:userPk', { userPk })
       .orderBy('conversation.startedAt', 'DESC')
       .skip(skip)
       .take(limit)
