@@ -35,11 +35,11 @@ export class ConversationDatasService {
       const saveDatas = this.conversationDatasRepository.create({
         uuid,
         noteUrl: uploadKeys.note,
-        drawBoardUrl: uploadKeys.board,
+        drawBoardUrl: uploadKeys.drawBoard,
         chattingUrl: uploadKeys.chat,
         voiceUrl: uploadKeys.voice,
         isNoteShared: conversationDataSaveDto.note.isShared,
-        isDrawBoardShared: conversationDataSaveDto.board.isShared,
+        isDrawBoardShared: conversationDataSaveDto.drawBoard.isShared,
         isChattingShared: conversationDataSaveDto.chat.isShared,
         isVoiceShared: conversationDataSaveDto.voice.isShared,
       });
