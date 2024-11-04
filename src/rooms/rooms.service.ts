@@ -1,4 +1,4 @@
-import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Room } from './item';
 import { v4 as _uuid } from 'uuid';
 import { User } from 'src/users/entities/user.entity';
@@ -35,19 +35,18 @@ export class RoomsService {
 
   // TODO: room 내용을 저장하는 행위를 해야함.
   async saveRoom(room: Room) {
-    const dataPk = 0;
     const { creatorPk, participantPk, startedAt, finishedAt } = room;
     const participant = await this.usersService.fineOneByPk(room.participantPk);
     const title = `${participant.name}와의 대화`;
-    const roomData = room.data;
+    const { chat, drawBoard } = room.data;
     // TODO: data에 실제 data 넣는 작업 추가해야 함.
     const sampleData: SaveDataDto = {
       data: 'datadata',
       isShared: false,
     };
     const data: ConversationDataSaveDto = {
-      chat: roomData.chat.toSaveDataDto(),
-      drawBoard: sampleData,
+      chat: chat.toSaveDataDto(),
+      drawBoard: await drawBoard.toSaveDataDto(),
       voice: sampleData,
       note: sampleData,
       canShared: false,
