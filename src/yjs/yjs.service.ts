@@ -50,7 +50,9 @@ export class YjsService {
     const partialElement = doc.getXmlFragment('document-store');
     const coppiedElement = coppiedDoc.getXmlFragment('document-store');
 
-    coppiedElement.push([partialElement.firstChild.clone()]);
+    if (partialElement.firstChild) {
+      coppiedElement.push([partialElement.firstChild.clone()]);
+    }
     // for (const paragraph of partialElement.createTreeWalker(() => true)) {
     //   coppiedElement.push([paragraph.clone() as Y.XmlElement]);
     // }
