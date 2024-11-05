@@ -43,6 +43,20 @@ export class YjsService {
     return coppiedDoc;
   }
 
+  async getNoteDoc(yjsDocProvider: YjsDocProvider) {
+    const { doc } = yjsDocProvider;
+    const coppiedDoc = new Y.Doc();
+
+    const partialElement = doc.getXmlFragment('document-store');
+    const coppiedElement = coppiedDoc.getXmlFragment('document-store');
+
+    coppiedElement.push([partialElement.firstChild.clone()]);
+    // for (const paragraph of partialElement.createTreeWalker(() => true)) {
+    //   coppiedElement.push([paragraph.clone() as Y.XmlElement]);
+    // }
+    return coppiedDoc;
+  }
+
   async encodeDoc(doc: Y.Doc) {
     const documentState = Y.encodeStateAsUpdate(doc);
     const base64Encoded = fromUint8Array(documentState);
