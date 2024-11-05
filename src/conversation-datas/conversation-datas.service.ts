@@ -12,7 +12,7 @@ import { InjectRepository, TypeOrmModule } from '@nestjs/typeorm';
 import { ConversationDataSaveDto } from './dto/conversation-data-save.dto';
 import { FileConfig } from './data/fileconfig';
 import { v4 as uuidv4 } from 'uuid';
-import { FileUpload } from './file-upload.service';
+import { S3Service } from './s3.service';
 import { GlobalHttpException } from 'src/utils/global-http-exception';
 
 @Injectable()
@@ -24,7 +24,7 @@ export class ConversationDatasService {
     private configService: ConfigService,
     @InjectRepository(ConversationDatas)
     private conversationDatasRepository: Repository<ConversationDatas>,
-    private uploadFileService: FileUpload,
+    private uploadFileService: S3Service,
   ) {}
   async createConversationDatas(
     conversationDataSaveDto: ConversationDataSaveDto,
