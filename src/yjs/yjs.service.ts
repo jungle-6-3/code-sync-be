@@ -59,6 +59,26 @@ export class YjsService {
     return coppiedDoc;
   }
 
+  async getCodeEditorDoc(yjsDocProvider: YjsDocProvider) {
+    const keys = ['assets', 'elements', 'document-store'];
+    const { doc } = yjsDocProvider;
+    const coppiedDoc = new Y.Doc();
+
+    doc.share.forEach((value, key) => {
+      if (keys.includes(key)) {
+        return;
+      }
+      const partialElement = doc.getText(key);
+      const coppiedElement = coppiedDoc.getText(key);
+      coppiedElement.insert(0, partialElement.toString());
+    });
+
+    console.log(doc);
+    console.log(coppiedDoc);
+
+    return coppiedDoc;
+  }
+
   async encodeDoc(doc: Y.Doc) {
     const documentState = Y.encodeStateAsUpdate(doc);
     const base64Encoded = fromUint8Array(documentState);
