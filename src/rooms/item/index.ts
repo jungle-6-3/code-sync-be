@@ -3,6 +3,8 @@ import { User } from 'src/users/entities/user.entity';
 import { RoomEvent } from './room-event';
 import { YjsDocProvider } from 'src/yjs/yjs-doc-provider.interface';
 import { DrawBoard } from 'src/conversation-datas/data/drawBoard';
+import { Note } from 'src/conversation-datas/data/note';
+import { CodeEditor } from 'src/conversation-datas/data/codeEditor';
 
 export class Room extends RoomEvent {
   creatorPk: number;
@@ -28,6 +30,6 @@ export class Room extends RoomEvent {
 interface RoomData {
   chat: ChatData;
   drawBoard?: DrawBoard;
-  // note?: NoteData;
-  // draw?: DrawData;
+  note?: Note;
+  codeEditor?: CodeEditor;
 }
