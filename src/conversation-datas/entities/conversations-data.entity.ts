@@ -10,16 +10,16 @@ export class ConversationDatas {
   uuid: string;
 
   @Column()
-  noteUrl: string;
+  noteKey: string;
 
   @Column()
-  drawBoardUrl: string;
+  drawBoardKey: string;
 
   @Column()
-  chattingUrl: string;
+  chattingKey: string;
 
   @Column()
-  voiceUrl: string;
+  voiceKey: string;
 
   @Column()
   isNoteShared: boolean;
@@ -32,6 +32,9 @@ export class ConversationDatas {
 
   @Column()
   isVoiceShared: boolean;
+
+  @Column()
+  canShared: boolean;
 
   @OneToOne(
     (type) => Conversation,

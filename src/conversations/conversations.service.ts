@@ -62,10 +62,7 @@ export class ConversationsService {
     const conversation = await this.conversationRepository.findOneBy({
       dataPk,
     });
-    const conversationDatas =
-      this.conversationDatasService.getConversationDatas(dataPk);
-    // TODO: Custom Exception으로 처리 (에러 코드와 함께 처리)
-    if (!conversation || !conversationDatas) {
+    if (!conversation) {
       throw new GlobalHttpException(
         '회의록이 존재하지 않습니다.',
         'CONVERSATION_01',
@@ -78,10 +75,21 @@ export class ConversationsService {
     if (conversation.creatorPk != userPk) {
       throw new GlobalHttpException(
         '회의록이 존재하지 않습니다.',
+        'CONVERSATION_03',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const conversationDatas =
+      this.conversationDatasService.getConversationDatas(dataPk);
+    if (!conversationDatas) {
+      throw new GlobalHttpException(
+        '회의록이 존재하지 않습니다.',
         'CONVERSATION_02',
         HttpStatus.BAD_REQUEST,
       );
     }
+
     return conversationDatas;
   }
 

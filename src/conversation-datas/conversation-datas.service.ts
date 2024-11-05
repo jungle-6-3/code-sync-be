@@ -12,7 +12,7 @@ import { InjectRepository, TypeOrmModule } from '@nestjs/typeorm';
 import { ConversationDataSaveDto } from './dto/conversation-data-save.dto';
 import { FileConfig } from './data/fileconfig';
 import { v4 as uuidv4 } from 'uuid';
-import { FileUpload } from './file-upload.service';
+import { S3Service } from './s3.service';
 import { GlobalHttpException } from 'src/utils/global-http-exception';
 
 @Injectable()
@@ -24,7 +24,7 @@ export class ConversationDatasService {
     private configService: ConfigService,
     @InjectRepository(ConversationDatas)
     private conversationDatasRepository: Repository<ConversationDatas>,
-    private uploadFileService: FileUpload,
+    private uploadFileService: S3Service,
   ) {}
   async createConversationDatas(
     conversationDataSaveDto: ConversationDataSaveDto,
@@ -34,14 +34,15 @@ export class ConversationDatasService {
     try {
       const saveDatas = this.conversationDatasRepository.create({
         uuid,
-        noteUrl: uploadKeys.note,
-        drawBoardUrl: uploadKeys.drawBoard,
-        chattingUrl: uploadKeys.chat,
-        voiceUrl: uploadKeys.voice,
+        noteKey: uploadKeys.note,
+        drawBoardKey: uploadKeys.drawBoard,
+        chattingKey: uploadKeys.chat,
+        voiceKey: uploadKeys.voice,
         isNoteShared: conversationDataSaveDto.note.isShared,
         isDrawBoardShared: conversationDataSaveDto.drawBoard.isShared,
         isChattingShared: conversationDataSaveDto.chat.isShared,
         isVoiceShared: conversationDataSaveDto.voice.isShared,
+        canShared: conversationDataSaveDto.canShared,
       });
 
       const result = await this.conversationDatasRepository.save(saveDatas);
@@ -76,16 +77,49 @@ export class ConversationDatasService {
     }
   }
 
+  async getDataUrls(conversationData) {
+    return {
+      chat: {
+        url: await this.uploadFileService.getPresignedUrl(
+          conversationData.chattingKey,
+        ),
+        isShared: conversationData.isChattingShared,
+      },
+      drawBoard: {
+        url: await this.uploadFileService.getPresignedUrl(
+          conversationData.drawBoardKey,
+        ),
+        isShared: conversationData.isDrawBoardShared,
+      },
+      note: {
+        url: await this.uploadFileService.getPresignedUrl(
+          conversationData.noteKey,
+        ),
+        isShared: conversationData.isNoteShared,
+      },
+      voice: {
+        url: await this.uploadFileService.getPresignedUrl(
+          conversationData.voiceKey,
+        ),
+        isShared: conversationData.isNoteShared,
+      },
+      canShared: conversationData.canShared,
+    };
+  }
+
   async getConversationDatas(pk: number) {
     try {
-      const conversationDatas = this.conversationDatasRepository.findOneBy({
-        pk,
-      });
+      const conversationDatas =
+        await this.conversationDatasRepository.findOneBy({
+          pk,
+        });
+
+      return await this.getDataUrls(conversationDatas);
       return conversationDatas;
     } catch (error) {
       this.logger.debug(error.stack);
       throw new GlobalHttpException(
-        'DB Error',
+        '백엔드에게 문의하세요.',
         'CONVERSATIONDATA_DB',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
