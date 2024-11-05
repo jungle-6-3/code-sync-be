@@ -44,12 +44,15 @@ export class ConversationsService {
       .leftJoinAndSelect('conversation.creator', 'creator')
       .where('conversation.creatorPk =:userPk', { userPk })
       .leftJoinAndSelect('conversation.participant', 'participant')
+      .leftJoinAndSelect('conversation.conversationDatas', 'conversationDatas')
       .select([
         'conversation',
         'creator.email',
         'creator.name',
         'participant.name',
         'participant.email',
+        'conversationDatas.uuid',
+        'conversationDatas.canShared',
       ])
       .orderBy('conversation.startedAt', 'DESC')
       .skip(skip)
