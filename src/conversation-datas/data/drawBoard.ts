@@ -17,6 +17,6 @@ export class DrawBoard implements SaveDataDtoConversation {
     private yjsService: YjsService,
     yjsDocProvider: YjsDocProvider,
   ) {
-    this.docPromise = this.yjsService.getPartialDoc(yjsDocProvider, 'elements');
+    this.docPromise = this.yjsService.getDrawBoardDoc(yjsDocProvider);
   }
 }
