@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
+import { CodeEditor } from 'src/conversation-datas/data/codeEditor';
 import { DrawBoard } from 'src/conversation-datas/data/drawBoard';
+import { Note } from 'src/conversation-datas/data/note';
 import { Room } from 'src/rooms/item';
 import { YjsService } from 'src/yjs/yjs.service';
 
@@ -16,5 +18,7 @@ export class SaveYjsService {
     await this.yjsService.closeYjsDocProvider(yjsDocProvider);
     const roomData = room.data;
     roomData.drawBoard = new DrawBoard(this.yjsService, yjsDocProvider);
+    roomData.note = new Note(this.yjsService, yjsDocProvider);
+    roomData.codeEditor = new CodeEditor(this.yjsService, yjsDocProvider);
   }
 }

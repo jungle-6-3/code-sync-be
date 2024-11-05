@@ -3,7 +3,7 @@ import * as Y from 'yjs';
 import { YjsService } from 'src/yjs/yjs.service';
 import { YjsDocProvider } from 'src/yjs/yjs-doc-provider.interface';
 
-export class DrawBoard implements SaveDataDtoConversation {
+export class CodeEditor implements SaveDataDtoConversation {
   private docPromise: Promise<Y.Doc>;
 
   public async toSaveDataDto() {
@@ -17,6 +17,6 @@ export class DrawBoard implements SaveDataDtoConversation {
     private yjsService: YjsService,
     yjsDocProvider: YjsDocProvider,
   ) {
-    this.docPromise = this.yjsService.getDrawBoardDoc(yjsDocProvider);
+    this.docPromise = this.yjsService.getCodeEditorDoc(yjsDocProvider);
   }
 }
