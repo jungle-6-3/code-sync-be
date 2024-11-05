@@ -34,14 +34,15 @@ export class ConversationDatasService {
     try {
       const saveDatas = this.conversationDatasRepository.create({
         uuid,
-        noteUrl: uploadKeys.note,
-        drawBoardUrl: uploadKeys.drawBoard,
-        chattingUrl: uploadKeys.chat,
-        voiceUrl: uploadKeys.voice,
+        noteKey: uploadKeys.note,
+        drawBoardKey: uploadKeys.drawBoard,
+        chattingKey: uploadKeys.chat,
+        voiceKey: uploadKeys.voice,
         isNoteShared: conversationDataSaveDto.note.isShared,
         isDrawBoardShared: conversationDataSaveDto.drawBoard.isShared,
         isChattingShared: conversationDataSaveDto.chat.isShared,
         isVoiceShared: conversationDataSaveDto.voice.isShared,
+        canShared: conversationDataSaveDto.canShared,
       });
 
       const result = await this.conversationDatasRepository.save(saveDatas);
