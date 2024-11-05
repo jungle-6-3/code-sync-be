@@ -65,15 +65,15 @@ export class ConversationsController {
     description: '회의록에 대한 회의 내용을 요청한다.',
   })
   @Get(':dataPk')
-  getConversationDatas(
+  async getConversationDatas(
     @Request() req: Request & { user: JwtPayloadDto },
     @Param('dataPk') dataPk: number,
   ) {
-    return this.conversationsService.getConversationDatas(req.user, dataPk);
+    return await this.conversationsService.getConversationDatas(req.user, dataPk);
   }
   @ApiOperation({
-    summary: '회의록 데이터 요청',
-    description: '회의록에 대한 회의 내용을 요청한다.',
+    summary: '회의록 데이터 수정',
+    description: '회의록에 대한 회의 내용을 수정한다.',
   })
   @Patch(':dataPk')
   update(
