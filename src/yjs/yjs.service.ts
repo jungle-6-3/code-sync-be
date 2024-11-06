@@ -38,7 +38,9 @@ export class YjsService {
     const partialElement = doc.getArray<Y.Map<unknown>>('elements');
     const coppiedElement = coppiedDoc.getArray<Y.Map<unknown>>('elements');
 
-    coppiedElement.push(partialElement.clone().toArray());
+    partialElement.toArray().forEach((item) => {
+      coppiedElement.push([item.clone()]);
+    });
 
     return coppiedDoc;
   }
@@ -72,9 +74,6 @@ export class YjsService {
       const coppiedElement = coppiedDoc.getText(key);
       coppiedElement.insert(0, partialElement.toString());
     });
-
-    console.log(doc);
-    console.log(coppiedDoc);
 
     return coppiedDoc;
   }
