@@ -18,8 +18,11 @@ export class ConversationDatas {
   @Column()
   chattingKey: string;
 
-  @Column()
+  @Column({ nullable: true })
   voiceKey: string;
+
+  @Column()
+  codeEditorKey: string;
 
   @Column()
   isNoteShared: boolean;
@@ -30,8 +33,11 @@ export class ConversationDatas {
   @Column()
   isChattingShared: boolean;
 
-  @Column()
+  @Column({ nullable: true })
   isVoiceShared: boolean;
+
+  @Column()
+  isCodeEditorShared: boolean;
 
   @Column()
   canShared: boolean;

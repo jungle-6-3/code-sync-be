@@ -30,9 +30,13 @@ export class ConversationDataSaveDto {
   @ApiProperty()
   drawBoard: SaveDataDto;
 
+  // @IsNotEmpty()
+  // @ApiProperty()
+  // voice: SaveDataDto;
+
   @IsNotEmpty()
   @ApiProperty()
-  voice: SaveDataDto;
+  codeEditor : SaveDataDto
 
   @IsNotEmpty()
   @ApiProperty()
