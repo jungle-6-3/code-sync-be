@@ -14,6 +14,8 @@ import { FileConfig } from './data/fileconfig';
 import { v4 as uuidv4 } from 'uuid';
 import { S3Service } from './s3.service';
 import { GlobalHttpException } from 'src/utils/global-http-exception';
+import { UpdateConversationDataDto } from './dto/update-conversation-data.dto';
+import { FileInfoDto } from './dto/file-info.dto';
 
 @Injectable()
 export class ConversationDatasService {
@@ -24,7 +26,7 @@ export class ConversationDatasService {
     private configService: ConfigService,
     @InjectRepository(ConversationDatas)
     private conversationDatasRepository: Repository<ConversationDatas>,
-    private uploadFileService: S3Service,
+    private s3Service: S3Service,
   ) {}
   async createConversationDatas(
     conversationDataSaveDto: ConversationDataSaveDto,
@@ -67,8 +69,8 @@ export class ConversationDatasService {
             contentType: contentType.ContentType,
           };
 
-          const url = await this.uploadFileService.uploadFile(uploadData);
-          return [filename, url];
+          const key = await this.s3Service.uploadFile(uploadData);
+          return [filename, key];
         },
       );
       return Object.fromEntries(await Promise.all(uploads));
@@ -80,27 +82,21 @@ export class ConversationDatasService {
   async getDataUrls(conversationData) {
     return {
       chat: {
-        url: await this.uploadFileService.getPresignedUrl(
-          conversationData.chattingKey,
-        ),
+        url: await this.s3Service.getPresignedUrl(conversationData.chattingKey),
         isShared: conversationData.isChattingShared,
       },
       drawBoard: {
-        url: await this.uploadFileService.getPresignedUrl(
+        url: await this.s3Service.getPresignedUrl(
           conversationData.drawBoardKey,
         ),
         isShared: conversationData.isDrawBoardShared,
       },
       note: {
-        url: await this.uploadFileService.getPresignedUrl(
-          conversationData.noteKey,
-        ),
+        url: await this.s3Service.getPresignedUrl(conversationData.noteKey),
         isShared: conversationData.isNoteShared,
       },
       voice: {
-        url: await this.uploadFileService.getPresignedUrl(
-          conversationData.voiceKey,
-        ),
+        url: await this.s3Service.getPresignedUrl(conversationData.voiceKey),
         isShared: conversationData.isNoteShared,
       },
       canShared: conversationData.canShared,
@@ -115,7 +111,6 @@ export class ConversationDatasService {
         });
 
       return await this.getDataUrls(conversationDatas);
-      return conversationDatas;
     } catch (error) {
       this.logger.debug(error.stack);
       throw new GlobalHttpException(
@@ -125,4 +120,54 @@ export class ConversationDatasService {
       );
     }
   }
+
+  // 테스트용 fileType 정의
+
+  async updateConversatoinDatas(
+    updateConversationDataDto: UpdateConversationDataDto,
+    dataPk,
+  ) {
+    /**
+     * 회의 기록이 수정될 경우 s3에 있던 기존 데이터를 삭제하고 새로 만들어진 데이터를 넣어야함.
+     * 다른 방법도 있지만 일단 이 방법으로 하고 이후 수정
+     *
+     * key는 기존의 key를 그대로 사용.
+     **
+     * 공유여부가 수정되었을 경우 db에 업데이트
+     **
+     * canShared 마지막에 확인 필요
+     */
+    const updates = {};
+    const conversationData = await this.conversationDatasRepository.findOneBy({
+      pk: dataPk,
+    });
+
+    for (const type of fileTypes) {
+      const updateData = updateConversationDataDto[type];
+      if (!updateData) continue;
+      if (updateData.data) {
+        // s3에 데이터 삭제하고 다시 넣는 로직 작성
+        const contentType = FileConfig.fileConfigs[type].ContentType;
+        const fileName = `${conversationData.uuid}/${type}`;
+        const file = updateData.data;
+        const fileDto = { contentType, fileName, file };
+
+        this.s3Service.uploadFile(fileDto);
+      }
+      if (updateData.isShared) {
+        conversationData[SHARED_COLUMN_MAP[type]] = updateData.isShared;
+      }
+    }
+    if (updateConversationDataDto.canShared !== undefined) {
+      conversationData.canShared = updateConversationDataDto.canShared;
+    }
+    await this.conversationDatasRepository.save(conversationData);
+  }
 }
+export const fileTypes = ['chat', 'drawBoard', 'voice', 'note'] as const;
+export const SHARED_COLUMN_MAP = {
+  chat: 'isChattingShared',
+  drawBoard: 'isDrawBoardShared',
+  voice: 'isVoiceShared',
+  note: 'isNoteShared',
+} as const;
