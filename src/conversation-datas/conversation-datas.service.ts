@@ -29,6 +29,14 @@ export class ConversationDatasService {
     private conversationDatasRepository: Repository<ConversationDatas>,
     private s3Service: S3Service,
   ) {}
+
+  async findOneConversationDatas(pk) {
+    const conversationDatas = await this.conversationDatasRepository.findOneBy({
+      pk,
+    });
+    return conversationDatas;
+  }
+
   async createConversationDatas(
     conversationDataSaveDto: ConversationDataSaveDto,
   ) {
@@ -129,6 +137,18 @@ export class ConversationDatasService {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
+  }
+
+  async saveVoice(uuid: string) {
+    const updateConversatoinDatas =
+      await this.conversationDatasRepository.findOneBy({
+        uuid,
+      });
+    const voiceKey = `${uuid}/voice`;
+    updateConversatoinDatas.isVoiceShared = false;
+    updateConversatoinDatas.voiceKey = voiceKey;
+    this.conversationDatasRepository.save(updateConversatoinDatas);
+    return this.s3Service.getPresignedUrl(voiceKey);
   }
 
   // 테스트용 fileType 정의
