@@ -16,6 +16,7 @@ import { S3Service } from './s3.service';
 import { GlobalHttpException } from 'src/utils/global-http-exception';
 import { UpdateConversationDataDto } from './dto/update-conversation-data.dto';
 import { FileInfoDto } from './dto/file-info.dto';
+import { CodeEditor } from './data/codeEditor';
 
 @Injectable()
 export class ConversationDatasService {
@@ -39,11 +40,13 @@ export class ConversationDatasService {
         noteKey: uploadKeys.note,
         drawBoardKey: uploadKeys.drawBoard,
         chattingKey: uploadKeys.chat,
-        voiceKey: uploadKeys.voice,
+        // voiceKey: uploadKeys.voice,
+        codeEditorKey: uploadKeys.codeEditor,
         isNoteShared: conversationDataSaveDto.note.isShared,
         isDrawBoardShared: conversationDataSaveDto.drawBoard.isShared,
         isChattingShared: conversationDataSaveDto.chat.isShared,
-        isVoiceShared: conversationDataSaveDto.voice.isShared,
+        // isVoiceShared: conversationDataSaveDto.voice.isShared,
+        isCodeEditorShared: conversationDataSaveDto.codeEditor.isShared,
         canShared: conversationDataSaveDto.canShared,
       });
 
@@ -63,6 +66,7 @@ export class ConversationDatasService {
     try {
       const uploads = Object.entries(FileConfig.fileConfigs).map(
         async ([filename, contentType]) => {
+          // if(conversationDataSaveDto[filename]==undefined) return; //추후 fileType 리팩터링 후 사용
           const uploadData = {
             fileName: `${uuid}/${filename}`,
             file: conversationDataSaveDto[filename].data,
@@ -95,9 +99,15 @@ export class ConversationDatasService {
         url: await this.s3Service.getPresignedUrl(conversationData.noteKey),
         isShared: conversationData.isNoteShared,
       },
-      voice: {
-        url: await this.s3Service.getPresignedUrl(conversationData.voiceKey),
-        isShared: conversationData.isNoteShared,
+      // voice: {
+      //   url: await this.s3Service.getPresignedUrl(conversationData.voiceKey),
+      //   isShared: conversationData.isNoteShared,
+      // },
+      codeEditor: {
+        url: await this.s3Service.getPresignedUrl(
+          conversationData.codeEditorKey,
+        ),
+        isShared: conversationData.isCodeEditorShared,
       },
       canShared: conversationData.canShared,
     };
@@ -164,10 +174,17 @@ export class ConversationDatasService {
     await this.conversationDatasRepository.save(conversationData);
   }
 }
-export const fileTypes = ['chat', 'drawBoard', 'voice', 'note'] as const;
+export const fileTypes = [
+  'chat',
+  'drawBoard',
+  'voice',
+  'note',
+  'codeEditor',
+] as const;
 export const SHARED_COLUMN_MAP = {
   chat: 'isChattingShared',
   drawBoard: 'isDrawBoardShared',
   voice: 'isVoiceShared',
   note: 'isNoteShared',
+  codeEditor: 'isCodeEditorShared',
 } as const;
