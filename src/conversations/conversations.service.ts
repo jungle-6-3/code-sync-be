@@ -3,7 +3,7 @@ import { UpdateConversationDto } from './dto/update-conversation.dto';
 import { ConversationDto } from './dto/conversation.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Conversation } from './entities/conversation.entity';
-import { Repository } from 'typeorm';
+import { createQueryBuilder, Repository } from 'typeorm';
 import { ConversationDatasService } from 'src/conversation-datas/conversation-datas.service';
 import { UsersService } from 'src/users/users.service';
 import { RoomSaveDto } from './dto/room-save.dto';
@@ -61,6 +61,18 @@ export class ConversationsService {
     return { total: total, conversations };
   }
 
+  async findConversationWithDataKey(email, dataPk: number) {
+    const conversations = await this.conversationRepository
+      .createQueryBuilder('conversation')
+      .leftJoinAndSelect('conversation.conversationDatas', 'conversationDatas')
+      .where('conversation.dataPk =:dataPk', { dataPk })
+      .leftJoinAndSelect('conversation.creator', 'creator')
+      .select(['conversation', 'creator.pk', 'conversationDatas.uuid'])
+      .getOne();
+
+    return conversations;
+  }
+
   async getConversationDatas(user, dataPk: number) {
     const conversation = await this.conversationRepository.findOneBy({
       dataPk,
@@ -94,6 +106,26 @@ export class ConversationsService {
     }
 
     return conversationDatas;
+  }
+
+  async saveVoiceData(dataPk: number, user) {
+    console.log(dataPk, user.email);
+    const conversationData = await this.findConversationWithDataKey(
+      user.email,
+      dataPk,
+    );
+    console.log(conversationData);
+    if (!conversationData) {
+      throw new GlobalHttpException(
+        '회의록이 존재하지 않습니다.',
+        'CONVERSATION_04',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    const voicePresignedUrl = this.conversationDatasService.saveVoice(
+      conversationData.conversationDatas.uuid,
+    );
+    return voicePresignedUrl;
   }
 
   update(id: number, updateConversationDto: UpdateConversationDto) {
