@@ -33,17 +33,12 @@ export class RoomsService {
     return roomUuid;
   }
 
-  // TODO: room 내용을 저장하는 행위를 해야함.
   async saveRoom(room: Room) {
     const { creatorPk, participantPk, startedAt, finishedAt } = room;
     const participant = await this.usersService.fineOneByPk(room.participantPk);
     const title = `${participant.name}와의 대화`;
     const { chat, drawBoard, codeEditor, note } = room.data;
-    // TODO: data에 실제 data 넣는 작업 추가해야 함.
-    const sampleData: SaveDataDto = {
-      data: 'datadata',
-      isShared: false,
-    };
+
     const data: ConversationDataSaveDto = {
       chat: chat.toSaveDataDto(),
       drawBoard: await drawBoard.toSaveDataDto(),
