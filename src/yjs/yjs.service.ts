@@ -33,14 +33,21 @@ export class YjsService {
 
   async getDrawBoardDoc(yjsDocProvider: YjsDocProvider) {
     const { doc } = yjsDocProvider;
+    const partialElementsElement = doc.getArray<Y.Map<unknown>>('elements');
+    const partialAssetsElement = doc.getMap('assets');
+
     const coppiedDoc = new Y.Doc();
+    const coppiedElementsElement =
+      coppiedDoc.getArray<Y.Map<unknown>>('elements');
+    const coppiedAssetsElement = coppiedDoc.getMap('assets');
 
-    const partialElement = doc.getArray<Y.Map<unknown>>('elements');
-    const coppiedElement = coppiedDoc.getArray<Y.Map<unknown>>('elements');
-
-    partialElement.toArray().forEach((item) => {
-      coppiedElement.push([item.clone()]);
+    partialElementsElement.toArray().forEach((value) => {
+      coppiedElementsElement.push([value.clone()]);
     });
+
+    for (const [key, value] of partialAssetsElement) {
+      coppiedAssetsElement.set(key, value);
+    }
 
     return coppiedDoc;
   }
