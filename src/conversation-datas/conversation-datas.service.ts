@@ -48,12 +48,12 @@ export class ConversationDatasService {
         noteKey: uploadKeys.note,
         drawBoardKey: uploadKeys.drawBoard,
         chattingKey: uploadKeys.chat,
-        // voiceKey: uploadKeys.voice,
+        voiceKey: uploadKeys.voice,
         codeEditorKey: uploadKeys.codeEditor,
         isNoteShared: conversationDataSaveDto.note.isShared,
         isDrawBoardShared: conversationDataSaveDto.drawBoard.isShared,
         isChattingShared: conversationDataSaveDto.chat.isShared,
-        // isVoiceShared: conversationDataSaveDto.voice.isShared,
+        isVoiceShared: conversationDataSaveDto.voice.isShared,
         isCodeEditorShared: conversationDataSaveDto.codeEditor.isShared,
         canShared: conversationDataSaveDto.canShared,
       });
@@ -105,10 +105,10 @@ export class ConversationDatasService {
         url: await this.s3Service.getPresignedUrl(conversationData.noteKey),
         isShared: conversationData.isNoteShared,
       },
-      // voice: {
-      //   url: await this.s3Service.getPresignedUrl(conversationData.voiceKey),
-      //   isShared: conversationData.isNoteShared,
-      // },
+      voice: {
+        url: await this.s3Service.getPresignedUrl(conversationData.voiceKey),
+        isShared: conversationData.isNoteShared,
+      },
       codeEditor: {
         url: await this.s3Service.getPresignedUrl(
           conversationData.codeEditorKey,
