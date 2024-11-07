@@ -71,21 +71,19 @@ export class ConversationDatasService {
   }
 
   async uploadData(conversationDataSaveDto: ConversationDataSaveDto, uuid) {
+    const result: Record<string, string> = {};
     try {
-      const uploads = Object.entries(FileConfig.fileConfigs).map(
-        async ([filename, contentType]) => {
-          // if(conversationDataSaveDto[filename]==undefined) return; //추후 fileType 리팩터링 후 사용
-          const uploadData = {
-            fileName: `${uuid}/${filename}`,
-            file: conversationDataSaveDto[filename].data,
-            contentType: contentType.ContentType,
-          };
+      for (const type of FileConfig.fileTypes) {
+        const updateData = conversationDataSaveDto[type];
+        if (!updateData) continue;
 
-          const key = await this.s3Service.uploadFile(uploadData);
-          return [filename, key];
-        },
-      );
-      return Object.fromEntries(await Promise.all(uploads));
+        const fileName = `${uuid}/${type}`;
+        const file = updateData.data;
+        const fileDto = { fileName, file };
+        const key = await this.s3Service.uploadFile(fileDto);
+        result[type] = key;
+      }
+      return result;
     } catch (error) {
       throw new BadRequestException(`File upload failed: ${error.message}`);
     }
