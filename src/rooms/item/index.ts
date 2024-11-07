@@ -1,4 +1,4 @@
-import { ChatData } from 'src/conversation-datas/data/chatting';
+import { Chatting } from 'src/conversation-datas/data/chatting';
 import { User } from 'src/users/entities/user.entity';
 import { RoomEvent } from './room-event';
 import { YjsDocProvider } from 'src/yjs/yjs-doc-provider.interface';
@@ -22,13 +22,13 @@ export class Room extends RoomEvent {
     this.prUrl = prUrl;
     this.startedAt = new Date();
     this.data = {
-      chat: new ChatData(),
+      chat: new Chatting(),
     };
   }
 }
 
 interface RoomData {
-  chat: ChatData;
+  chat: Chatting;
   drawBoard?: DrawBoard;
   note?: Note;
   codeEditor?: CodeEditor;
