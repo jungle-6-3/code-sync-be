@@ -157,35 +157,31 @@ export class ConversationDatasService {
     updateConversationDataDto: UpdateConversationDataDto,
     dataPk,
   ) {
-    /**
-     * 회의 기록이 수정될 경우 s3에 있던 기존 데이터를 삭제하고 새로 만들어진 데이터를 넣어야함.
-     * 다른 방법도 있지만 일단 이 방법으로 하고 이후 수정
-     *
-     * key는 기존의 key를 그대로 사용.
-     **
-     * 공유여부가 수정되었을 경우 db에 업데이트
-     **
-     * canShared 마지막에 확인 필요
-     */
-    const updates = {};
     const conversationData = await this.conversationDatasRepository.findOneBy({
       pk: dataPk,
     });
 
-    for (const type of fileTypes) {
+    // 공유 여부 확인
+    for (const type of FileConfig.fileTypes) {
+      const updateData = updateConversationDataDto[type];
+      if (!updateData) continue;
+
+      if (updateData.isShared) {
+        conversationData[FileConfig.SHARED_COLUMN_MAP[type]] =
+          updateData.isShared;
+      }
+    }
+
+    // 데이터 여부 확인
+    for (const type of FileConfig.fileUpdateTypes) {
       const updateData = updateConversationDataDto[type];
       if (!updateData) continue;
       if (updateData.data) {
-        // s3에 데이터 삭제하고 다시 넣는 로직 작성
-        const contentType = FileConfig.fileConfigs[type].ContentType;
         const fileName = `${conversationData.uuid}/${type}`;
         const file = updateData.data;
-        const fileDto = { contentType, fileName, file };
+        const fileDto = { fileName, file };
 
         this.s3Service.uploadFile(fileDto);
-      }
-      if (updateData.isShared) {
-        conversationData[SHARED_COLUMN_MAP[type]] = updateData.isShared;
       }
     }
     if (updateConversationDataDto.canShared !== undefined) {
