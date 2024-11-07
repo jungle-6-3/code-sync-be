@@ -1,9 +1,9 @@
 import { SaveDataDtoConversation } from './save-data-dto-convesation.interface';
 
 export class ChatData implements SaveDataDtoConversation {
-  private chats: chat[];
+  private chats: Chat[];
 
-  public addChat(chat: chat) {
+  public addChat(chat: Chat) {
     this.chats.push(chat);
   }
 
@@ -19,7 +19,7 @@ export class ChatData implements SaveDataDtoConversation {
   }
 }
 
-interface chat {
+interface Chat {
   date: string;
   name: string;
   email: string;
