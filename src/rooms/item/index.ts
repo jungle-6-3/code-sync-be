@@ -5,6 +5,7 @@ import { YjsDocProvider } from 'src/yjs/yjs-doc-provider.interface';
 import { DrawBoard } from 'src/conversation-datas/data/drawBoard';
 import { Note } from 'src/conversation-datas/data/note';
 import { CodeEditor } from 'src/conversation-datas/data/codeEditor';
+import { VoiceChatting } from 'src/conversation-datas/data/voice-chatting';
 
 export class Room extends RoomEvent {
   creatorPk: number;
@@ -23,12 +24,14 @@ export class Room extends RoomEvent {
     this.startedAt = new Date();
     this.data = {
       chat: new Chatting(),
+      voiceChat: new VoiceChatting(),
     };
   }
 }
 
 interface RoomData {
   chat: Chatting;
+  voiceChat: VoiceChatting;
   drawBoard?: DrawBoard;
   note?: Note;
   codeEditor?: CodeEditor;
