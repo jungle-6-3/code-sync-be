@@ -188,17 +188,3 @@ export class ConversationDatasService {
     await this.conversationDatasRepository.save(conversationData);
   }
 }
-export const fileTypes = [
-  'chat',
-  'drawBoard',
-  'voice',
-  'note',
-  'codeEditor',
-] as const;
-export const SHARED_COLUMN_MAP = {
-  chat: 'isChattingShared',
-  drawBoard: 'isDrawBoardShared',
-  voice: 'isVoiceShared',
-  note: 'isNoteShared',
-  codeEditor: 'isCodeEditorShared',
-} as const;
