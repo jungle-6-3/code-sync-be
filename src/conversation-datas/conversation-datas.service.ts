@@ -1,4 +1,3 @@
-import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import {
   BadRequestException,
   HttpStatus,
@@ -15,12 +14,9 @@ import { v4 as uuidv4 } from 'uuid';
 import { S3Service } from './s3.service';
 import { GlobalHttpException } from 'src/utils/global-http-exception';
 import { UpdateConversationDataDto } from './dto/update-conversation-data.dto';
-import { FileInfoDto } from './dto/file-info.dto';
-import { CodeEditor } from './data/codeEditor';
 
 @Injectable()
 export class ConversationDatasService {
-  private s3Client: S3Client;
   logger: Logger = new Logger('ConversationDataService');
 
   constructor(
