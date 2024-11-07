@@ -44,6 +44,7 @@ export class RoomsService {
       drawBoard: await drawBoard.toSaveDataDto(),
       codeEditor: await codeEditor.toSaveDataDto(),
       note: await note.toSaveDataDto(),
+      voice: { data: undefined, isShared: false },
       canShared: false,
     };
     const roomSaveDto: RoomSaveDto = {
