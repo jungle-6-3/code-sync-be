@@ -47,6 +47,7 @@ export class RoomsService {
       voice: await voiceChat.toSaveDataDto(),
       canShared: false,
     };
+
     const roomSaveDto: RoomSaveDto = {
       creatorPk,
       participantPk,

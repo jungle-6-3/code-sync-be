@@ -34,7 +34,7 @@ export class VoiceChat {
   name: string;
   email: string;
   constructor(
-    public data: Date,
+    public date: Date,
     public message: string,
     user: User,
   ) {
