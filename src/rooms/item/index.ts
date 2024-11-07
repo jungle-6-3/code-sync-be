@@ -1,10 +1,11 @@
-import { ChatData } from 'src/conversation-datas/data/chatting';
+import { Chatting } from 'src/conversation-datas/data/chatting';
 import { User } from 'src/users/entities/user.entity';
 import { RoomEvent } from './room-event';
 import { YjsDocProvider } from 'src/yjs/yjs-doc-provider.interface';
 import { DrawBoard } from 'src/conversation-datas/data/drawBoard';
 import { Note } from 'src/conversation-datas/data/note';
 import { CodeEditor } from 'src/conversation-datas/data/codeEditor';
+import { VoiceChatting } from 'src/conversation-datas/data/voice-chatting';
 
 export class Room extends RoomEvent {
   creatorPk: number;
@@ -22,13 +23,15 @@ export class Room extends RoomEvent {
     this.prUrl = prUrl;
     this.startedAt = new Date();
     this.data = {
-      chat: new ChatData(),
+      chat: new Chatting(),
+      voiceChat: new VoiceChatting(),
     };
   }
 }
 
 interface RoomData {
-  chat: ChatData;
+  chat: Chatting;
+  voiceChat: VoiceChatting;
   drawBoard?: DrawBoard;
   note?: Note;
   codeEditor?: CodeEditor;

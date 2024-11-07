@@ -1,6 +1,6 @@
 import { SaveDataDtoConversation } from './save-data-dto-convesation.interface';
 
-export class ChatData implements SaveDataDtoConversation {
+export class Chatting implements SaveDataDtoConversation {
   private chats: Chat[];
 
   public addChat(chat: Chat) {
