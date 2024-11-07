@@ -9,7 +9,13 @@ export class VoiceChatting implements SaveDataDtoConversation {
     this.voiceChats.push(chat);
   }
 
-  public toSaveDataDto() {
+  // TODO: 여기 채워야 함
+  private async generateSummary() {
+    this.voiceSummary = 'sample summary';
+  }
+
+  public async toSaveDataDto() {
+    await this.generateSummary();
     return {
       data: JSON.stringify({
         voiceChats: this.voiceChats,
