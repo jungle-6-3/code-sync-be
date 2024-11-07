@@ -27,11 +27,12 @@ export class S3Service {
   async uploadFile(fileDto: FileInfoDto): Promise<string> {
     const { fileName, file, contentType } = fileDto;
     try {
+      if (file == undefined) return fileName;
       const command = new PutObjectCommand({
         Bucket: this.configService.get('AWS_BUCKET_NAME'),
         Key: fileName,
         Body: file,
-        ContentType: `${contentType}; charset=utf-8`,
+        // ContentType: contentType || `charset=utf-8`,
         ContentEncoding: 'utf-8',
       });
 

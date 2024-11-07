@@ -1,4 +1,3 @@
-import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import {
   BadRequestException,
   HttpStatus,
@@ -15,12 +14,9 @@ import { v4 as uuidv4 } from 'uuid';
 import { S3Service } from './s3.service';
 import { GlobalHttpException } from 'src/utils/global-http-exception';
 import { UpdateConversationDataDto } from './dto/update-conversation-data.dto';
-import { FileInfoDto } from './dto/file-info.dto';
-import { CodeEditor } from './data/codeEditor';
 
 @Injectable()
 export class ConversationDatasService {
-  private s3Client: S3Client;
   logger: Logger = new Logger('ConversationDataService');
 
   constructor(
@@ -48,12 +44,12 @@ export class ConversationDatasService {
         noteKey: uploadKeys.note,
         drawBoardKey: uploadKeys.drawBoard,
         chattingKey: uploadKeys.chat,
-        // voiceKey: uploadKeys.voice,
+        voiceKey: uploadKeys.voice,
         codeEditorKey: uploadKeys.codeEditor,
         isNoteShared: conversationDataSaveDto.note.isShared,
         isDrawBoardShared: conversationDataSaveDto.drawBoard.isShared,
         isChattingShared: conversationDataSaveDto.chat.isShared,
-        // isVoiceShared: conversationDataSaveDto.voice.isShared,
+        isVoiceShared: conversationDataSaveDto.voice.isShared,
         isCodeEditorShared: conversationDataSaveDto.codeEditor.isShared,
         canShared: conversationDataSaveDto.canShared,
       });
@@ -71,21 +67,19 @@ export class ConversationDatasService {
   }
 
   async uploadData(conversationDataSaveDto: ConversationDataSaveDto, uuid) {
+    const result: Record<string, string> = {};
     try {
-      const uploads = Object.entries(FileConfig.fileConfigs).map(
-        async ([filename, contentType]) => {
-          // if(conversationDataSaveDto[filename]==undefined) return; //추후 fileType 리팩터링 후 사용
-          const uploadData = {
-            fileName: `${uuid}/${filename}`,
-            file: conversationDataSaveDto[filename].data,
-            contentType: contentType.ContentType,
-          };
+      for (const type of FileConfig.fileTypes) {
+        const updateData = conversationDataSaveDto[type];
+        if (!updateData) continue;
 
-          const key = await this.s3Service.uploadFile(uploadData);
-          return [filename, key];
-        },
-      );
-      return Object.fromEntries(await Promise.all(uploads));
+        const fileName = `${uuid}/${type}`;
+        const file = updateData.data;
+        const fileDto = { fileName, file };
+        const key = await this.s3Service.uploadFile(fileDto);
+        result[type] = key;
+      }
+      return result;
     } catch (error) {
       throw new BadRequestException(`File upload failed: ${error.message}`);
     }
@@ -107,10 +101,10 @@ export class ConversationDatasService {
         url: await this.s3Service.getPresignedUrl(conversationData.noteKey),
         isShared: conversationData.isNoteShared,
       },
-      // voice: {
-      //   url: await this.s3Service.getPresignedUrl(conversationData.voiceKey),
-      //   isShared: conversationData.isNoteShared,
-      // },
+      voice: {
+        url: await this.s3Service.getPresignedUrl(conversationData.voiceKey),
+        isShared: conversationData.isNoteShared,
+      },
       codeEditor: {
         url: await this.s3Service.getPresignedUrl(
           conversationData.codeEditorKey,
@@ -157,35 +151,31 @@ export class ConversationDatasService {
     updateConversationDataDto: UpdateConversationDataDto,
     dataPk,
   ) {
-    /**
-     * 회의 기록이 수정될 경우 s3에 있던 기존 데이터를 삭제하고 새로 만들어진 데이터를 넣어야함.
-     * 다른 방법도 있지만 일단 이 방법으로 하고 이후 수정
-     *
-     * key는 기존의 key를 그대로 사용.
-     **
-     * 공유여부가 수정되었을 경우 db에 업데이트
-     **
-     * canShared 마지막에 확인 필요
-     */
-    const updates = {};
     const conversationData = await this.conversationDatasRepository.findOneBy({
       pk: dataPk,
     });
 
-    for (const type of fileTypes) {
+    // 공유 여부 확인
+    for (const type of FileConfig.fileTypes) {
+      const updateData = updateConversationDataDto[type];
+      if (!updateData) continue;
+
+      if (updateData.isShared) {
+        conversationData[FileConfig.SHARED_COLUMN_MAP[type]] =
+          updateData.isShared;
+      }
+    }
+
+    // 데이터 여부 확인
+    for (const type of FileConfig.fileUpdateTypes) {
       const updateData = updateConversationDataDto[type];
       if (!updateData) continue;
       if (updateData.data) {
-        // s3에 데이터 삭제하고 다시 넣는 로직 작성
-        const contentType = FileConfig.fileConfigs[type].ContentType;
         const fileName = `${conversationData.uuid}/${type}`;
         const file = updateData.data;
-        const fileDto = { contentType, fileName, file };
+        const fileDto = { fileName, file };
 
         this.s3Service.uploadFile(fileDto);
-      }
-      if (updateData.isShared) {
-        conversationData[SHARED_COLUMN_MAP[type]] = updateData.isShared;
       }
     }
     if (updateConversationDataDto.canShared !== undefined) {
@@ -194,17 +184,3 @@ export class ConversationDatasService {
     await this.conversationDatasRepository.save(conversationData);
   }
 }
-export const fileTypes = [
-  'chat',
-  'drawBoard',
-  'voice',
-  'note',
-  'codeEditor',
-] as const;
-export const SHARED_COLUMN_MAP = {
-  chat: 'isChattingShared',
-  drawBoard: 'isDrawBoardShared',
-  voice: 'isVoiceShared',
-  note: 'isNoteShared',
-  codeEditor: 'isCodeEditorShared',
-} as const;

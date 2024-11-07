@@ -23,5 +23,5 @@ export class FileInfoDto {
   })
   @IsString()
   @IsNotEmpty()
-  contentType: string;
+  contentType?: string;
 }
