@@ -14,6 +14,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { S3Service } from './s3.service';
 import { GlobalHttpException } from 'src/utils/global-http-exception';
 import { UpdateConversationDataDto } from './dto/update-conversation-data.dto';
+import { ResponseDataDto } from './dto/response-update-conversation-data.dto';
 
 @Injectable()
 export class ConversationDatasService {
@@ -85,44 +86,28 @@ export class ConversationDatasService {
     }
   }
 
-  async getDataUrls(conversationData) {
-    return {
-      chat: {
-        url: await this.s3Service.getPresignedUrl(conversationData.chattingKey),
-        isShared: conversationData.isChattingShared,
-      },
-      drawBoard: {
-        url: await this.s3Service.getPresignedUrl(
-          conversationData.drawBoardKey,
-        ),
-        isShared: conversationData.isDrawBoardShared,
-      },
-      note: {
-        url: await this.s3Service.getPresignedUrl(conversationData.noteKey),
-        isShared: conversationData.isNoteShared,
-      },
-      voice: {
-        url: await this.s3Service.getPresignedUrl(conversationData.voiceKey),
-        isShared: conversationData.isNoteShared,
-      },
-      codeEditor: {
-        url: await this.s3Service.getPresignedUrl(
-          conversationData.codeEditorKey,
-        ),
-        isShared: conversationData.isCodeEditorShared,
-      },
-      canShared: conversationData.canShared,
-    };
-  }
-
-  async getConversationDatas(pk: number) {
+  async getUpdateConversationDatas(pk: number) {
     try {
+      const responseDto = {};
       const conversationDatas =
         await this.conversationDatasRepository.findOneBy({
           pk,
         });
-
-      return await this.getDataUrls(conversationDatas);
+      for (const type of FileConfig.fileTypes) {
+        if (conversationDatas[FileConfig.SHARED_COLUMN_MAP[type]]) {
+          const dataDto = new ResponseDataDto();
+          const url = await this.s3Service.getPresignedUrl(
+            conversationDatas[FileConfig.fileTypeKeys[type]],
+          );
+          const isShared =
+            conversationDatas[FileConfig.SHARED_COLUMN_MAP[type]];
+          dataDto.url = url;
+          dataDto.isShared = isShared;
+          responseDto[type] = dataDto;
+        }
+      }
+      responseDto['canShared'] = conversationDatas.canShared;
+      return responseDto;
     } catch (error) {
       this.logger.debug(error.stack);
       throw new GlobalHttpException(
@@ -132,17 +117,35 @@ export class ConversationDatasService {
       );
     }
   }
-
-  async saveVoice(uuid: string) {
-    const updateConversatoinDatas =
-      await this.conversationDatasRepository.findOneBy({
-        uuid,
-      });
-    const voiceKey = `${uuid}/voice`;
-    updateConversatoinDatas.isVoiceShared = false;
-    updateConversatoinDatas.voiceKey = voiceKey;
-    this.conversationDatasRepository.save(updateConversatoinDatas);
-    return this.s3Service.getPresignedUrl(voiceKey);
+  async getConversationDatasToShared(uuid: string) {
+    const responseDto = {};
+    try {
+      const conversationDatas =
+        await this.conversationDatasRepository.findOneBy({
+          uuid,
+        });
+      if (!conversationDatas.canShared) return false;
+      // shared 된 내용인지 확인해야함. shared가 되지 않았다면 url을 주면 안됨.
+      // cansShared인지 확인
+      for (const type of FileConfig.fileTypes) {
+        if (conversationDatas[FileConfig.SHARED_COLUMN_MAP[type]]) {
+          const dataDto = new ResponseDataDto();
+          const url = await this.s3Service.getPresignedUrl(
+            conversationDatas[FileConfig.fileTypeKeys[type]],
+          );
+          dataDto.url = url;
+          responseDto[type] = dataDto;
+        }
+      }
+      return responseDto;
+    } catch (error) {
+      this.logger.debug(error.stack);
+      throw new GlobalHttpException(
+        '백엔드에게 문의하세요.',
+        'CONVERSATIONDATA_DB',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   // 테스트용 fileType 정의
@@ -156,6 +159,7 @@ export class ConversationDatasService {
     });
 
     // 공유 여부 확인
+    // updateData.isShared의 여부는 확인할 필요가 없을듯.. 추후 확인해보고 조건문 제거
     for (const type of FileConfig.fileTypes) {
       const updateData = updateConversationDataDto[type];
       if (!updateData) continue;
