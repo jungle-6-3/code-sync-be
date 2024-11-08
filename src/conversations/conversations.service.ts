@@ -153,7 +153,7 @@ export class ConversationsService {
       dataPk,
     );
 
-    return;
+    return result;
   }
 
   remove(id: number) {
