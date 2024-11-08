@@ -14,4 +14,12 @@ export class FileConfig {
     note: 'isNoteShared',
     codeEditor: 'isCodeEditorShared',
   } as const;
+
+  static fileTypeKeys = {
+    chat: 'chattingKey',
+    drawBoard: 'drawBoardKey',
+    voice: 'voiceKey',
+    note: 'noteKey',
+    codeEditor: 'codeEditorKey',
+  } as const;
 }

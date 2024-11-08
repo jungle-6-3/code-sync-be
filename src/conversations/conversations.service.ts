@@ -73,7 +73,7 @@ export class ConversationsService {
     return conversations;
   }
 
-  async getConversationDatas(user, dataPk: number) {
+  async getUpdateConversationDatas(user, dataPk: number) {
     const conversation = await this.conversationRepository.findOneBy({
       dataPk,
     });
@@ -96,7 +96,7 @@ export class ConversationsService {
     }
 
     const conversationDatas =
-      this.conversationDatasService.getConversationDatas(dataPk);
+      this.conversationDatasService.getUpdateConversationDatas(dataPk);
     if (!conversationDatas) {
       throw new GlobalHttpException(
         '회의록이 존재하지 않습니다.',
@@ -108,24 +108,17 @@ export class ConversationsService {
     return conversationDatas;
   }
 
-  async saveVoiceData(dataPk: number, user) {
-    console.log(dataPk, user.email);
-    const conversationData = await this.findConversationWithDataKey(
-      user.email,
-      dataPk,
-    );
-    console.log(conversationData);
-    if (!conversationData) {
+  async getConversationDatas(uuid: string) {
+    const conversationDatas =
+      await this.conversationDatasService.getConversationDatasToShared(uuid);
+    if (!conversationDatas) {
       throw new GlobalHttpException(
-        '회의록이 존재하지 않습니다.',
-        'CONVERSATION_04',
-        HttpStatus.BAD_REQUEST,
+        '허가되지 않은 접근입니다.',
+        'CONVERSATIONDATAS_04',
+        HttpStatus.UNAUTHORIZED,
       );
     }
-    const voicePresignedUrl = this.conversationDatasService.saveVoice(
-      conversationData.conversationDatas.uuid,
-    );
-    return voicePresignedUrl;
+    return conversationDatas;
   }
 
   update(id: number, updateConversationDto: UpdateConversationDto) {
