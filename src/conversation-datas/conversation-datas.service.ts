@@ -13,8 +13,8 @@ import { FileConfig } from './data/fileconfig';
 import { v4 as uuidv4 } from 'uuid';
 import { S3Service } from './s3.service';
 import { GlobalHttpException } from 'src/utils/global-http-exception';
-import { UpdateConversationDataDto } from './dto/update-conversation-data.dto';
 import { ResponseDataDto } from './dto/response-update-conversation-data.dto';
+import { UpdateConversationDatasDto } from 'src/conversations/dto/update-conversationdatas.dto';
 
 @Injectable()
 export class ConversationDatasService {
@@ -148,7 +148,7 @@ export class ConversationDatasService {
   // 테스트용 fileType 정의
 
   async updateConversatoinDatas(
-    updateConversationDataDto: UpdateConversationDataDto,
+    updateConversationDataDto: UpdateConversationDatasDto,
     dataPk,
   ) {
     const conversationData = await this.conversationDatasRepository.findOneBy({
