@@ -67,10 +67,18 @@ export class ConversationsController {
     @Request() req: Request & { user: JwtPayloadDto },
     @Param('dataPk') dataPk: number,
   ) {
-    return await this.conversationsService.getConversationDatas(
+    return await this.conversationsService.getUpdateConversationDatas(
       req.user,
       dataPk,
     );
+  }
+  @ApiOperation({
+    summary: '공유 회의록 데이터 요청',
+    description: '공유된 회의록에 대한 회의 내용을 요청한다.',
+  })
+  @Get('share/:uuid')
+  async getPublicConversationDatas(@Param('uuid') uuid: string) {
+    return await this.conversationsService.getConversationDatas(uuid);
   }
   @ApiOperation({
     summary: '회의록 데이터 수정',
@@ -79,17 +87,10 @@ export class ConversationsController {
   @Patch(':dataPk')
   update(
     @Param('dataPk') dataPk: number,
+    @Request() req: Request & { user: JwtPayloadDto },
     @Body() updateConversationDto: UpdateConversationDto,
   ) {
     return this.conversationsService.update(dataPk, updateConversationDto);
-  }
-
-  @Get('voice/:dataPk')
-  async saveVoice(
-    @Param('dataPk') dataPk: number,
-    @Request() req: Request & { user: JwtPayloadDto },
-  ) {
-    return await this.conversationsService.saveVoiceData(dataPk, req.user);
   }
 
   @Delete(':dataPk')
