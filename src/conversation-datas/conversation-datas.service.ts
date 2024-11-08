@@ -94,17 +94,14 @@ export class ConversationDatasService {
           pk,
         });
       for (const type of FileConfig.fileTypes) {
-        if (conversationDatas[FileConfig.SHARED_COLUMN_MAP[type]]) {
-          const dataDto = new ResponseDataDto();
-          const url = await this.s3Service.getPresignedUrl(
-            conversationDatas[FileConfig.fileTypeKeys[type]],
-          );
-          const isShared =
-            conversationDatas[FileConfig.SHARED_COLUMN_MAP[type]];
-          dataDto.url = url;
-          dataDto.isShared = isShared;
-          responseDto[type] = dataDto;
-        }
+        const dataDto = new ResponseDataDto();
+        const url = await this.s3Service.getPresignedUrl(
+          conversationDatas[FileConfig.fileTypeKeys[type]],
+        );
+        const isShared = conversationDatas[FileConfig.SHARED_COLUMN_MAP[type]];
+        dataDto.url = url;
+        dataDto.isShared = isShared;
+        responseDto[type] = dataDto;
       }
       responseDto['canShared'] = conversationDatas.canShared;
       return responseDto;
