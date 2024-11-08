@@ -151,37 +151,50 @@ export class ConversationDatasService {
     updateConversationDataDto: UpdateConversationDatasDto,
     dataPk,
   ) {
-    const conversationData = await this.conversationDatasRepository.findOneBy({
-      pk: dataPk,
-    });
+    try {
+      const conversationData = await this.conversationDatasRepository.findOneBy(
+        {
+          pk: dataPk,
+        },
+      );
 
-    // 공유 여부 확인
-    // updateData.isShared의 여부는 확인할 필요가 없을듯.. 추후 확인해보고 조건문 제거
-    for (const type of FileConfig.fileTypes) {
-      const updateData = updateConversationDataDto[type];
-      if (!updateData) continue;
+      // 공유 여부 확인
+      // updateData.isShared의 여부는 확인할 필요가 없을듯.. 추후 확인해보고 조건문 제거
+      for (const type of FileConfig.fileTypes) {
+        const updateData = updateConversationDataDto[type];
+        if (!updateData) continue;
 
-      if (updateData.isShared) {
-        conversationData[FileConfig.SHARED_COLUMN_MAP[type]] =
-          updateData.isShared;
+        if (updateData.isShared) {
+          conversationData[FileConfig.SHARED_COLUMN_MAP[type]] =
+            updateData.isShared;
+        }
       }
-    }
 
-    // 데이터 여부 확인
-    for (const type of FileConfig.fileUpdateTypes) {
-      const updateData = updateConversationDataDto[type];
-      if (!updateData) continue;
-      if (updateData.data) {
-        const fileName = `${conversationData.uuid}/${type}`;
-        const file = updateData.data;
-        const fileDto = { fileName, file };
+      // 데이터 여부 확인
+      for (const type of FileConfig.fileUpdateTypes) {
+        const updateData = updateConversationDataDto[type];
+        if (!updateData) continue;
+        if (updateData.data) {
+          const fileName = `${conversationData.uuid}/${type}`;
+          const file = updateData.data;
+          const fileDto = { fileName, file };
 
-        this.s3Service.uploadFile(fileDto);
+          this.s3Service.uploadFile(fileDto);
+        }
       }
+      if (updateConversationDataDto.canShared !== undefined) {
+        conversationData.canShared = updateConversationDataDto.canShared;
+      }
+      await this.conversationDatasRepository.save(conversationData);
+
+      return { success: true, message: '수정에 성공했습니다.' };
+    } catch (error) {
+      this.logger.debug(error.stack);
+      throw new GlobalHttpException(
+        '백엔드에게 문의하세요.',
+        'CONVERSATIONDATA_DB',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
-    if (updateConversationDataDto.canShared !== undefined) {
-      conversationData.canShared = updateConversationDataDto.canShared;
-    }
-    await this.conversationDatasRepository.save(conversationData);
   }
 }
