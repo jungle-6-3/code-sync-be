@@ -88,12 +88,12 @@ export class ConversationsController {
     description: '회의록에 대한 회의 내용을 수정한다.',
   })
   @Patch(':dataPk')
-  update(
+  async update(
     @Param('dataPk') dataPk: number,
     @Request() req: Request & { user: JwtPayloadDto },
     @Body() updateConversationDatasDto: UpdateConversationDatasDto,
   ) {
-    return this.conversationsService.update(
+    return await this.conversationsService.update(
       req.user,
       dataPk,
       updateConversationDatasDto,
