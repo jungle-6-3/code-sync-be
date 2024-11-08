@@ -15,10 +15,12 @@ import { UpdateConversationDto } from './dto/update-conversation.dto';
 import { JwtPayloadDto } from 'src/auth/dto/jwt-payload';
 import { UsersService } from 'src/users/users.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import { ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ConversationResponseDto } from './dto/conversation-response.dto';
 import { RoomSaveDto } from './dto/room-save.dto';
+import { UpdateConversationDatasDto } from './dto/update-conversationdatas.dto';
 @UseGuards(JwtAuthGuard)
+@ApiTags('Conversation API')
 @Controller('conversations')
 export class ConversationsController {
   constructor(
@@ -80,17 +82,22 @@ export class ConversationsController {
   async getPublicConversationDatas(@Param('uuid') uuid: string) {
     return await this.conversationsService.getConversationDatas(uuid);
   }
+
   @ApiOperation({
-    summary: '회의록 데이터 수정',
+    summary: '회의록 데이터 수정______',
     description: '회의록에 대한 회의 내용을 수정한다.',
   })
   @Patch(':dataPk')
-  update(
+  async update(
     @Param('dataPk') dataPk: number,
     @Request() req: Request & { user: JwtPayloadDto },
-    @Body() updateConversationDto: UpdateConversationDto,
+    @Body() updateConversationDatasDto: UpdateConversationDatasDto,
   ) {
-    return this.conversationsService.update(dataPk, updateConversationDto);
+    return await this.conversationsService.update(
+      req.user,
+      dataPk,
+      updateConversationDatasDto,
+    );
   }
 
   @Delete(':dataPk')

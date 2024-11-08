@@ -8,6 +8,7 @@ import { ConversationDatasService } from 'src/conversation-datas/conversation-da
 import { UsersService } from 'src/users/users.service';
 import { RoomSaveDto } from './dto/room-save.dto';
 import { GlobalHttpException } from 'src/utils/global-http-exception';
+import { UpdateConversationDatasDto } from './dto/update-conversationdatas.dto';
 
 @Injectable()
 export class ConversationsService {
@@ -121,8 +122,38 @@ export class ConversationsService {
     return conversationDatas;
   }
 
-  update(id: number, updateConversationDto: UpdateConversationDto) {
-    return `This action updates a #${id} conversation`;
+  async update(
+    user,
+    dataPk: number,
+    updateConversationDatasDto: UpdateConversationDatasDto,
+  ) {
+    // 유저 검증
+    // title 변경 여부 확인
+    // 이 외의 변경 내용 conversationDatas로 전달.
+    const conversation = await this.conversationRepository.findOneBy({
+      dataPk,
+    });
+
+    const userPk = (await this.usersServie.findOne(user.email)).pk;
+    if (conversation.creatorPk != userPk) {
+      throw new GlobalHttpException(
+        '회의록이 존재하지 않습니다.',
+        'CONVERSATION_03',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    if (updateConversationDatasDto.title) {
+      conversation.title = updateConversationDatasDto.title;
+      this.conversationRepository.save(conversation);
+    }
+
+    const result = this.conversationDatasService.updateConversatoinDatas(
+      updateConversationDatasDto,
+      dataPk,
+    );
+
+    return result;
   }
 
   remove(id: number) {
