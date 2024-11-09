@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { OpenAI } from 'openai';
+import * as Promt from './prompt';
 
 @Injectable()
 export class OpenAiService {
@@ -17,14 +18,7 @@ export class OpenAiService {
     try {
       const response = await this.openai.chat.completions.create({
         model: 'gpt-4o-mini',
-        messages: [
-          {
-            role: 'system',
-            content:
-              '너는 openai에 대해 설명해주는 비서야. 주어진 text를 보고 할 수 있는 일에 대해 말해줘.',
-          },
-          { role: 'user', content: text },
-        ],
+        messages: [Promt.testSystem, { role: 'user', content: text }],
       });
       return response.choices[0].message?.content || 'No response generated';
     } catch (error) {
