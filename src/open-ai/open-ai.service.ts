@@ -45,7 +45,6 @@ export class OpenAiService {
       if (!response.choices[0].message) {
         throw new Error('OpenAi로부터 받은 response가 없음.');
       }
-      console.log('response', response.choices[0].message.content);
       return JSON.parse(response.choices[0].message.content);
     } catch (error) {
       this.logger.error(error.stack);
@@ -75,7 +74,6 @@ export class OpenAiService {
     }
 
     const convertedVoiceChats = await Promise.all(convertedVoicePromise);
-    console.log(convertedVoiceChats.flat());
     return convertedVoiceChats.flat();
   }
 
@@ -99,11 +97,14 @@ export class OpenAiService {
   }
 
   async setVoiceChatting(voieChatting: VoiceChatting) {
+    this.logger.log('Voice 관련 OpenAI 서비스 시작');
     const originalChats = voieChatting.voiceChats;
     voieChatting.voiceChats = await this.beautifyVoiceChats(originalChats);
+    this.logger.log('STT 변환 변환 완료');
     voieChatting.voiceSummary = await this.summaryVoiceChatting(
       voieChatting.voiceChats,
     );
+    this.logger.log('대화 요약 완료');
     return;
   }
 }
