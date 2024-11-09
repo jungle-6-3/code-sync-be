@@ -80,14 +80,27 @@ export class OpenAiService {
   }
 
   private async summaryVoiceChatting(voiceChats: VoiceChat[]) {
-    return 'temp summary';
+    try {
+      const response = await this.openai.chat.completions.create({
+        model: 'gpt-4o-mini',
+        messages: [
+          Promt.summarySystem,
+          { role: 'user', content: JSON.stringify(voiceChats) },
+        ],
+      });
+      if (!response.choices[0].message) {
+        throw new Error('OpenAi로부터 받은 response가 없음.');
+      }
+      return response.choices[0].message.content;
+    } catch (error) {
+      this.logger.error(error.stack);
+      return '요약본이 없습니다.';
+    }
   }
 
   async setVoiceChatting(voieChatting: VoiceChatting) {
-    // TODO: beautify voice chatting
     const originalChats = voieChatting.voiceChats;
     voieChatting.voiceChats = await this.beautifyVoiceChats(originalChats);
-    // TODO: summary voice chatting
     voieChatting.voiceSummary = await this.summaryVoiceChatting(
       voieChatting.voiceChats,
     );
