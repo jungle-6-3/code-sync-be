@@ -4,7 +4,7 @@ import { ConversationDatasController } from './conversation-datas.controller';
 import { ConversationDatasService } from './conversation-datas.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConversationDatas } from './entities/conversations-data.entity';
-import { FileUpload } from './file-upload.service';
+import { S3Service } from './s3.service';
 
 @Module({
   imports: [
@@ -13,7 +13,7 @@ import { FileUpload } from './file-upload.service';
     }),
     TypeOrmModule.forFeature([ConversationDatas]),
   ],
-  providers: [ConversationDatasService, FileUpload],
+  providers: [ConversationDatasService, S3Service],
   controllers: [ConversationDatasController],
   exports: [ConversationDatasService],
 })

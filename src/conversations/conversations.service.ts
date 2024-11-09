@@ -3,11 +3,12 @@ import { UpdateConversationDto } from './dto/update-conversation.dto';
 import { ConversationDto } from './dto/conversation.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Conversation } from './entities/conversation.entity';
-import { Repository } from 'typeorm';
+import { createQueryBuilder, Repository } from 'typeorm';
 import { ConversationDatasService } from 'src/conversation-datas/conversation-datas.service';
 import { UsersService } from 'src/users/users.service';
 import { RoomSaveDto } from './dto/room-save.dto';
 import { GlobalHttpException } from 'src/utils/global-http-exception';
+import { UpdateConversationDatasDto } from './dto/update-conversationdatas.dto';
 
 @Injectable()
 export class ConversationsService {
@@ -44,12 +45,15 @@ export class ConversationsService {
       .leftJoinAndSelect('conversation.creator', 'creator')
       .where('conversation.creatorPk =:userPk', { userPk })
       .leftJoinAndSelect('conversation.participant', 'participant')
+      .leftJoinAndSelect('conversation.conversationDatas', 'conversationDatas')
       .select([
         'conversation',
         'creator.email',
         'creator.name',
         'participant.name',
         'participant.email',
+        'conversationDatas.uuid',
+        'conversationDatas.canShared',
       ])
       .orderBy('conversation.startedAt', 'DESC')
       .skip(skip)
@@ -58,14 +62,23 @@ export class ConversationsService {
     return { total: total, conversations };
   }
 
-  async getConversationDatas(user, dataPk: number) {
+  async findConversationWithDataKey(email, dataPk: number) {
+    const conversations = await this.conversationRepository
+      .createQueryBuilder('conversation')
+      .leftJoinAndSelect('conversation.conversationDatas', 'conversationDatas')
+      .where('conversation.dataPk =:dataPk', { dataPk })
+      .leftJoinAndSelect('conversation.creator', 'creator')
+      .select(['conversation', 'creator.pk', 'conversationDatas.uuid'])
+      .getOne();
+
+    return conversations;
+  }
+
+  async getUpdateConversationDatas(user, dataPk: number) {
     const conversation = await this.conversationRepository.findOneBy({
       dataPk,
     });
-    const conversationDatas =
-      this.conversationDatasService.getConversationDatas(dataPk);
-    // TODO: Custom Exception으로 처리 (에러 코드와 함께 처리)
-    if (!conversation || !conversationDatas) {
+    if (!conversation) {
       throw new GlobalHttpException(
         '회의록이 존재하지 않습니다.',
         'CONVERSATION_01',
@@ -78,15 +91,69 @@ export class ConversationsService {
     if (conversation.creatorPk != userPk) {
       throw new GlobalHttpException(
         '회의록이 존재하지 않습니다.',
+        'CONVERSATION_03',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const conversationDatas =
+      this.conversationDatasService.getUpdateConversationDatas(dataPk);
+    if (!conversationDatas) {
+      throw new GlobalHttpException(
+        '회의록이 존재하지 않습니다.',
         'CONVERSATION_02',
         HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    return conversationDatas;
+  }
+
+  async getConversationDatas(uuid: string) {
+    const conversationDatas =
+      await this.conversationDatasService.getConversationDatasToShared(uuid);
+    if (!conversationDatas) {
+      throw new GlobalHttpException(
+        '허가되지 않은 접근입니다.',
+        'CONVERSATIONDATAS_04',
+        HttpStatus.UNAUTHORIZED,
       );
     }
     return conversationDatas;
   }
 
-  update(id: number, updateConversationDto: UpdateConversationDto) {
-    return `This action updates a #${id} conversation`;
+  async update(
+    user,
+    dataPk: number,
+    updateConversationDatasDto: UpdateConversationDatasDto,
+  ) {
+    // 유저 검증
+    // title 변경 여부 확인
+    // 이 외의 변경 내용 conversationDatas로 전달.
+    const conversation = await this.conversationRepository.findOneBy({
+      dataPk,
+    });
+
+    const userPk = (await this.usersServie.findOne(user.email)).pk;
+    if (conversation.creatorPk != userPk) {
+      throw new GlobalHttpException(
+        '회의록이 존재하지 않습니다.',
+        'CONVERSATION_03',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    if (updateConversationDatasDto.title) {
+      conversation.title = updateConversationDatasDto.title;
+      this.conversationRepository.save(conversation);
+    }
+
+    const result = this.conversationDatasService.updateConversatoinDatas(
+      updateConversationDatasDto,
+      dataPk,
+    );
+
+    return result;
   }
 
   remove(id: number) {

@@ -1,11 +1,16 @@
-import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import {
+  GetObjectCommand,
+  PutObjectCommand,
+  S3Client,
+} from '@aws-sdk/client-s3';
 import { FileInfoDto } from './dto/file-info.dto';
 import { ConfigService } from '@nestjs/config';
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { GlobalHttpException } from 'src/utils/global-http-exception';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 @Injectable()
-export class FileUpload {
+export class S3Service {
   private s3Client: S3Client;
   logger: Logger = new Logger('FileUploadService');
 
@@ -22,11 +27,12 @@ export class FileUpload {
   async uploadFile(fileDto: FileInfoDto): Promise<string> {
     const { fileName, file, contentType } = fileDto;
     try {
+      if (file == undefined) return fileName;
       const command = new PutObjectCommand({
         Bucket: this.configService.get('AWS_BUCKET_NAME'),
         Key: fileName,
         Body: file,
-        ContentType: `${contentType}; charset=utf-8`,
+        // ContentType: contentType || `charset=utf-8`,
         ContentEncoding: 'utf-8',
       });
 
@@ -41,5 +47,15 @@ export class FileUpload {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
+  }
+
+  // TODO: Presigned URL 받아오기
+  async getPresignedUrl(key: string) {
+    const command = new GetObjectCommand({
+      Bucket: this.configService.get('AWS_BUCKET_NAME'),
+      Key: key,
+    });
+
+    return await getSignedUrl(this.s3Client, command, { expiresIn: 3600 });
   }
 }

@@ -1,16 +1,25 @@
 export class FileConfig {
-  static readonly fileConfigs = {
-    chat: {
-      ContentType: 'text/plain',
-    },
-    drawBoard: {
-      ContentType: 'application/json',
-    },
-    voice: {
-      ContentType: 'audio/mpeg',
-    },
-    note: {
-      ContentType: 'application/json',
-    },
+  static fileTypes = [
+    'chat',
+    'drawBoard',
+    'voice',
+    'note',
+    'codeEditor',
+  ] as const;
+  static fileUpdateTypes = ['drawBoard', 'note'] as const;
+  static SHARED_COLUMN_MAP = {
+    chat: 'isChattingShared',
+    drawBoard: 'isDrawBoardShared',
+    voice: 'isVoiceShared',
+    note: 'isNoteShared',
+    codeEditor: 'isCodeEditorShared',
+  } as const;
+
+  static fileTypeKeys = {
+    chat: 'chattingKey',
+    drawBoard: 'drawBoardKey',
+    voice: 'voiceKey',
+    note: 'noteKey',
+    codeEditor: 'codeEditorKey',
   } as const;
 }

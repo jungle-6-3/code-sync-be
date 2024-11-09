@@ -36,6 +36,10 @@ export class ConversationDataSaveDto {
 
   @IsNotEmpty()
   @ApiProperty()
+  codeEditor: SaveDataDto;
+
+  @IsNotEmpty()
+  @ApiProperty()
   note: SaveDataDto;
 
   @ApiProperty({

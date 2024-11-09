@@ -31,15 +31,55 @@ export class YjsService {
     provider.disconnect();
   }
 
-  async getPartialDoc(yjsDocProvider: YjsDocProvider, key: string) {
+  async getDrawBoardDoc(yjsDocProvider: YjsDocProvider) {
+    const { doc } = yjsDocProvider;
+    const partialElementsElement = doc.getArray<Y.Map<unknown>>('elements');
+    const partialAssetsElement = doc.getMap('assets');
+
+    const coppiedDoc = new Y.Doc();
+    const coppiedElementsElement =
+      coppiedDoc.getArray<Y.Map<unknown>>('elements');
+    const coppiedAssetsElement = coppiedDoc.getMap('assets');
+
+    partialElementsElement.toArray().forEach((value) => {
+      coppiedElementsElement.push([value.clone()]);
+    });
+
+    for (const [key, value] of partialAssetsElement) {
+      coppiedAssetsElement.set(key, value);
+    }
+
+    return coppiedDoc;
+  }
+
+  async getNoteDoc(yjsDocProvider: YjsDocProvider) {
     const { doc } = yjsDocProvider;
     const coppiedDoc = new Y.Doc();
 
-    const partialElement = doc.getArray<Y.Map<unknown>>(key);
-    const coppiedElement = coppiedDoc.getArray<Y.Map<unknown>>(key);
+    const partialElement = doc.getXmlFragment('document-store');
+    const coppiedElement = coppiedDoc.getXmlFragment('document-store');
 
-    partialElement.toArray().forEach((item) => {
-      coppiedElement.push([item.clone()]);
+    if (partialElement.firstChild) {
+      coppiedElement.push([partialElement.firstChild.clone()]);
+    }
+    // for (const paragraph of partialElement.createTreeWalker(() => true)) {
+    //   coppiedElement.push([paragraph.clone() as Y.XmlElement]);
+    // }
+    return coppiedDoc;
+  }
+
+  async getCodeEditorDoc(yjsDocProvider: YjsDocProvider) {
+    const keys = ['assets', 'elements', 'document-store'];
+    const { doc } = yjsDocProvider;
+    const coppiedDoc = new Y.Doc();
+
+    doc.share.forEach((value, key) => {
+      if (keys.includes(key)) {
+        return;
+      }
+      const partialElement = doc.getText(key);
+      const coppiedElement = coppiedDoc.getText(key);
+      coppiedElement.insert(0, partialElement.toString());
     });
 
     return coppiedDoc;
