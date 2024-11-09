@@ -54,34 +54,29 @@ export class OpenAiService {
   }
 
   private async beautifyVoiceChats(voiceChats: VoiceChat[]) {
-    let currentChunk: VoiceChat[] = [];
-    let convertedVoiceChats: VoiceChat[] = [];
-    let currentChunkLength = 0;
     const CHUNK_SIZE = 2000;
+    let currentChunk: VoiceChat[] = [];
+    let convertedVoicePromise: Promise<VoiceChat[]>[] = [];
+    let currentChunkLength = 0;
 
     for (const chat of voiceChats) {
       const messageLength = JSON.stringify(chat).length;
-
       if (currentChunkLength + messageLength <= CHUNK_SIZE) {
         currentChunk.push(chat);
         currentChunkLength += messageLength;
       } else {
-        convertedVoiceChats = convertedVoiceChats.concat(
-          await this.beautifyVoiceChatChunk(currentChunk),
-        );
-        console.log('converted chats', convertedVoiceChats);
+        convertedVoicePromise.push(this.beautifyVoiceChatChunk(currentChunk));
         currentChunk = [chat];
         currentChunkLength = messageLength;
       }
     }
-
     if (currentChunk.length > 0) {
-      convertedVoiceChats = convertedVoiceChats.concat(
-        await this.beautifyVoiceChatChunk(currentChunk),
-      );
+      convertedVoicePromise.push(this.beautifyVoiceChatChunk(currentChunk));
     }
-    console.log('final output', convertedVoiceChats);
-    return convertedVoiceChats;
+
+    const convertedVoiceChats = await Promise.all(convertedVoicePromise);
+    console.log(convertedVoiceChats.flat());
+    return convertedVoiceChats.flat();
   }
 
   private async summaryVoiceChatting(voiceChats: VoiceChat[]) {
