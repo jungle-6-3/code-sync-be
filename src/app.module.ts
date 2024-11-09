@@ -9,6 +9,7 @@ import { RoomsModule } from './rooms/rooms.module';
 import { ConversationDatasModule } from './conversation-datas/conversation-datas.module';
 import { EventsHandlerModule } from './conversation-events/events-handler/events-handler.module';
 import { YjsModule } from './yjs/yjs.module';
+import { OpenAiModule } from './open-ai/open-ai.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { YjsModule } from './yjs/yjs.module';
     ConversationDatasModule,
     EventsHandlerModule,
     YjsModule,
+    OpenAiModule,
   ],
   controllers: [],
   providers: [],
