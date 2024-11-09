@@ -96,15 +96,19 @@ export class OpenAiService {
     }
   }
 
+  // TODO: prompt 더 좋게 수정 필요 있음.
+  // TODO: 실제 배포할 때는 주석 내용으로 교체 필요.
   async setVoiceChatting(voieChatting: VoiceChatting) {
-    this.logger.log('Voice 관련 OpenAI 서비스 시작');
-    const originalChats = voieChatting.voiceChats;
-    voieChatting.voiceChats = await this.beautifyVoiceChats(originalChats);
-    this.logger.log('STT 변환 변환 완료');
-    voieChatting.voiceSummary = await this.summaryVoiceChatting(
-      voieChatting.voiceChats,
-    );
-    this.logger.log('대화 요약 완료');
+    this.logger.log('Voice 관련 mock data 주입 시작');
+    voieChatting.voiceSummary = 'temp-summary';
+    // this.logger.log('Voice 관련 OpenAI 서비스 시작');
+    // const originalChats = voieChatting.voiceChats;
+    // voieChatting.voiceChats = await this.beautifyVoiceChats(originalChats);
+    // this.logger.log('STT 변환 변환 완료');
+    // voieChatting.voiceSummary = await this.summaryVoiceChatting(
+    //   voieChatting.voiceChats,
+    // );
+    // this.logger.log('대화 요약 완료');
     return;
   }
 }
