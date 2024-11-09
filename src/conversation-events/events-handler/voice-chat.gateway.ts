@@ -24,7 +24,7 @@ export class VoiceChatGateway {
   @SubscribeMessage('send-voice-text')
   async handleSubscribeMessage(
     @ConnectedSocket() client: RoomSocket,
-    @MessageBody() { date, message }: { date: Date; message: string },
+    @MessageBody() { date, message }: { date: string; message: string },
   ) {
     const { room, user } = client;
     const voiceChat = room.data.voiceChat;
