@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { OpenAI } from 'openai';
 import * as Promt from './prompt';
+import { VoiceChatting } from 'src/conversation-datas/data/voice-chatting';
 
 @Injectable()
 export class OpenAiService {
@@ -25,5 +26,11 @@ export class OpenAiService {
       this.logger.error(error.stack);
       return 'Error generating response';
     }
+  }
+
+  async setVoiceChatting(voieChatting: VoiceChatting) {
+    // TODO: beautify voice chatting
+    // TODO: summary voice chatting
+    return;
   }
 }

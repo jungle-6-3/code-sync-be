@@ -10,6 +10,7 @@ import {
   ConversationDataSaveDto,
   SaveDataDto,
 } from 'src/conversation-datas/dto/conversation-data-save.dto';
+import { OpenAiService } from 'src/open-ai/open-ai.service';
 
 @Injectable()
 export class RoomsService {
@@ -20,6 +21,7 @@ export class RoomsService {
     private roomEventsService: RoomEventService,
     private conversationsService: ConversationsService,
     private usersService: UsersService,
+    private openAiService: OpenAiService,
   ) {
     this.roomsById = new Map();
   }
@@ -39,6 +41,7 @@ export class RoomsService {
     const title = `${participant.name}와의 대화`;
     const { chat, drawBoard, codeEditor, note, voiceChat } = room.data;
 
+    await this.openAiService.setVoiceChatting(voiceChat);
     const data: ConversationDataSaveDto = {
       chat: chat.toSaveDataDto(),
       drawBoard: await drawBoard.toSaveDataDto(),
