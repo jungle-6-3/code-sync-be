@@ -20,10 +20,9 @@ export class OpenAiService {
 
   async test(text: string) {
     try {
-      const response = await this.openai.chat.completions.create({
-        model: 'gpt-4o-mini',
-        messages: [Promt.testSystem, { role: 'user', content: text }],
-      });
+      const response = await this.openai.chat.completions.create(
+        Promt.testPromt(text),
+      );
       return response.choices[0].message?.content || 'No response generated';
     } catch (error) {
       this.logger.error(error.stack);
@@ -35,25 +34,34 @@ export class OpenAiService {
     voiceChatChunk: VoiceChat[],
   ): Promise<VoiceChat[]> {
     try {
-      const response = await this.openai.chat.completions.create({
-        model: 'gpt-4o-mini',
-        messages: [
-          Promt.beutifySystem,
-          { role: 'user', content: JSON.stringify(voiceChatChunk) },
-        ],
-      });
+      const response = await this.openai.chat.completions.create(
+        Promt.beauifyPrompt(JSON.stringify(voiceChatChunk)),
+      );
       if (!response.choices[0].message) {
         throw new Error('OpenAi로부터 받은 response가 없음.');
       }
-      return JSON.parse(response.choices[0].message.content);
+      const fixedVoiceChatChunk: VoiceChat[] = JSON.parse(
+        response.choices[0].message.content,
+      );
+      console.log(fixedVoiceChatChunk);
+      voiceChatChunk.forEach((originChat) => {
+        const match = fixedVoiceChatChunk.find(
+          (fixedChat) =>
+            originChat.date === fixedChat.date &&
+            originChat.email === fixedChat.email,
+        );
+        if (match) {
+          originChat.message = match.message;
+        }
+      });
     } catch (error) {
       this.logger.error(error.stack);
-      return voiceChatChunk;
     }
+    return voiceChatChunk;
   }
 
   public async beautifyVoiceChats(voiceChats: VoiceChat[]) {
-    const CHUNK_SIZE = 2000;
+    const CHUNK_SIZE = 4096;
     let currentChunk: VoiceChat[] = [];
     let convertedVoicePromise: Promise<VoiceChat[]>[] = [];
     let currentChunkLength = 0;
@@ -79,13 +87,9 @@ export class OpenAiService {
 
   public async summaryVoiceChatting(voiceChats: VoiceChat[]) {
     try {
-      const response = await this.openai.chat.completions.create({
-        model: 'gpt-4o-mini',
-        messages: [
-          Promt.summarySystem,
-          { role: 'user', content: JSON.stringify(voiceChats) },
-        ],
-      });
+      const response = await this.openai.chat.completions.create(
+        Promt.summaryPromt(JSON.stringify(voiceChats)),
+      );
       if (!response.choices[0].message) {
         throw new Error('OpenAi로부터 받은 response가 없음.');
       }
