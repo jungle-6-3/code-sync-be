@@ -43,7 +43,6 @@ export class OpenAiService {
       const fixedVoiceChatChunk: VoiceChat[] = JSON.parse(
         response.choices[0].message.content,
       );
-      console.log(fixedVoiceChatChunk);
       voiceChatChunk.forEach((originChat) => {
         const match = fixedVoiceChatChunk.find(
           (fixedChat) =>
