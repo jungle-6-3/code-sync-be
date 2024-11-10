@@ -52,7 +52,7 @@ export class OpenAiService {
     }
   }
 
-  private async beautifyVoiceChats(voiceChats: VoiceChat[]) {
+  public async beautifyVoiceChats(voiceChats: VoiceChat[]) {
     const CHUNK_SIZE = 2000;
     let currentChunk: VoiceChat[] = [];
     let convertedVoicePromise: Promise<VoiceChat[]>[] = [];
@@ -77,7 +77,7 @@ export class OpenAiService {
     return convertedVoiceChats.flat();
   }
 
-  private async summaryVoiceChatting(voiceChats: VoiceChat[]) {
+  public async summaryVoiceChatting(voiceChats: VoiceChat[]) {
     try {
       const response = await this.openai.chat.completions.create({
         model: 'gpt-4o-mini',
