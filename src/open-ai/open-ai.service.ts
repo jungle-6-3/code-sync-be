@@ -20,10 +20,9 @@ export class OpenAiService {
 
   async test(text: string) {
     try {
-      const response = await this.openai.chat.completions.create({
-        model: 'gpt-4o-mini',
-        messages: [Promt.testSystem, { role: 'user', content: text }],
-      });
+      const response = await this.openai.chat.completions.create(
+        Promt.testPromt(text),
+      );
       return response.choices[0].message?.content || 'No response generated';
     } catch (error) {
       this.logger.error(error.stack);

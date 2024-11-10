@@ -1,8 +1,20 @@
-export const testSystem = {
-  role: 'system',
-  content:
-    '너는 openai에 대해 설명해주는 비서야. 주어진 text를 보고 할 수 있는 일에 대해 말해줘.',
-} as const;
+import { ChatCompletionCreateParamsNonStreaming } from 'openai/resources/chat/completions';
+
+export function testPromt(
+  text: string,
+): ChatCompletionCreateParamsNonStreaming {
+  return {
+    model: 'gpt-4o-mini',
+    messages: [
+      {
+        role: 'system',
+        content:
+          '너는 openai에 대해 설명해주는 비서야. 주어진 text를 보고 할 수 있는 일에 대해 말해줘.',
+      },
+      { role: 'user', content: text },
+    ],
+  };
+}
 
 export const beutifySystem = {
   role: 'system',
