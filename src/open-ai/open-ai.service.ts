@@ -43,7 +43,6 @@ export class OpenAiService {
       const fixedVoiceChatChunk: VoiceChat[] = JSON.parse(
         response.choices[0].message.content,
       );
-      console.log(fixedVoiceChatChunk);
       voiceChatChunk.forEach((originChat) => {
         const match = fixedVoiceChatChunk.find(
           (fixedChat) =>
@@ -54,6 +53,26 @@ export class OpenAiService {
           originChat.message = match.message;
         }
       });
+      // let originIdex = 0;
+      // for (const fixedChat of fixedVoiceChatChunk) {
+      //   while (
+      //     originIdex < voiceChatChunk.length &&
+      //     !(
+      //       voiceChatChunk[originIdex].date === fixedChat.date &&
+      //       voiceChatChunk[originIdex].email === fixedChat.email
+      //     )
+      //   ) {
+      //     originIdex++;
+      //   }
+      //   if (originIdex == voiceChatChunk.length) {
+      //     throw new Error(
+      //       `고쳐진 Chat에서 origin Chat과 일치 하는 것을 찾을 수 없음.
+      //       ${fixedChat}`,
+      //     );
+      //   }
+      //   voiceChatChunk[originIdex].message = fixedChat.message;
+      //   originIdex++;
+      // }
     } catch (error) {
       this.logger.error(error.stack);
     }
