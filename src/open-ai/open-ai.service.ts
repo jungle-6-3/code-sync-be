@@ -87,13 +87,9 @@ export class OpenAiService {
 
   public async summaryVoiceChatting(voiceChats: VoiceChat[]) {
     try {
-      const response = await this.openai.chat.completions.create({
-        model: 'gpt-4o-mini',
-        messages: [
-          Promt.summarySystem,
-          { role: 'user', content: JSON.stringify(voiceChats) },
-        ],
-      });
+      const response = await this.openai.chat.completions.create(
+        Promt.summaryPromt(JSON.stringify(voiceChats)),
+      );
       if (!response.choices[0].message) {
         throw new Error('OpenAi로부터 받은 response가 없음.');
       }
