@@ -10,7 +10,7 @@ export class OpenAiController {
 
   @ApiOperation({
     summary: 'OpenAI API와 간단한 대화',
-    description: 'OpenAI API가 작동하는지 확인한다.',
+    description: `OpenAI API가 작동하는지 확인한다. 누군가의 돈을 거덜내기 싫으면 적당히 써주세요.`,
   })
   @Post('test')
   async test(@Body() { text }: TestDto) {
