@@ -164,7 +164,7 @@ export class ConversationDatasService {
         const updateData = updateConversationDataDto[type];
         if (!updateData) continue;
 
-        if (updateData.isShared) {
+        if (updateData.isShared !== undefined) {
           conversationData[FileConfig.SHARED_COLUMN_MAP[type]] =
             updateData.isShared;
         }
