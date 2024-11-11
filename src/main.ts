@@ -3,12 +3,14 @@ import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as cookieParser from 'cookie-parser';
 import { ExceptionGlobalFilter } from './utils/exception-global.filter';
+import { json } from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors({ origin: ['http://localhost:5173'], credentials: true });
   // use cookie-parser middleware as global
   app.use(cookieParser());
+  app.use(json({ limit: '50mb' }));
   app.setGlobalPrefix('api');
   app.useGlobalFilters(new ExceptionGlobalFilter());
 
