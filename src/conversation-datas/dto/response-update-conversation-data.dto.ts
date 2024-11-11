@@ -1,13 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsBoolean, IsNotEmpty, IsString } from 'class-validator';
 
-export class ResponseUpdateConversationDatasDto {
-  chat: ResponseDataDto;
-  drawBoard: ResponseDataDto;
-  note: ResponseDataDto;
-  codeEditor: ResponseDataDto;
-  voice: ResponseDataDto;
-}
 export class ResponseDataDto {
   @ApiProperty({
     example: 'code-sync.dev/amazone.s3.............',
@@ -23,4 +16,18 @@ export class ResponseDataDto {
   })
   @IsBoolean()
   isShared?: boolean;
+}
+export class ResponseUpdateConversationDatasDto {
+  @ApiProperty()
+  chat: ResponseDataDto;
+  @ApiProperty()
+  drawBoard: ResponseDataDto;
+  @ApiProperty()
+  note: ResponseDataDto;
+  @ApiProperty()
+  codeEditor: ResponseDataDto;
+  @ApiProperty()
+  voice: ResponseDataDto;
+  @ApiProperty()
+  canShared: boolean;
 }

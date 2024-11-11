@@ -97,7 +97,7 @@ export class ConversationsService {
     }
 
     const conversationDatas =
-      this.conversationDatasService.getUpdateConversationDatas(dataPk);
+      await this.conversationDatasService.getUpdateConversationDatas(dataPk);
     if (!conversationDatas) {
       throw new GlobalHttpException(
         '회의록이 존재하지 않습니다.',
@@ -106,7 +106,15 @@ export class ConversationsService {
       );
     }
 
-    return conversationDatas;
+    return {
+      title: conversation.title,
+      chat: conversationDatas.chat,
+      drawBoard: conversationDatas.drawBoard,
+      voice: conversationDatas.voice,
+      note: conversationDatas.note,
+      codeEditor: conversationDatas.codeEditor,
+      canShared: conversationDatas.canShared,
+    };
   }
 
   async getConversationDatas(uuid: string) {

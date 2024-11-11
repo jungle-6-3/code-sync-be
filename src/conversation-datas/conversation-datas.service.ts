@@ -13,7 +13,10 @@ import { FileConfig } from './data/fileconfig';
 import { v4 as uuidv4 } from 'uuid';
 import { S3Service } from './s3.service';
 import { GlobalHttpException } from 'src/utils/global-http-exception';
-import { ResponseDataDto } from './dto/response-update-conversation-data.dto';
+import {
+  ResponseDataDto,
+  ResponseUpdateConversationDatasDto,
+} from './dto/response-update-conversation-data.dto';
 import { UpdateConversationDatasDto } from 'src/conversations/dto/update-conversationdatas.dto';
 
 @Injectable()
@@ -86,13 +89,24 @@ export class ConversationDatasService {
     }
   }
 
-  async getUpdateConversationDatas(pk: number) {
+  async getUpdateConversationDatas(
+    pk: number,
+  ): Promise<ResponseUpdateConversationDatasDto> {
     try {
-      const responseDto = {};
       const conversationDatas =
         await this.conversationDatasRepository.findOneBy({
           pk,
         });
+
+      const responseDto: ResponseUpdateConversationDatasDto = {
+        chat: new ResponseDataDto(),
+        drawBoard: new ResponseDataDto(),
+        voice: new ResponseDataDto(),
+        note: new ResponseDataDto(),
+        codeEditor: new ResponseDataDto(),
+        canShared: conversationDatas.canShared,
+      };
+
       for (const type of FileConfig.fileTypes) {
         const dataDto = new ResponseDataDto();
         const url = await this.s3Service.getPresignedUrl(
