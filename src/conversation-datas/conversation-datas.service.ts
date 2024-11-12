@@ -56,7 +56,7 @@ export class ConversationDatasService {
         isChattingShared: conversationDataSaveDto.chat.isShared,
         isVoiceShared: conversationDataSaveDto.voice.isShared,
         isCodeEditorShared: conversationDataSaveDto.codeEditor.isShared,
-        isSummeryShared: conversationDataSaveDto.summery.isShared,
+        isSummeryShared: conversationDataSaveDto.summary.isShared,
         canShared: conversationDataSaveDto.canShared,
       });
 

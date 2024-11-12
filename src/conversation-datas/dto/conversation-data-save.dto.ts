@@ -44,7 +44,7 @@ export class ConversationDataSaveDto {
 
   @IsNotEmpty()
   @ApiProperty()
-  summery: SaveDataDto;
+  summary: SaveDataDto;
 
   @ApiProperty({
     example: 'false',

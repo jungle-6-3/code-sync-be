@@ -1,7 +1,7 @@
 import { User } from 'src/users/entities/user.entity';
-import { SaveDataDtoConversation } from './save-data-dto-convesation.interface';
+import { SaveDataDto } from '../dto/conversation-data-save.dto';
 
-export class VoiceChatting implements SaveDataDtoConversation {
+export class VoiceChatting {
   public voiceChats: VoiceChat[];
   public voiceSummary: string;
 
@@ -9,14 +9,12 @@ export class VoiceChatting implements SaveDataDtoConversation {
     this.voiceChats.push(chat);
   }
 
-  public async toSaveDataDto() {
-    return {
-      data: JSON.stringify({
-        voiceChats: this.voiceChats,
-        voiceSummary: this.voiceSummary,
-      }),
-      isShared: false,
-    };
+  public async toSaveVoiceDataDto(): Promise<SaveDataDto> {
+    return { data: JSON.stringify(this.voiceChats), isShared: false };
+  }
+
+  public async toSaveSummaryDataDto(): Promise<SaveDataDto> {
+    return { data: this.voiceSummary, isShared: false };
   }
 
   constructor() {

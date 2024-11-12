@@ -47,7 +47,8 @@ export class RoomsService {
       drawBoard: await drawBoard.toSaveDataDto(),
       codeEditor: await codeEditor.toSaveDataDto(),
       note: await note.toSaveDataDto(),
-      voice: await voiceChat.toSaveDataDto(),
+      voice: await voiceChat.toSaveVoiceDataDto(),
+      summary: await voiceChat.toSaveSummaryDataDto(),
       canShared: false,
     };
 
