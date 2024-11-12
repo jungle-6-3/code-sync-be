@@ -42,6 +42,10 @@ export class ConversationDataSaveDto {
   @ApiProperty()
   note: SaveDataDto;
 
+  @IsNotEmpty()
+  @ApiProperty()
+  summery: SaveDataDto;
+
   @ApiProperty({
     example: 'false',
     description: '회의정보 공유 여부',

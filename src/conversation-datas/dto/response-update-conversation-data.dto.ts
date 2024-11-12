@@ -29,5 +29,7 @@ export class ResponseUpdateConversationDatasDto {
   @ApiProperty()
   voice: ResponseDataDto;
   @ApiProperty()
+  summery: ResponseDataDto;
+  @ApiProperty()
   canShared: boolean;
 }

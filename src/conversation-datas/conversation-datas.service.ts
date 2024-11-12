@@ -50,11 +50,13 @@ export class ConversationDatasService {
         chattingKey: uploadKeys.chat,
         voiceKey: uploadKeys.voice,
         codeEditorKey: uploadKeys.codeEditor,
+        summaryKey: uploadKeys.summery,
         isNoteShared: conversationDataSaveDto.note.isShared,
         isDrawBoardShared: conversationDataSaveDto.drawBoard.isShared,
         isChattingShared: conversationDataSaveDto.chat.isShared,
         isVoiceShared: conversationDataSaveDto.voice.isShared,
         isCodeEditorShared: conversationDataSaveDto.codeEditor.isShared,
+        isSummeryShared: conversationDataSaveDto.summery.isShared,
         canShared: conversationDataSaveDto.canShared,
       });
 
@@ -104,6 +106,7 @@ export class ConversationDatasService {
         voice: new ResponseDataDto(),
         note: new ResponseDataDto(),
         codeEditor: new ResponseDataDto(),
+        summery: new ResponseDataDto(),
         canShared: conversationDatas.canShared,
       };
 

@@ -40,6 +40,12 @@ export class ConversationDatas {
   isCodeEditorShared: boolean;
 
   @Column()
+  summaryKey: string;
+
+  @Column()
+  isSummeryShared: boolean;
+
+  @Column()
   canShared: boolean;
 
   @OneToOne(
