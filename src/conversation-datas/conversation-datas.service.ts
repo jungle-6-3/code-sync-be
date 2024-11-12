@@ -131,10 +131,12 @@ export class ConversationDatasService {
   async getConversationDatasToShared(uuid: string) {
     const responseDto = {};
     try {
-      const conversationDatas =
-        await this.conversationDatasRepository.findOneBy({
-          uuid,
-        });
+      const conversationDatas = await this.conversationDatasRepository
+        .createQueryBuilder('conversationDatas')
+        .where('conversationDatas.uuid =:uuid', { uuid })
+        .leftJoinAndSelect('conversationDatas.conversation', 'conversation')
+        .select(['conversationDatas', 'conversation.title'])
+        .getOne();
       if (!conversationDatas.canShared) return false;
       // shared 된 내용인지 확인해야함. shared가 되지 않았다면 url을 주면 안됨.
       // cansShared인지 확인
@@ -147,6 +149,7 @@ export class ConversationDatasService {
           dataDto.url = url;
           responseDto[type] = dataDto;
         }
+        responseDto['title'] = conversationDatas.conversation.title;
       }
       return responseDto;
     } catch (error) {
