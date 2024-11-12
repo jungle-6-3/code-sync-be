@@ -5,6 +5,7 @@ export class FileConfig {
     'voice',
     'note',
     'codeEditor',
+    'summary,',
   ] as const;
   static fileUpdateTypes = ['drawBoard', 'note'] as const;
   static SHARED_COLUMN_MAP = {
@@ -13,6 +14,7 @@ export class FileConfig {
     voice: 'isVoiceShared',
     note: 'isNoteShared',
     codeEditor: 'isCodeEditorShared',
+    summary: 'isSummaryShared',
   } as const;
 
   static fileTypeKeys = {
@@ -21,5 +23,6 @@ export class FileConfig {
     voice: 'voiceKey',
     note: 'noteKey',
     codeEditor: 'codeEditorKey',
+    summary: 'summaryKey',
   } as const;
 }
