@@ -19,7 +19,6 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ConversationResponseDto } from './dto/conversation-response.dto';
 import { RoomSaveDto } from './dto/room-save.dto';
 import { UpdateConversationDatasDto } from './dto/update-conversationdatas.dto';
-@UseGuards(JwtAuthGuard)
 @ApiTags('Conversation API')
 @Controller('conversations')
 export class ConversationsController {
@@ -28,6 +27,7 @@ export class ConversationsController {
     private readonly userService: UsersService,
   ) {}
 
+  @UseGuards(JwtAuthGuard)
   @Post('test')
   async testConversationSave(@Body() saveDataDto: RoomSaveDto) {
     return this.conversationsService.createConversation(saveDataDto);
@@ -42,6 +42,7 @@ export class ConversationsController {
     description: '회의록 요청 성공',
     type: ConversationResponseDto,
   })
+  @UseGuards(JwtAuthGuard)
   @Get()
   async findAll(
     @Request() req: Request & { user: JwtPayloadDto },
@@ -64,6 +65,7 @@ export class ConversationsController {
     summary: '회의록 데이터 요청',
     description: '회의록에 대한 회의 내용을 요청한다.',
   })
+  @UseGuards(JwtAuthGuard)
   @Get(':dataPk')
   async getConversationDatas(
     @Request() req: Request & { user: JwtPayloadDto },
@@ -87,6 +89,7 @@ export class ConversationsController {
     summary: '회의록 데이터 수정______',
     description: '회의록에 대한 회의 내용을 수정한다.',
   })
+  @UseGuards(JwtAuthGuard)
   @Patch(':dataPk')
   async update(
     @Param('dataPk') dataPk: number,
@@ -100,6 +103,7 @@ export class ConversationsController {
     );
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete(':dataPk')
   remove(@Param('dataPk') dataPk: number) {
     return this.conversationsService.remove(dataPk);
