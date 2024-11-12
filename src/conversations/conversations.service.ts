@@ -113,6 +113,7 @@ export class ConversationsService {
       voice: conversationDatas.voice,
       note: conversationDatas.note,
       codeEditor: conversationDatas.codeEditor,
+      summary: conversationDatas.summary,
       canShared: conversationDatas.canShared,
     };
   }
