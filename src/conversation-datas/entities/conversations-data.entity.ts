@@ -43,7 +43,7 @@ export class ConversationDatas {
   summaryKey: string;
 
   @Column()
-  isSummeryShared: boolean;
+  isSummaryShared: boolean;
 
   @Column()
   canShared: boolean;
