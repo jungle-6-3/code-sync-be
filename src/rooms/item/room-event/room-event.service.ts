@@ -108,11 +108,7 @@ export class RoomEventService {
   }
 
   private disconnectExceptCreator(room: Room) {
-    const { creatorSocket, participantSocket, waitingSockets } = room;
-
-    creatorSocket?.emit('room-closed', {
-      message: '대화가 종료됩니다.',
-    });
+    const { participantSocket, waitingSockets } = room;
 
     disconenctRoomSocket(participantSocket);
     waitingSockets.forEach((socket) => disconenctRoomSocket(socket));
