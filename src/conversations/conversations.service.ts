@@ -106,16 +106,7 @@ export class ConversationsService {
       );
     }
 
-    return {
-      title: conversation.title,
-      chat: conversationDatas.chat,
-      drawBoard: conversationDatas.drawBoard,
-      voice: conversationDatas.voice,
-      note: conversationDatas.note,
-      codeEditor: conversationDatas.codeEditor,
-      summary: conversationDatas.summary,
-      canShared: conversationDatas.canShared,
-    };
+    return { ...conversationDatas, title: conversation.title };
   }
 
   async getConversationDatas(uuid: string) {
