@@ -7,7 +7,7 @@ export class FileConfig {
     'codeEditor',
     'summary',
   ] as const;
-  static fileUpdateTypes = ['drawBoard', 'note'] as const;
+  static fileUpdateTypes = ['drawBoard', 'note', 'summary'] as const;
   static SHARED_COLUMN_MAP = {
     chat: 'isChattingShared',
     drawBoard: 'isDrawBoardShared',
