@@ -48,6 +48,9 @@ export function disconenctRoomSocket(socket: RoomSocket) {
   if (!socket) {
     return;
   }
+  if (!socket.status) {
+    socket.disconnect(true);
+  }
   switch (socket.status) {
     case SocketStatus.WAITER:
       socket.emit('invite-rejected', {

@@ -1,6 +1,10 @@
 import { ArgumentsHost, Catch, ExceptionFilter, Logger } from '@nestjs/common';
 import { WsException } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
+import {
+  disconenctRoomSocket,
+  RoomSocket,
+} from './interfaces/room-socket.interface';
 
 export interface ConversationError {
   code: string;
@@ -24,7 +28,7 @@ export class ConversationEventsFilter<T> implements ExceptionFilter {
   catch(exception: Error, host: ArgumentsHost) {
     const ctx = host.switchToWs();
     const event = ctx.getPattern();
-    const client = ctx.getClient<Socket>();
+    const client = ctx.getClient<RoomSocket>();
     if (exception instanceof ConversationException) {
       client.emit('exception', {
         success: false,
@@ -33,7 +37,7 @@ export class ConversationEventsFilter<T> implements ExceptionFilter {
         message: exception.message,
       });
       if (exception.withTerminate) {
-        client.disconnect(true);
+        disconenctRoomSocket(client);
       }
       return;
     }
