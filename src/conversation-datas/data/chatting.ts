@@ -10,7 +10,7 @@ export class Chatting implements SaveDataDtoConversation {
   public toSaveDataDto() {
     return {
       data: JSON.stringify(this.chats),
-      isShared: false,
+      isShared: true,
     };
   }
 

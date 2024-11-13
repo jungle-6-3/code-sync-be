@@ -10,11 +10,11 @@ export class VoiceChatting {
   }
 
   public async toSaveVoiceDataDto(): Promise<SaveDataDto> {
-    return { data: JSON.stringify(this.voiceChats), isShared: false };
+    return { data: JSON.stringify(this.voiceChats), isShared: true };
   }
 
   public async toSaveSummaryDataDto(): Promise<SaveDataDto> {
-    return { data: this.voiceSummary, isShared: false };
+    return { data: this.voiceSummary, isShared: true };
   }
 
   constructor() {
