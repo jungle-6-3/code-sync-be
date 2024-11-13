@@ -9,7 +9,7 @@ export class DrawBoard implements SaveDataDtoConversation {
   public async toSaveDataDto() {
     return {
       data: await this.yjsService.encodeDoc(await this.docPromise),
-      isShared: false,
+      isShared: true,
     };
   }
 
