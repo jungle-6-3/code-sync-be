@@ -17,7 +17,7 @@ export class UsersService {
   async createUser(createUserDto: CreateUserDto) {
     const { email, password, name } = createUserDto;
 
-    if ((await this.usersRepository.findOneBy({ email })) !== undefined) {
+    if ((await this.usersRepository.findOneBy({ email }))) {
       return false;
     }
     const user = await this.usersRepository.create({
