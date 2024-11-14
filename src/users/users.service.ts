@@ -1,10 +1,11 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { JwtPayloadDto } from 'src/auth/dto/jwt-payload';
+import { GlobalHttpException } from 'src/utils/global-http-exception';
 
 @Injectable()
 export class UsersService {
@@ -16,16 +17,19 @@ export class UsersService {
   async createUser(createUserDto: CreateUserDto) {
     const { email, password, name } = createUserDto;
 
+    if ((await this.usersRepository.findOneBy({ email })) !== undefined) {
+      return false;
+    }
+    const user = await this.usersRepository.create({
+      name,
+      email,
+      hashedPassword: password,
+    });
     try {
-      const user = await this.usersRepository.create({
-        name,
-        email,
-        hashedPassword: password,
-      });
       await this.usersRepository.save(user);
       return true;
     } catch (error) {
-      return false;
+      throw new GlobalHttpException('DB에러입니다. 백엔드에게 문의해주세요.','USER_01',HttpStatus.UNAUTHORIZED);
     }
   }
 
