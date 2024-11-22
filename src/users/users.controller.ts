@@ -8,14 +8,19 @@ import {
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { UserInfoDTO } from './dto/user-info.response';
-import { ApiOkResponse } from '@nestjs/swagger';
+import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtPayloadDto } from 'src/auth/dto/jwt-payload';
 import { UsersFilter } from './users.filter';
 
+@ApiTags('User API')
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  @ApiOperation({
+    summary: '로그인 채크',
+    description: '로그인을 했다면, 자기 자신의 정보를 돌려준다.',
+  })
   @UseGuards(JwtAuthGuard)
   @Get('me')
   @ApiOkResponse({})
